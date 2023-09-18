@@ -1,5 +1,6 @@
 {
   "name": "@nuxt/a11y",
+  "packageManager": "pnpm@8.7.6",
   "version": "0.0.1",
   "description": "Nuxt module to provide accessibility hinting and utilties.",
   "repository": "nuxt/a11y",
