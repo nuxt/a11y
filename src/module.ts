@@ -1,5 +1,6 @@
 import { addPlugin, defineNuxtModule, createResolver } from '@nuxt/kit'
 import type { Spec as AxeOptions, RunOptions as AxeRunOptions } from 'axe-core'
+import { setupDevToolsUI } from './devtools'
 
 export interface ModuleOptions {
   enabled: boolean
@@ -28,6 +29,8 @@ export default defineNuxtModule<ModuleOptions>({
 
     addPlugin(resolver.resolve('./runtime/plugins/axe.client'))
     nuxt.options.runtimeConfig.public.axe = options.axe
+
+    setupDevToolsUI(nuxt, resolver)
   },
 })
 

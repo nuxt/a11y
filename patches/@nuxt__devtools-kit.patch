@@ -1,0 +1,79 @@
+diff --git a/dist/runtime/host-client.d.ts b/dist/runtime/host-client.d.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..baa8d00a29e56a56df79497487b40959466331d7
+--- /dev/null
++++ b/dist/runtime/host-client.d.ts
+@@ -0,0 +1,4 @@
++import type { Ref } from 'vue';
++import type { NuxtDevtoolsHostClient } from '../types';
++export declare function onDevtoolsHostClientConnected(fn: (client: NuxtDevtoolsHostClient) => void): (() => void) | undefined;
++export declare function useDevtoolsHostClient(): Ref<NuxtDevtoolsHostClient | undefined>;
+diff --git a/dist/runtime/host-client.mjs b/dist/runtime/host-client.mjs
+new file mode 100644
+index 0000000000000000000000000000000000000000..a7446a16140984666906502c8145407baa346368
+--- /dev/null
++++ b/dist/runtime/host-client.mjs
+@@ -0,0 +1,34 @@
++import { shallowRef } from "vue";
++let clientRef;
++const fns = [];
++export function onDevtoolsHostClientConnected(fn) {
++  fns.push(fn);
++  if (typeof window === "undefined")
++    return;
++  if (window.__NUXT_DEVTOOLS_HOST__) {
++    fns.forEach((fn2) => fn2(window.__NUXT_DEVTOOLS_HOST__));
++  }
++  Object.defineProperty(window, "__NUXT_DEVTOOLS_HOST__", {
++    set(value) {
++      if (value)
++        fns.forEach((fn2) => fn2(value));
++    },
++    get() {
++      return clientRef.value;
++    },
++    configurable: true
++  });
++  return () => {
++    fns.splice(fns.indexOf(fn), 1);
++  };
++}
++export function useDevtoolsHostClient() {
++  if (!clientRef) {
++    clientRef = shallowRef();
++    onDevtoolsHostClientConnected(setup);
++  }
++  function setup(client) {
++    clientRef.value = client;
++  }
++  return clientRef;
++}
+diff --git a/host-client.d.ts b/host-client.d.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..269d571bbcf3f3214c0a0c93362666a6061da173
+--- /dev/null
++++ b/host-client.d.ts
+@@ -0,0 +1 @@
++export * from './dist/runtime/host-client'
+diff --git a/host-client.mjs b/host-client.mjs
+new file mode 100644
+index 0000000000000000000000000000000000000000..32b20aede57143f884af96346767da30032f5e68
+--- /dev/null
++++ b/host-client.mjs
+@@ -0,0 +1 @@
++export * from './dist/runtime/host-client.mjs'
+diff --git a/package.json b/package.json
+index 975d71c27ce9a75240ec7227feaf01c9ff8b3c03..a82d330608f312255b19cc2e84ce6bd84dc74b42 100644
+--- a/package.json
++++ b/package.json
+@@ -23,6 +23,10 @@
+     "./iframe-client": {
+       "types": "./iframe-client.d.ts",
+       "import": "./iframe-client.mjs"
++    },
++    "./host-client": {
++      "types": "./host-client.d.ts",
++      "import": "./host-client.mjs"
+     }
+   },
+   "main": "./dist/index.cjs",

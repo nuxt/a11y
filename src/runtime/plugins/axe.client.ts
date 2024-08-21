@@ -1,9 +1,14 @@
 import axe from 'axe-core'
+import { onDevtoolsHostClientConnected, useDevtoolsHostClient } from '@nuxt/devtools-kit/host-client'
 import { defineNuxtPlugin, nextTick, onNuxtReady, useRuntimeConfig } from '#imports'
+import type {} from '../../../shared/declarations'
 
 export default defineNuxtPlugin((nuxtApp) => {
   const { options, runOptions } = useRuntimeConfig().public.axe
   axe.configure(options)
+
+  const devtools = useDevtoolsHostClient()
+  let lastResult: axe.AxeResults | null = null
 
   // TODO: support introspecting individual components when they render
   async function run() {
@@ -11,10 +16,12 @@ export default defineNuxtPlugin((nuxtApp) => {
       elementRef: true,
       ...runOptions,
     })
+    lastResult = result
     for (const violation of result.violations) {
       // TODO: support different backends (console logging, devtools, etc.)
       logViolation(violation)
     }
+    devtools.value?.hooks.callHook('a11y:run', result)
   }
 
   const warned = new Set<string>()
@@ -42,6 +49,16 @@ export default defineNuxtPlugin((nuxtApp) => {
   // TODO: trigger on nuxt hook or composable?
   onNuxtReady(() => {
     run()
+  })
+  onDevtoolsHostClientConnected((devtools) => {
+    devtools.hooks.hook('a11y:iframe-ready', () => {
+      if (lastResult) {
+        devtools.hooks.callHook('a11y:run', lastResult)
+      }
+    })
+    if (lastResult) {
+      devtools.hooks.callHook('a11y:run', lastResult)
+    }
   })
   nuxtApp.hook('page:finish', async () => {
     await nextTick()
