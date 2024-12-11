@@ -27,6 +27,7 @@
     "release": "npm run lint && npm run test && npm run prepack && changelogen --release && npm publish && git push --follow-tags",
     "lint": "eslint .",
     "test": "vitest run",
+    "test:types": "vue-tsc --noEmit",
     "test:watch": "vitest watch"
   },
   "dependencies": {
@@ -43,6 +44,11 @@
     "changelogen": "^0.5.7",
     "eslint": "^9.16.0",
     "nuxt": "^3.14.1592",
-    "vitest": "^2.1.8"
+    "typescript": "~5.6",
+    "vitest": "^2.1.8",
+    "vue-tsc": "^2.1.10"
+  },
+  "resolutions": {
+    "@nuxt/a11y": "workspace:*"
   }
 }

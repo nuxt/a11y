@@ -8,6 +8,7 @@
     "generate": "nuxi generate"
   },
   "devDependencies": {
+    "@nuxt/a11y": "latest",
     "nuxt": "latest"
   }
 }
