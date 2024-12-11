@@ -30,19 +30,19 @@
     "test:watch": "vitest watch"
   },
   "dependencies": {
-    "@nuxt/kit": "^3.12.4",
+    "@nuxt/kit": "^3.14.1592",
     "axe-core": "^4.10.0"
   },
   "devDependencies": {
     "@nuxt/devtools": "latest",
     "@nuxt/eslint-config": "^0.5.1",
     "@nuxt/module-builder": "^0.8.3",
-    "@nuxt/schema": "^3.12.4",
-    "@nuxt/test-utils": "^3.14.1",
+    "@nuxt/schema": "^3.14.1592",
+    "@nuxt/test-utils": "^3.15.1",
     "@types/node": "^22.4.2",
     "changelogen": "^0.5.5",
     "eslint": "^9.9.0",
-    "nuxt": "^3.12.4",
+    "nuxt": "^3.14.1592",
     "vitest": "^2.0.5"
   }
 }
