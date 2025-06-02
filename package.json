@@ -1,6 +1,6 @@
 {
   "name": "@nuxt/a11y",
-  "packageManager": "pnpm@10.11.0",
+  "packageManager": "pnpm@10.11.1",
   "version": "0.0.1",
   "description": "Nuxt module to provide accessibility hinting and utilities.",
   "repository": "nuxt/a11y",
@@ -51,7 +51,7 @@
     "nuxt": "3.17.4",
     "playwright-core": "1.52.0",
     "typescript": "~5.8.3",
-    "vitest": "3.1.4",
+    "vitest": "3.2.0",
     "vue-tsc": "2.2.10"
   },
   "resolutions": {
