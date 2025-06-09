@@ -51,7 +51,7 @@
     "nuxt": "3.17.5",
     "playwright-core": "1.52.0",
     "typescript": "~5.8.3",
-    "vitest": "3.2.2",
+    "vitest": "3.2.3",
     "vue-tsc": "2.2.10"
   },
   "resolutions": {
