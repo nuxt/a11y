@@ -36,19 +36,19 @@
     "test:watch": "vitest watch"
   },
   "dependencies": {
-    "@nuxt/kit": "^3.17.7",
+    "@nuxt/kit": "^3.18.0",
     "axe-core": "^4.10.3"
   },
   "devDependencies": {
     "@nuxt/devtools": "latest",
     "@nuxt/eslint-config": "1.5.2",
     "@nuxt/module-builder": "1.0.1",
-    "@nuxt/schema": "3.17.7",
+    "@nuxt/schema": "3.18.0",
     "@nuxt/test-utils": "3.19.2",
     "@types/node": "22.16.3",
     "changelogen": "0.6.2",
     "eslint": "9.31.0",
-    "nuxt": "3.17.7",
+    "nuxt": "3.18.0",
     "playwright-core": "1.54.1",
     "typescript": "~5.8.3",
     "vitest": "3.2.4",
