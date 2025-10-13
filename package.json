@@ -24,11 +24,14 @@
     "dist"
   ],
   "scripts": {
-    "prepack": "nuxt-module-build build",
-    "play": "nuxt dev playground",
-    "dev": "nuxt dev playground",
-    "dev:build": "nuxt build playground",
-    "dev:prepare": "nuxt-module-build build --stub && nuxt-module-build prepare && nuxt prepare playground",
+    "build": "nuxt-module-build build --stub && nuxt-module-build prepare && nuxt-module-build build && npm run client:build",
+    "client:build": "nuxt generate client",
+    "client:dev": "nuxt dev client --port 3030",
+    "dev": "npm run play:dev",
+    "prepack": "pnpm run build",
+    "dev:prepare": "nuxt-module-build build --stub && nuxt-module-build prepare && nuxt prepare client && nuxt prepare playground",
+    "play:dev": "nuxt dev playground",
+    "play:prod": "npm run build && nuxt dev playground",
     "release": "npm run lint && npm run test && npm run prepack && changelogen --release && npm publish && git push --follow-tags",
     "lint": "eslint .",
     "test": "vitest run",
@@ -37,7 +40,8 @@
   },
   "dependencies": {
     "@nuxt/kit": "^3.19.3",
-    "axe-core": "^4.10.3"
+    "axe-core": "^4.11.0",
+    "sirv": "^3.0.2"
   },
   "devDependencies": {
     "@nuxt/devtools": "latest",
