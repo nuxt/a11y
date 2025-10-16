@@ -19,22 +19,22 @@ describe('ssr', async () => {
     expect(logs.filter(l => !l.startsWith('[vite]') && !l.startsWith('<Suspense>'))).toMatchInlineSnapshot(`
       [
         "%ca11y%c Documents must have <title> element to aid in navigation
-        https://dequeuniversity.com/rules/axe/4.10/document-title?application=axeAPI
+        https://dequeuniversity.com/rules/axe/4.11/document-title?application=axeAPI
        color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #f25c54; ",
         "%ca11y%c Heading levels should only increase by one
-        https://dequeuniversity.com/rules/axe/4.10/heading-order?application=axeAPI
+        https://dequeuniversity.com/rules/axe/4.11/heading-order?application=axeAPI
        color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #cf863e;  JSHandle@node",
         "%ca11y%c <html> element must have a lang attribute
-        https://dequeuniversity.com/rules/axe/4.10/html-has-lang?application=axeAPI
+        https://dequeuniversity.com/rules/axe/4.11/html-has-lang?application=axeAPI
        color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #f25c54; ",
         "%ca11y%c Document should have one main landmark
-        https://dequeuniversity.com/rules/axe/4.10/landmark-one-main?application=axeAPI
+        https://dequeuniversity.com/rules/axe/4.11/landmark-one-main?application=axeAPI
        color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #cf863e; ",
         "%ca11y%c Page should contain a level-one heading
-        https://dequeuniversity.com/rules/axe/4.10/page-has-heading-one?application=axeAPI
+        https://dequeuniversity.com/rules/axe/4.11/page-has-heading-one?application=axeAPI
        color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #cf863e; ",
         "%ca11y%c All page content should be contained by landmarks
-        https://dequeuniversity.com/rules/axe/4.10/region?application=axeAPI
+        https://dequeuniversity.com/rules/axe/4.11/region?application=axeAPI
        color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #cf863e;  JSHandle@node",
       ]
     `)
