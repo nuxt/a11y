@@ -1,11 +1,16 @@
 import type { Resolver } from '@nuxt/kit'
 import type { Nuxt } from 'nuxt/schema'
 import type { ModuleOptions } from './module'
+import type { BirpcGroup } from 'birpc'
 import { existsSync } from 'node:fs'
 import { useNuxt } from '@nuxt/kit'
+import type { ClientFunctions, ServerFunctions } from './rpc-types'
+import { extendServerRpc, onDevToolsInitialized } from '@nuxt/devtools-kit'
+import { useViteWebSocket } from './util'
 
 const DEVTOOLS_UI_ROUTE = '/__nuxt-a11y-client'
 const DEVTOOLS_UI_LOCAL_PORT = 3030
+const RPC_NAMESPACE = 'nuxt-a11y-rpc'
 
 export function setupDevToolsUI(options: ModuleOptions, moduleResolve: Resolver['resolve'], nuxt: Nuxt = useNuxt()) {
   const clientPath = moduleResolve('./client')
@@ -48,6 +53,43 @@ export function setupDevToolsUI(options: ModuleOptions, moduleResolve: Resolver[
         type: 'iframe',
         src: DEVTOOLS_UI_ROUTE,
       },
+    })
+  })
+
+  let isConnected = false
+  const viteServerWs = useViteWebSocket()
+  const rpc = new Promise<BirpcGroup<ClientFunctions, ServerFunctions>>((promiseResolve) => {
+    onDevToolsInitialized(async () => {
+      const rpc = extendServerRpc<ClientFunctions, ServerFunctions>(RPC_NAMESPACE, {
+        getOptions() {
+          return options
+        },
+        async reset() {
+          const ws = await viteServerWs
+          ws.send('nuxt-a11y:reset')
+        },
+        async connected() {
+          const ws = await viteServerWs
+          ws.send('nuxt-a11y:connected')
+          isConnected = true
+        },
+      })
+      promiseResolve(rpc)
+    })
+  })
+
+  viteServerWs.then((ws) => {
+    ws.on('nuxt-a11y:showViolations', async (payload) => {
+      if (isConnected) {
+        const _rpc = await rpc
+        _rpc.broadcast.showViolations(payload).catch(() => {})
+      }
+    })
+    ws.on('nuxt-a11y:scanRunning', async (payload: boolean) => {
+      if (isConnected) {
+        const _rpc = await rpc
+        _rpc.broadcast.scanRunning(payload).catch(() => {})
+      }
     })
   })
 }
