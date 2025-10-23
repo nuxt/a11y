@@ -9,5 +9,5 @@ export interface ServerFunctions {
 
 export interface ClientFunctions {
   showViolations: (payload: A11yViolation[]) => void
-  scanRunning?: (running: boolean) => void
+  scanRunning: (running: boolean) => void
 }

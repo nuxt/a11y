@@ -16,9 +16,14 @@ export default defineNuxtPlugin(() => {
     broadcast('scanRunning', isScanRunning)
 
     try {
-      const result = await axe.run(document, {
-        elementRef: true,
-        ...runOptions,
+      const result = await new Promise<axe.AxeResults>((resolve, reject) => {
+        axe.run(document, {
+          elementRef: true,
+          ...runOptions,
+        }, (error, results) => {
+          if (error) reject(error)
+          else resolve(results)
+        })
       })
       sendViolationsToDevtools(result.violations)
     }
