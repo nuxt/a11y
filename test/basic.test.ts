@@ -9,14 +9,33 @@ describe('ssr', async () => {
     browser: true,
   })
 
-  it('renders the index page', async () => {
+  it('renders the index page and runs axe-core scan', async () => {
     const page = await createPage()
     const logs: string[] = []
     page.on('console', (msg) => {
       logs.push(msg.text())
     })
     await page.goto(url('/'), { waitUntil: 'hydration' })
-    expect(logs.filter(l => !l.startsWith('[vite]') && !l.startsWith('<Suspense>'))).toMatchInlineSnapshot(`
+
+    // Trigger the axe scan using the exposed test helper
+    await page.evaluate(async () => {
+      type TestWindow = Window & {
+        __nuxt_a11y_run__?: () => Promise<void>
+      }
+
+      const win = window as TestWindow
+
+      // Call the exposed run function if available
+      if (win.__nuxt_a11y_run__) {
+        await win.__nuxt_a11y_run__()
+      }
+    })
+
+    // Filter for a11y violation logs
+    const a11yLogs = logs.filter(l => l.includes('%ca11y%c'))
+
+    // Expect violations to be logged
+    expect(a11yLogs).toMatchInlineSnapshot(`
       [
         "%ca11y%c Documents must have <title> element to aid in navigation
         https://dequeuniversity.com/rules/axe/4.11/document-title?application=axeAPI
@@ -38,6 +57,7 @@ describe('ssr', async () => {
        color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #cf863e;  JSHandle@node",
       ]
     `)
+
     await page.close()
   })
 })
