@@ -15,4 +15,8 @@ export default defineNuxtConfig({
       publicDir: resolve(__dirname, '../dist/client'),
     },
   },
+
+  vite: {
+    base: '/__nuxt-a11y-client/',
+  },
 })

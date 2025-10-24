@@ -20,6 +20,13 @@ defineProps<{
             </NBadge>
             <span class="text-sm font-mono opacity-60">{{ violation.id }}</span>
           </div>
+          <div
+            v-if="violation.route"
+            class="flex items-center gap-1 mb-2 text-xs opacity-70"
+          >
+            <NIcon icon="i-carbon-link" />
+            <span class="font-mono">{{ violation.route }}</span>
+          </div>
           <h4 class="font-semibold text-base mb-2">
             {{ violation.help }}
           </h4>
@@ -37,7 +44,6 @@ defineProps<{
         target="_blank"
         class="text-sm inline-flex items-center gap-1 mb-4"
       >
-        <NIcon icon="i-carbon-launch" />
         Learn more about this issue
       </NLink>
 

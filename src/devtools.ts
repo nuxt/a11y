@@ -31,11 +31,21 @@ export function setupDevToolsUI(options: ModuleOptions, moduleResolve: Resolver[
     nuxt.hook('vite:extendConfig', (config) => {
       config.server = config.server || {}
       config.server.proxy = config.server.proxy || {}
+
+      // Proxy for Nuxt assets within the DevTools UI (must come first for specificity)
+      config.server.proxy[`${DEVTOOLS_UI_ROUTE}/_nuxt`] = {
+        target: `http://localhost:${DEVTOOLS_UI_LOCAL_PORT}`,
+        changeOrigin: true,
+        followRedirects: true,
+        rewrite: (path: string) => path,
+      }
+
+      // Proxy for the main DevTools UI route
       config.server.proxy[DEVTOOLS_UI_ROUTE] = {
         target: `http://localhost:${DEVTOOLS_UI_LOCAL_PORT}${DEVTOOLS_UI_ROUTE}`,
         changeOrigin: true,
         followRedirects: true,
-        rewrite: path => path.replace(DEVTOOLS_UI_ROUTE, ''),
+        rewrite: (path: string) => path.replace(DEVTOOLS_UI_ROUTE, ''),
       }
     })
   }
@@ -73,6 +83,18 @@ export function setupDevToolsUI(options: ModuleOptions, moduleResolve: Resolver[
           ws.send('nuxt-a11y:connected')
           isConnected = true
         },
+        async enableConstantScanning() {
+          const ws = await viteServerWs
+          ws.send('nuxt-a11y:enableConstantScanning')
+        },
+        async disableConstantScanning() {
+          const ws = await viteServerWs
+          ws.send('nuxt-a11y:disableConstantScanning')
+        },
+        async triggerScan() {
+          const ws = await viteServerWs
+          ws.send('nuxt-a11y:triggerScan')
+        },
       })
       promiseResolve(rpc)
     })
@@ -89,6 +111,12 @@ export function setupDevToolsUI(options: ModuleOptions, moduleResolve: Resolver[
       if (isConnected) {
         const _rpc = await rpc
         _rpc.broadcast.scanRunning(payload).catch(() => {})
+      }
+    })
+    ws.on('nuxt-a11y:constantScanningEnabled', async (payload: boolean) => {
+      if (isConnected) {
+        const _rpc = await rpc
+        _rpc.broadcast.constantScanningEnabled(payload).catch(() => {})
       }
     })
   })

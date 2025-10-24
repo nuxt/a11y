@@ -20,12 +20,15 @@ defineProps<{
         :class="{ 'hover:border-primary': stat.count > 0 }"
       >
         <div class="flex items-center justify-between">
-          <div>
+          <div class="flex-1">
             <div class="text-xs opacity-50 mb-1 capitalize">
               {{ stat.impact }}
             </div>
             <div class="text-2xl font-bold">
               {{ stat.count }}
+            </div>
+            <div class="text-xs opacity-60 mt-1">
+              {{ stat.elementsCount }} element{{ stat.elementsCount !== 1 ? 's' : '' }}
             </div>
           </div>
         </div>

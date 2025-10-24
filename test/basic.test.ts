@@ -54,7 +54,7 @@ describe('ssr', async () => {
        color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #cf863e; ",
         "%ca11y%c All page content should be contained by landmarks
         https://dequeuniversity.com/rules/axe/4.11/region?application=axeAPI
-       color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #cf863e;  JSHandle@node",
+       color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #cf863e;  JSHandle@node JSHandle@node",
       ]
     `)
 

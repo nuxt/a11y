@@ -15,6 +15,7 @@ export interface A11yViolation {
   nodes: A11yViolationNode[]
   tags: axe.TagValue[]
   timestamp: number
+  route?: string
 }
 
 export type ViolationsByImpact = Record<NonNullable<axe.ImpactValue>, A11yViolation[]>
@@ -24,5 +25,15 @@ export type ImpactColor = '#720026' | '#f25c54' | '#cf863e' | '#f7e167'
 export interface ImpactStat {
   impact: NonNullable<axe.ImpactValue>
   count: number
+  elementsCount: number
   color: ImpactColor
+}
+
+/**
+ * Window interface with exposed a11y testing functions
+ */
+export interface A11yWindow extends Window {
+  __nuxt_a11y_run__?: () => Promise<void>
+  __nuxt_a11y_enableConstantScanning__?: () => void
+  __nuxt_a11y_disableConstantScanning__?: () => void
 }

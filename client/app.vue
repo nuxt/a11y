@@ -24,18 +24,26 @@ const violationsByImpact = computed<ViolationsByImpact>(() => {
 })
 
 const totalViolations = computed(() => violations.value.length)
+const totalElements = computed(() =>
+  violations.value.reduce((sum, v) => sum + v.nodes.length, 0),
+)
+const totalPages = computed(() => {
+  const uniqueRoutes = new Set(violations.value.map(v => v.route).filter(Boolean))
+  return uniqueRoutes.size
+})
 
 const impactStats = computed<ImpactStat[]>(() =>
   IMPACT_LEVELS.map(impact => ({
     impact,
     count: violationsByImpact.value[impact].length,
+    elementsCount: violationsByImpact.value[impact].reduce((sum, v) => sum + v.nodes.length, 0),
     color: IMPACT_COLORS[impact],
   })),
 )
 </script>
 
 <template>
-  <div class="p-4 h-full overflow-auto">
+  <div class="p-4">
     <div class="mb-4">
       <div class="flex items-center gap-3 mb-2">
         <NIcon
@@ -51,20 +59,29 @@ const impactStats = computed<ImpactStat[]>(() =>
       </p>
     </div>
 
+    <ControlPanel :total-violations="totalViolations" />
+
     <div
       v-if="totalViolations > 0"
       class="mb-6"
     >
+      <div class="mb-3 text-sm opacity-70">
+        <span class="font-semibold">{{ totalViolations }}</span> violation{{ totalViolations !== 1 ? 's' : '' }} affecting
+        <span class="font-semibold">{{ totalElements }}</span> element{{ totalElements !== 1 ? 's' : '' }}
+        <span v-if="totalPages > 0">
+          on <span class="font-semibold">{{ totalPages }}</span> page{{ totalPages !== 1 ? 's' : '' }}
+        </span>
+      </div>
       <ViolationStatsCard :stats="impactStats" />
     </div>
 
-    <NLoading v-if="isScanRunning" />
-
-    <EmptyState v-else-if="totalViolations === 0" />
+    <EmptyState v-if="!isScanRunning && totalViolations === 0" />
 
     <ViolationsList
       v-else
       :violations-by-impact="violationsByImpact"
     />
+
+    <ScrollToTop />
   </div>
 </template>
