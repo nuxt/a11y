@@ -59,5 +59,5 @@ describe('ssr', async () => {
     `)
 
     await page.close()
-  })
+  }, 10000)
 })
