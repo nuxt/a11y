@@ -34,29 +34,34 @@ onDevtoolsClientConnected(async (client) => {
     },
   })
 
-  nuxtA11yRpc.value!.connected()
+  try {
+    await nuxtA11yRpc.value!.connected()
+  }
+  catch (error) {
+    console.debug('[Nuxt A11y] Initial connection error (expected):', error)
+  }
 })
 
 export function enableConstantScanning() {
   if (!nuxtA11yRpc.value) return
 
-  nuxtA11yRpc.value.enableConstantScanning()
+  nuxtA11yRpc.value.enableConstantScanning().catch(() => {})
 }
 
 export function disableConstantScanning() {
   if (!nuxtA11yRpc.value) return
 
-  nuxtA11yRpc.value.disableConstantScanning()
+  nuxtA11yRpc.value.disableConstantScanning().catch(() => {})
 }
 
 export function triggerScan() {
   if (!nuxtA11yRpc.value) return
 
-  nuxtA11yRpc.value.triggerScan()
+  nuxtA11yRpc.value.triggerScan().catch(() => {})
 }
 
 export function resetViolations() {
   if (!nuxtA11yRpc.value) return
 
-  nuxtA11yRpc.value.reset()
+  nuxtA11yRpc.value.reset().catch(() => {})
 }

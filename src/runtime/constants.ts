@@ -21,10 +21,6 @@ export const SCAN_EVENTS = [
   'change', // Select dropdowns, checkboxes, radio buttons
   'submit', // Form submissions
 
-  // Focus changes (critical for a11y)
-  'focusin', // Better than 'focus' - bubbles up
-  'focusout', // Better than 'blur' - bubbles up
-
   // Keyboard navigation
   'keydown', // Keyboard interactions (Enter, Space, Escape, Tab, etc.)
 

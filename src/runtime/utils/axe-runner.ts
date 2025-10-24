@@ -31,7 +31,9 @@ export function createAxeRunner(config: AxeRunnerConfig, onScanStateChange: (isR
 
     try {
       const result = await new Promise<axe.AxeResults>((resolve, reject) => {
-        axe.run(document, {
+        axe.run({
+          exclude: ['nuxt-devtools-frame'],
+        }, {
           elementRef: true,
           ...config.runOptions,
         }, (error, results) => {
