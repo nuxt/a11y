@@ -1,6 +1,6 @@
 {
   "name": "@nuxt/a11y",
-  "packageManager": "pnpm@10.18.3",
+  "packageManager": "pnpm@10.19.0",
   "version": "0.0.1",
   "description": "Nuxt module to provide accessibility hinting and utilities.",
   "repository": "nuxt/a11y",
@@ -39,7 +39,7 @@
     "test:watch": "vitest watch"
   },
   "dependencies": {
-    "@nuxt/devtools-kit": "^2.6.5",
+    "@nuxt/devtools-kit": "^2.7.0",
     "@nuxt/kit": "^4.2.0",
     "axe-core": "^4.11.0",
     "sirv": "^3.0.2"
@@ -49,7 +49,7 @@
     "@nuxt/eslint-config": "1.9.0",
     "@nuxt/module-builder": "1.0.2",
     "@nuxt/schema": "4.2.0",
-    "@nuxt/test-utils": "3.19.2",
+    "@nuxt/test-utils": "3.20.1",
     "@types/node": "22.18.12",
     "changelogen": "0.6.2",
     "eslint": "9.38.0",
@@ -57,7 +57,7 @@
     "playwright-core": "1.56.1",
     "typescript": "~5.9.3",
     "vitest": "3.2.4",
-    "vue-tsc": "3.1.1"
+    "vue-tsc": "3.1.2"
   },
   "resolutions": {
     "@nuxt/a11y": "workspace:*"
