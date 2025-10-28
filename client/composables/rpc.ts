@@ -65,3 +65,9 @@ export function resetViolations() {
 
   nuxtA11yRpc.value.reset().catch(() => {})
 }
+
+export function setAxeCoreTags() {
+  if (!nuxtA11yRpc.value) return
+
+  nuxtA11yRpc.value.setAxeCoreTags().catch(() => {})
+}

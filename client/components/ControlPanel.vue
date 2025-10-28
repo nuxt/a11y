@@ -1,9 +1,13 @@
 <script setup lang="ts">
 import { isScanRunning, isConstantScanningEnabled, enableConstantScanning, disableConstantScanning, triggerScan, resetViolations } from '../composables/rpc'
+import {ALL_SUPPORTED_AXE_CORE_TYPES, AxeTag} from "../../src/runtime/types";
+import { ref } from 'vue'
 
 defineProps<{
   totalViolations: number
 }>()
+
+const selectedAxeTag = ref('')
 
 function toggleConstantScanning() {
   if (isConstantScanningEnabled.value) {
@@ -15,7 +19,7 @@ function toggleConstantScanning() {
 }
 
 function handleTriggerScan() {
-  triggerScan()
+  triggerScan(selectedAxeTag.value || '')
 }
 
 function handleReset() {
@@ -40,6 +44,10 @@ function handleReset() {
             {{ isScanRunning ? 'Scanning' : 'Run Scan' }}
           </span>
         </button>
+
+        <select ref="selectedAxeTag">
+          <option v-for="axeTag in ALL_SUPPORTED_AXE_CORE_TYPES" :key="axeTag">All Violations</option>
+        </select>
 
         <button
           class="px-3 py-1.5 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"

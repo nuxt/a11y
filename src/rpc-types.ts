@@ -1,4 +1,4 @@
-import type { A11yViolation } from './runtime/types'
+import type {A11yViolation, AxeTag} from './runtime/types'
 import type { ModuleOptions } from './module'
 
 export interface ServerFunctions {
@@ -7,7 +7,7 @@ export interface ServerFunctions {
   connected: () => void
   enableConstantScanning: () => void
   disableConstantScanning: () => void
-  triggerScan: () => void
+  triggerScan: (tags?: AxeTag[]) => void
 }
 
 export interface ClientFunctions {
