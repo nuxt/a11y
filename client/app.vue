@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { axeViolations, isScanRunning } from './composables/rpc'
 import { computed } from 'vue'
+import type axe from 'axe-core'
 import type { ViolationsByImpact, ImpactStat, A11yViolation } from '../src/runtime/types'
 import { IMPACT_LEVELS, IMPACT_COLORS } from '../src/runtime/constants'
-import type axe from 'axe-core'
+import { axeViolations, isScanRunning } from './composables/rpc'
 
 const violations = computed(() => axeViolations.value)
 

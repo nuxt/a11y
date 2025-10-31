@@ -33,9 +33,7 @@ export default defineNuxtModule<ModuleOptions>({
     extendViteConfig((config) => {
       config.optimizeDeps = config.optimizeDeps || {}
       config.optimizeDeps.include = config.optimizeDeps.include || []
-      if (!config.optimizeDeps.include.includes('axe-core')) {
-        config.optimizeDeps.include.push('axe-core')
-      }
+      config.optimizeDeps.include.push('axe-core')
     })
 
     setupDevToolsUI(options, resolver.resolve, nuxt)
