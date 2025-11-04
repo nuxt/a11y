@@ -7,19 +7,37 @@
         <!-- Issue: div used instead of nav, missing aria-label -->
         <div class="nav-wrapper">
           <!-- Issue: Logo missing alt text -->
-          <nuxt-link to="/" class="logo">
-            <img src="https://placehold.co/150x50/4F46E5/ffffff?text=A11y+Test" class="logo-img">
+          <nuxt-link
+            to="/"
+            class="logo"
+          >
+            <img
+              src="https://placehold.co/150x50/4F46E5/ffffff?text=A11y+Test"
+              class="logo-img"
+            >
           </nuxt-link>
 
           <!-- Issue: Non-semantic list markup -->
           <div class="nav-links">
             <!-- Issue: Links have poor color contrast -->
-            <nuxt-link to="/" style="color: #aaa">Home</nuxt-link>
-            <nuxt-link to="/about-us" style="color: #aaa">About</nuxt-link>
-            <nuxt-link to="/contact" style="color: #aaa">Contact</nuxt-link>
+            <nuxt-link
+              to="/"
+              style="color: #aaa"
+            >Home</nuxt-link>
+            <nuxt-link
+              to="/about-us"
+              style="color: #aaa"
+            >About</nuxt-link>
+            <nuxt-link
+              to="/contact"
+              style="color: #aaa"
+            >Contact</nuxt-link>
 
             <!-- Issue: Button without accessible name -->
-            <button class="icon-button" @click="toggleMenu">
+            <button
+              class="icon-button"
+              @click="toggleMenu"
+            >
               <span>☰</span>
             </button>
           </div>
@@ -61,7 +79,10 @@
         </div>
 
         <!-- Issue: Low contrast text -->
-        <div class="footer-bottom" style="color: #666; background: #555;">
+        <div
+          class="footer-bottom"
+          style="color: #666; background: #555;"
+        >
           <p>&copy; 2025 A11y Playground. All rights reserved.</p>
         </div>
       </div>
