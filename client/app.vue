@@ -4,7 +4,7 @@ import { computed, ref, watch } from 'vue'
 import type { ViolationsByImpact, ImpactStat, A11yViolation } from '../src/runtime/types'
 import { IMPACT_LEVELS, IMPACT_COLORS } from '../src/runtime/constants'
 import type axe from 'axe-core'
-import axeCore from 'axe-core/package.json'
+import { version as axeCoreVersion } from 'axe-core/package.json'
 
 const showCurrentPageFirst = ref(true)
 const isShowingSkeleton = ref(false)
@@ -13,13 +13,8 @@ let skeletonStartTime = 0
 const MINIMUM_SKELETON_TIME = 1500 // 1.5 seconds
 
 // Get axe-core version for documentation link
-const axeVersion = computed(() => {
-  const version = axeCore.version as string
-  const [major, minor] = version.split('.')
-  return `${major}.${minor}`
-})
-
-const axeDocsUrl = computed(() => `https://dequeuniversity.com/rules/axe/html/${axeVersion.value}`)
+const axeVersion = axeCoreVersion.split('.').slice(0, 2).join('.')
+const axeDocsUrl = `https://dequeuniversity.com/rules/axe/html/${axeVersion}`
 
 // Watch for scan state changes
 watch(isScanRunning, (running) => {
