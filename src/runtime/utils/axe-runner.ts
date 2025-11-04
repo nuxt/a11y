@@ -20,6 +20,7 @@ export function createAxeRunner(config: AxeRunnerConfig, onScanStateChange: (isR
 
   /**
    * Runs an accessibility scan on the document
+   * Enforces a minimum duration to prevent UI flickering
    */
   async function run(): Promise<axe.Result[]> {
     if (isScanRunning) {
@@ -28,6 +29,10 @@ export function createAxeRunner(config: AxeRunnerConfig, onScanStateChange: (isR
 
     isScanRunning = true
     onScanStateChange(true)
+
+    // Track start time to enforce minimum scan duration
+    const startTime = Date.now()
+    const MIN_SCAN_DURATION = 500 // 500ms minimum - ensures skeleton loader is visible
 
     try {
       const result = await new Promise<axe.AxeResults>((resolve, reject) => {
@@ -42,6 +47,13 @@ export function createAxeRunner(config: AxeRunnerConfig, onScanStateChange: (isR
           else resolve(results)
         })
       })
+
+      // Ensure minimum scan duration
+      const elapsed = Date.now() - startTime
+      if (elapsed < MIN_SCAN_DURATION) {
+        await new Promise(resolve => setTimeout(resolve, MIN_SCAN_DURATION - elapsed))
+      }
+
       return result.violations
     }
     catch (error) {

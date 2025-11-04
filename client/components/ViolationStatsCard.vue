@@ -19,11 +19,21 @@ defineProps<{
         class="p-3 h-full transition-colors"
         :class="{ 'hover:border-primary': stat.count > 0 }"
       >
+        <div class="flex items-center justify-between mb-2">
+          <NBadge
+            class="text-xs capitalize"
+            :style="{
+              borderColor: stat.color,
+              borderWidth: '1.5px',
+              borderStyle: 'solid',
+              boxShadow: `0 2px 8px ${stat.color}40`,
+            }"
+          >
+            {{ stat.impact }}
+          </NBadge>
+        </div>
         <div class="flex items-center justify-between">
           <div class="flex-1">
-            <div class="text-xs opacity-50 mb-1 capitalize">
-              {{ stat.impact }}
-            </div>
             <div class="text-2xl font-bold">
               {{ stat.count }}
             </div>

@@ -4,10 +4,10 @@ import type { ImpactColor } from './types'
 export const IMPACT_LEVELS: readonly NonNullable<axe.ImpactValue>[] = ['critical', 'serious', 'moderate', 'minor'] as const
 
 export const IMPACT_COLORS: Record<NonNullable<axe.ImpactValue>, ImpactColor> = {
-  critical: '#720026',
-  serious: '#f25c54',
-  moderate: '#cf863e',
-  minor: '#f7e167',
+  critical: '#ff1e1eff',
+  serious: '#FF6E40',
+  moderate: '#FFB300',
+  minor: '#FFEB3B',
 } as const
 
 /**

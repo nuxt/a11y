@@ -1,9 +1,56 @@
 <script setup lang="ts">
-import { axeViolations, isScanRunning } from './composables/rpc'
-import { computed } from 'vue'
+import { axeViolations, isScanRunning, currentRoute } from './composables/rpc'
+import { computed, ref, watch } from 'vue'
 import type { ViolationsByImpact, ImpactStat, A11yViolation } from '../src/runtime/types'
 import { IMPACT_LEVELS, IMPACT_COLORS } from '../src/runtime/constants'
 import type axe from 'axe-core'
+import axeCore from 'axe-core/package.json'
+
+const showCurrentPageFirst = ref(true)
+const isShowingSkeleton = ref(false)
+let skeletonTimer: ReturnType<typeof setTimeout> | null = null
+let skeletonStartTime = 0
+const MINIMUM_SKELETON_TIME = 1500 // 1.5 seconds
+
+// Get axe-core version for documentation link
+const axeVersion = computed(() => {
+  const version = axeCore.version as string
+  const [major, minor] = version.split('.')
+  return `${major}.${minor}`
+})
+
+const axeDocsUrl = computed(() => `https://dequeuniversity.com/rules/axe/html/${axeVersion.value}`)
+
+// Watch for scan state changes
+watch(isScanRunning, (running) => {
+  if (running) {
+    // Scan started - show skeleton immediately
+    isShowingSkeleton.value = true
+    skeletonStartTime = Date.now()
+
+    // Clear any existing timer
+    if (skeletonTimer) {
+      clearTimeout(skeletonTimer)
+    }
+  }
+})
+
+// Watch for violations updates
+watch(axeViolations, () => {
+  // Only hide skeleton if scan is done
+  if (!isScanRunning.value && isShowingSkeleton.value) {
+    if (skeletonTimer) {
+      clearTimeout(skeletonTimer)
+    }
+
+    const elapsed = Date.now() - skeletonStartTime
+    const remainingTime = Math.max(0, MINIMUM_SKELETON_TIME - elapsed)
+
+    skeletonTimer = setTimeout(() => {
+      isShowingSkeleton.value = false
+    }, remainingTime)
+  }
+}, { deep: true })
 
 const violations = computed(() => axeViolations.value)
 
@@ -55,7 +102,13 @@ const impactStats = computed<ImpactStat[]>(() =>
         </h1>
       </div>
       <p class="text-sm opacity-70 ml-8">
-        Automated accessibility testing results powered by axe-core
+        Automated accessibility testing results powered by <NLink
+          :href="axeDocsUrl"
+          target="_blank"
+          class="underline hover:opacity-100"
+        >
+          axe-core {{ axeVersion }}
+        </NLink>
       </p>
     </div>
 
@@ -72,14 +125,37 @@ const impactStats = computed<ImpactStat[]>(() =>
           on <span class="font-semibold">{{ totalPages }}</span> page{{ totalPages !== 1 ? 's' : '' }}
         </span>
       </div>
+
+      <div
+        v-if="totalPages > 1"
+        class="mb-3 flex items-center gap-2 text-sm"
+      >
+        <input
+          id="show-current-first"
+          v-model="showCurrentPageFirst"
+          type="checkbox"
+          class="cursor-pointer"
+        >
+        <label
+          for="show-current-first"
+          class="cursor-pointer opacity-70 hover:opacity-100 transition-opacity"
+        >
+          Show issues on current page first
+        </label>
+      </div>
+
       <ViolationStatsCard :stats="impactStats" />
     </div>
 
-    <EmptyState v-if="!isScanRunning && totalViolations === 0" />
+    <LoadingSkeleton v-if="isShowingSkeleton" />
+
+    <EmptyState v-else-if="totalViolations === 0" />
 
     <ViolationsList
       v-else
       :violations-by-impact="violationsByImpact"
+      :show-current-page-first="showCurrentPageFirst"
+      :current-route="currentRoute"
     />
 
     <ScrollToTop />

@@ -12,6 +12,13 @@ export const HMR_EVENTS = {
   DISABLE_CONSTANT_SCANNING: 'disableConstantScanning',
   TRIGGER_SCAN: 'triggerScan',
   RESET: 'reset',
+  ROUTE_CHANGED: 'routeChanged',
+  HIGHLIGHT_ELEMENT: 'highlightElement',
+  UNHIGHLIGHT_ELEMENT: 'unhighlightElement',
+  UNHIGHLIGHT_ALL: 'unhighlightAll',
+  UPDATE_ELEMENT_ID: 'updateElementId',
+  REMOVE_ELEMENT_ID_BADGE: 'removeElementIdBadge',
+  SCROLL_TO_ELEMENT: 'scrollToElement',
 } as const
 
 /**
@@ -31,7 +38,7 @@ export function createHmrBridge() {
       import.meta.hot.send(`${HMR_EVENT_PREFIX}:${event}`, payload)
     }
     catch {
-      console.log('Failed to send via HMR')
+      // Silent fail
     }
   }
 
@@ -80,6 +87,60 @@ export function createHmrBridge() {
     }
   }
 
+  /**
+   * Registers a handler for highlight element requests
+   */
+  function onHighlightElement(handler: (payload: { selector: string, id?: number, color?: string }) => void): void {
+    if (import.meta.hot) {
+      import.meta.hot.on(`${HMR_EVENT_PREFIX}:${HMR_EVENTS.HIGHLIGHT_ELEMENT}`, handler)
+    }
+  }
+
+  /**
+   * Registers a handler for unhighlight element requests
+   */
+  function onUnhighlightElement(handler: (selector: string) => void): void {
+    if (import.meta.hot) {
+      import.meta.hot.on(`${HMR_EVENT_PREFIX}:${HMR_EVENTS.UNHIGHLIGHT_ELEMENT}`, handler)
+    }
+  }
+
+  /**
+   * Registers a handler for unhighlight all elements requests
+   */
+  function onUnhighlightAll(handler: () => void): void {
+    if (import.meta.hot) {
+      import.meta.hot.on(`${HMR_EVENT_PREFIX}:${HMR_EVENTS.UNHIGHLIGHT_ALL}`, handler)
+    }
+  }
+
+  /**
+   * Registers a handler for update element ID requests
+   */
+  function onUpdateElementId(handler: (payload: { selector: string, id: number }) => void): void {
+    if (import.meta.hot) {
+      import.meta.hot.on(`${HMR_EVENT_PREFIX}:${HMR_EVENTS.UPDATE_ELEMENT_ID}`, handler)
+    }
+  }
+
+  /**
+   * Registers a handler for remove element ID badge requests
+   */
+  function onRemoveElementIdBadge(handler: (selector: string) => void): void {
+    if (import.meta.hot) {
+      import.meta.hot.on(`${HMR_EVENT_PREFIX}:${HMR_EVENTS.REMOVE_ELEMENT_ID_BADGE}`, handler)
+    }
+  }
+
+  /**
+   * Registers a handler for scroll to element requests
+   */
+  function onScrollToElement(handler: (selector: string) => void): void {
+    if (import.meta.hot) {
+      import.meta.hot.on(`${HMR_EVENT_PREFIX}:${HMR_EVENTS.SCROLL_TO_ELEMENT}`, handler)
+    }
+  }
+
   return {
     broadcast,
     onConnected,
@@ -87,6 +148,12 @@ export function createHmrBridge() {
     onDisableScanning,
     onTriggerScan,
     onReset,
+    onHighlightElement,
+    onUnhighlightElement,
+    onUnhighlightAll,
+    onUpdateElementId,
+    onRemoveElementIdBadge,
+    onScrollToElement,
     HMR_EVENTS,
   }
 }
