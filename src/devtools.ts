@@ -3,7 +3,7 @@ import type { Nuxt } from 'nuxt/schema'
 import type { ModuleOptions } from './module'
 import type { BirpcGroup } from 'birpc'
 import { existsSync } from 'node:fs'
-import { addVitePlugin, useNuxt } from '@nuxt/kit'
+import { useNuxt } from '@nuxt/kit'
 import type { ClientFunctions, ServerFunctions } from './rpc-types'
 import { extendServerRpc, onDevToolsInitialized } from '@nuxt/devtools-kit'
 import { useViteWebSocket } from './util'
@@ -16,43 +16,35 @@ export function setupDevToolsUI(options: ModuleOptions, moduleResolve: Resolver[
   const clientPath = moduleResolve('./client')
   const isProductionBuild = existsSync(clientPath)
 
-  addVitePlugin({
-    name: 'nuxt-a11y-devtools-ui',
-    config() {
-      if (!isProductionBuild) {
-        return {
-          server: {
-            // Proxy for Nuxt assets within the DevTools UI (must come first for specificity)
-            proxy: { [`${DEVTOOLS_UI_ROUTE}/_nuxt`]: {
-              target: `http://localhost:${DEVTOOLS_UI_LOCAL_PORT}`,
-              changeOrigin: true,
-              followRedirects: true,
-              rewrite: path => path,
-            },
-
-            // Proxy for the main DevTools UI route
-            [DEVTOOLS_UI_ROUTE]: {
-              target: `http://localhost:${DEVTOOLS_UI_LOCAL_PORT}${DEVTOOLS_UI_ROUTE}`,
-              changeOrigin: true,
-              followRedirects: true,
-              rewrite: path => path.replace(DEVTOOLS_UI_ROUTE, ''),
-            },
-            },
-          },
-        }
+  // Serve production-built client (used when package is published)
+  if (isProductionBuild) {
+    nuxt.hook('vite:serverCreated', async (server) => {
+      const sirv = await import('sirv').then(r => r.default || r)
+      server.middlewares.use(
+        DEVTOOLS_UI_ROUTE,
+        sirv(clientPath, { dev: true, single: true }),
+      )
+    })
+  }
+  // In local development, start a separate Nuxt Server and proxy to serve the client
+  else {
+    nuxt.hook('vite:extendConfig', (config) => {
+      const server = config.server || {}
+      const proxy = server.proxy || {}
+      proxy[DEVTOOLS_UI_ROUTE] = {
+        target: `http://localhost:${DEVTOOLS_UI_LOCAL_PORT}${DEVTOOLS_UI_ROUTE}`,
+        changeOrigin: true,
+        followRedirects: true,
+        rewrite: path => path.replace(DEVTOOLS_UI_ROUTE, ''),
       }
-    },
-    async configureServer(server) {
-      // Serve production-built client (used when package is published)
-      if (isProductionBuild) {
-        const sirv = await import('sirv').then(r => r.default || r)
-        server.middlewares.use(
-          DEVTOOLS_UI_ROUTE,
-          sirv(clientPath, { dev: true, single: true }),
-        )
-      }
-    },
-  })
+      Object.assign(config, {
+        server: {
+          ...server,
+          proxy,
+        },
+      })
+    })
+  }
 
   nuxt.hook('devtools:customTabs', (tabs) => {
     tabs.push({
@@ -99,6 +91,30 @@ export function setupDevToolsUI(options: ModuleOptions, moduleResolve: Resolver[
           const ws = await viteServerWs
           ws.send('nuxt-a11y:triggerScan')
         },
+        async highlightElement(selector: string, id?: number, color?: string) {
+          const ws = await viteServerWs
+          ws.send('nuxt-a11y:highlightElement', { selector, id, color })
+        },
+        async unhighlightElement(selector: string) {
+          const ws = await viteServerWs
+          ws.send('nuxt-a11y:unhighlightElement', selector)
+        },
+        async unhighlightAll() {
+          const ws = await viteServerWs
+          ws.send('nuxt-a11y:unhighlightAll')
+        },
+        async updateElementId(selector: string, id: number) {
+          const ws = await viteServerWs
+          ws.send('nuxt-a11y:updateElementId', { selector, id })
+        },
+        async removeElementIdBadge(selector: string) {
+          const ws = await viteServerWs
+          ws.send('nuxt-a11y:removeElementIdBadge', selector)
+        },
+        async scrollToElement(selector: string) {
+          const ws = await viteServerWs
+          ws.send('nuxt-a11y:scrollToElement', selector)
+        },
       })
       promiseResolve(rpc)
     })
@@ -121,6 +137,12 @@ export function setupDevToolsUI(options: ModuleOptions, moduleResolve: Resolver[
       if (isConnected) {
         const _rpc = await rpc
         _rpc.broadcast.constantScanningEnabled(payload).catch(() => {})
+      }
+    })
+    ws.on('nuxt-a11y:routeChanged', async (payload: string) => {
+      if (isConnected) {
+        const _rpc = await rpc
+        _rpc.broadcast.routeChanged(payload).catch(() => {})
       }
     })
   })

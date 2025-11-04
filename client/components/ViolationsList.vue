@@ -5,6 +5,8 @@ import { computed } from 'vue'
 
 const props = defineProps<{
   violationsByImpact: ViolationsByImpact
+  showCurrentPageFirst: boolean
+  currentRoute: string
 }>()
 
 // Sort violations by id within each impact level
@@ -25,48 +27,102 @@ const sortedViolationsByImpact = computed(() => {
   return sorted
 })
 
-// Calculate element counts for each impact level
-const elementCounts = computed(() => {
-  const counts: Record<string, number> = {}
-  for (const impact of IMPACT_LEVELS) {
-    counts[impact] = sortedViolationsByImpact.value[impact].reduce(
-      (sum, v) => sum + v.nodes.length,
-      0,
-    )
+// When showing current page first, create a flat array grouped by route, then by impact
+const displayGroups = computed(() => {
+  if (!props.showCurrentPageFirst) {
+    // Normal mode: group by impact level
+    return IMPACT_LEVELS.map(impact => ({
+      title: `${impact} Issues`,
+      impact,
+      violations: sortedViolationsByImpact.value[impact],
+      elementCount: sortedViolationsByImpact.value[impact].reduce((sum, v) => sum + v.nodes.length, 0),
+    })).filter(group => group.violations.length > 0)
   }
-  return counts
+
+  // Current page first mode: separate current page from other pages
+  const currentPageViolations: ViolationsByImpact = {
+    critical: [],
+    serious: [],
+    moderate: [],
+    minor: [],
+  }
+  const otherPagesViolations: ViolationsByImpact = {
+    critical: [],
+    serious: [],
+    moderate: [],
+    minor: [],
+  }
+
+  // Split violations by current page vs other pages
+  for (const impact of IMPACT_LEVELS) {
+    sortedViolationsByImpact.value[impact].forEach((v) => {
+      const isCurrentPage = v.route === props.currentRoute
+      if (isCurrentPage) {
+        currentPageViolations[impact].push(v)
+      }
+      else {
+        otherPagesViolations[impact].push(v)
+      }
+    })
+  }
+
+  const groups = []
+
+  // Add current page groups first
+  for (const impact of IMPACT_LEVELS) {
+    if (currentPageViolations[impact].length > 0) {
+      groups.push({
+        title: `${impact} Issues`,
+        impact,
+        violations: currentPageViolations[impact],
+        elementCount: currentPageViolations[impact].reduce((sum, v) => sum + v.nodes.length, 0),
+      })
+    }
+  }
+
+  // Add other pages groups after
+  for (const impact of IMPACT_LEVELS) {
+    if (otherPagesViolations[impact].length > 0) {
+      groups.push({
+        title: `${impact} Issues (Other Pages)`,
+        impact,
+        violations: otherPagesViolations[impact],
+        elementCount: otherPagesViolations[impact].reduce((sum, v) => sum + v.nodes.length, 0),
+      })
+    }
+  }
+
+  return groups
 })
 </script>
 
 <template>
   <div class="space-y-4">
-    <template
-      v-for="impact in IMPACT_LEVELS"
-      :key="impact"
+    <div
+      v-for="group in displayGroups"
+      :key="group.title"
     >
-      <div v-if="sortedViolationsByImpact[impact].length > 0">
-        <h3
-          :id="`${impact}-issues`"
-          class="text-sm font-semibold uppercase tracking-wide opacity-70 mb-3 flex items-center gap-2 scroll-mt-4"
-        >
-          {{ impact }} Issues
-          <NBadge>
-            {{ sortedViolationsByImpact[impact].length }}
-          </NBadge>
-          <span class="text-xs font-normal opacity-60">
-            ({{ elementCounts[impact] }} element{{ elementCounts[impact] !== 1 ? 's' : '' }})
-          </span>
-        </h3>
+      <h3
+        :id="`${group.impact}-issues`"
+        class="text-sm font-semibold uppercase tracking-wide opacity-70 mb-3 flex items-center gap-2 scroll-mt-4"
+      >
+        {{ group.title }}
+        <NBadge>
+          {{ group.violations.length }}
+        </NBadge>
+        <span class="text-xs font-normal opacity-60">
+          ({{ group.elementCount }} element{{ group.elementCount !== 1 ? 's' : '' }})
+        </span>
+      </h3>
 
-        <div class="space-y-3">
-          <ViolationCard
-            v-for="v in sortedViolationsByImpact[impact]"
-            :key="v.id + v.timestamp"
-            :violation="v"
-            :impact-color="v.impact ? IMPACT_COLORS[v.impact] : 'gray'"
-          />
-        </div>
+      <div class="space-y-3">
+        <ViolationCard
+          v-for="v in group.violations"
+          :key="v.id + v.timestamp"
+          :violation="v"
+          :impact-color="v.impact ? IMPACT_COLORS[v.impact] : 'gray'"
+        />
       </div>
-    </template>
+    </div>
   </div>
 </template>

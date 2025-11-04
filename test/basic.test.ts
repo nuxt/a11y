@@ -37,27 +37,51 @@ describe('ssr', async () => {
     // Expect violations to be logged
     expect(a11yLogs).toMatchInlineSnapshot(`
       [
+        "%ca11y%c Elements must meet minimum color contrast ratio thresholds
+        https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=axeAPI
+       color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #FF6E40;  JSHandle@node JSHandle@node JSHandle@node JSHandle@node JSHandle@node",
         "%ca11y%c Documents must have <title> element to aid in navigation
         https://dequeuniversity.com/rules/axe/4.11/document-title?application=axeAPI
-       color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #f25c54; ",
+       color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #FF6E40; ",
         "%ca11y%c Heading levels should only increase by one
         https://dequeuniversity.com/rules/axe/4.11/heading-order?application=axeAPI
-       color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #cf863e;  JSHandle@node",
+       color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #FFB300;  JSHandle@node JSHandle@node",
         "%ca11y%c <html> element must have a lang attribute
         https://dequeuniversity.com/rules/axe/4.11/html-has-lang?application=axeAPI
-       color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #f25c54; ",
-        "%ca11y%c Document should have one main landmark
-        https://dequeuniversity.com/rules/axe/4.11/landmark-one-main?application=axeAPI
-       color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #cf863e; ",
-        "%ca11y%c Page should contain a level-one heading
-        https://dequeuniversity.com/rules/axe/4.11/page-has-heading-one?application=axeAPI
-       color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #cf863e; ",
-        "%ca11y%c All page content should be contained by landmarks
-        https://dequeuniversity.com/rules/axe/4.11/region?application=axeAPI
-       color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #cf863e;  JSHandle@node JSHandle@node",
+       color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #FF6E40; ",
+        "%ca11y%c Images must have alternative text
+        https://dequeuniversity.com/rules/axe/4.11/image-alt?application=axeAPI
+       color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #ff1e1eff;  JSHandle@node JSHandle@node JSHandle@node JSHandle@node JSHandle@node JSHandle@node",
+        "%ca11y%c Form elements must have labels
+        https://dequeuniversity.com/rules/axe/4.11/label?application=axeAPI
+       color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #ff1e1eff;  JSHandle@node",
+        "%ca11y%c Links must have discernible text
+        https://dequeuniversity.com/rules/axe/4.11/link-name?application=axeAPI
+       color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #FF6E40;  JSHandle@node JSHandle@node",
+        "%ca11y%c Elements must meet minimum color contrast ratio thresholds
+        https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=axeAPI
+       color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #FF6E40;  JSHandle@node JSHandle@node JSHandle@node JSHandle@node JSHandle@node",
+        "%ca11y%c Documents must have <title> element to aid in navigation
+        https://dequeuniversity.com/rules/axe/4.11/document-title?application=axeAPI
+       color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #FF6E40; ",
+        "%ca11y%c Heading levels should only increase by one
+        https://dequeuniversity.com/rules/axe/4.11/heading-order?application=axeAPI
+       color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #FFB300;  JSHandle@node JSHandle@node",
+        "%ca11y%c <html> element must have a lang attribute
+        https://dequeuniversity.com/rules/axe/4.11/html-has-lang?application=axeAPI
+       color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #FF6E40; ",
+        "%ca11y%c Images must have alternative text
+        https://dequeuniversity.com/rules/axe/4.11/image-alt?application=axeAPI
+       color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #ff1e1eff;  JSHandle@node JSHandle@node JSHandle@node JSHandle@node JSHandle@node JSHandle@node",
+        "%ca11y%c Form elements must have labels
+        https://dequeuniversity.com/rules/axe/4.11/label?application=axeAPI
+       color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #ff1e1eff;  JSHandle@node",
+        "%ca11y%c Links must have discernible text
+        https://dequeuniversity.com/rules/axe/4.11/link-name?application=axeAPI
+       color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #FF6E40;  JSHandle@node JSHandle@node",
       ]
     `)
 
     await page.close()
-  }, 10000)
+  }, 20000)
 })

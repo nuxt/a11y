@@ -5,7 +5,7 @@ import type { A11yViolation } from '../types'
  * Manages accessibility violations: tracking, merging, and deduplication.
  * Accumulates violations across multiple scans and routes.
  */
-export function createViolationManager(getCurrentRoute: () => string) {
+export function createViolationManager() {
   const warned = new Set<string>()
   const allViolations: A11yViolation[] = []
 
@@ -18,14 +18,15 @@ export function createViolationManager(getCurrentRoute: () => string) {
 
   /**
    * Processes violations from an axe scan, merging duplicates and tracking new ones
+   * @param violations - The violations from axe scan
+   * @param scanRoute - The route that was active when the scan STARTED (not when processing)
    */
-  function processViolations(violations: axe.Result[]): A11yViolation[] {
-    const currentRoute = getCurrentRoute()
+  function processViolations(violations: axe.Result[], scanRoute: string): A11yViolation[] {
     const currentScanViolations = new Map<string, axe.Result>()
 
     // Group violations by type (id + impact + route)
     violations.forEach((v: axe.Result) => {
-      const violationKey = createViolationKey(currentRoute, v.id, v.impact)
+      const violationKey = createViolationKey(scanRoute, v.id, v.impact)
 
       if (!currentScanViolations.has(violationKey)) {
         currentScanViolations.set(violationKey, v)
@@ -57,7 +58,7 @@ export function createViolationManager(getCurrentRoute: () => string) {
           })),
           tags: v.tags,
           timestamp: Date.now(),
-          route: currentRoute,
+          route: scanRoute,
         }
 
         allViolations.push(violation)
@@ -65,7 +66,7 @@ export function createViolationManager(getCurrentRoute: () => string) {
       else {
         // Update existing violation with new nodes
         const existingViolation = allViolations.find(
-          av => av.route === currentRoute && av.id === v.id && av.impact === v.impact,
+          av => av.route === scanRoute && av.id === v.id && av.impact === v.impact,
         )
         if (existingViolation) {
           // Merge new nodes with existing ones, avoiding duplicates
