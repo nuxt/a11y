@@ -1,0 +1,8 @@
+{
+  "packages": [
+    "."
+  ],
+  "comment": {
+    "enabled": true
+  }
+}
