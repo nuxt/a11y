@@ -3,7 +3,7 @@ import { resolve } from 'pathe'
 export default defineNuxtConfig({
   modules: ['@nuxt/devtools-ui-kit'],
 
-  // Use SSR in development for reliable CSS loading, disable in production builds
+  // WORKAROUND: Use SSR in development for reliable CSS loading, disable in production builds
   ssr: process.env.NODE_ENV === 'production' ? false : true,
 
   app: {
