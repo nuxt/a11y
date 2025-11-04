@@ -1,4 +1,4 @@
-import { addPlugin, defineNuxtModule, createResolver } from '@nuxt/kit'
+import { addPlugin, defineNuxtModule, createResolver, extendViteConfig } from '@nuxt/kit'
 import type { Spec as AxeOptions, RunOptions as AxeRunOptions } from 'axe-core'
 import { setupDevToolsUI } from './devtools'
 
@@ -29,6 +29,12 @@ export default defineNuxtModule<ModuleOptions>({
 
     addPlugin(resolver.resolve('./runtime/plugins/axe.client'))
     nuxt.options.runtimeConfig.public.axe = options.axe
+
+    extendViteConfig((config) => {
+      config.optimizeDeps = config.optimizeDeps || {}
+      config.optimizeDeps.include = config.optimizeDeps.include || []
+      config.optimizeDeps.include.push('axe-core')
+    })
 
     setupDevToolsUI(options, resolver.resolve, nuxt)
   },

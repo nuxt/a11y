@@ -1,11 +1,11 @@
+import { existsSync } from 'node:fs'
 import type { Resolver } from '@nuxt/kit'
 import type { Nuxt } from 'nuxt/schema'
-import type { ModuleOptions } from './module'
 import type { BirpcGroup } from 'birpc'
-import { existsSync } from 'node:fs'
-import { useNuxt } from '@nuxt/kit'
-import type { ClientFunctions, ServerFunctions } from './rpc-types'
+import { addVitePlugin, useNuxt } from '@nuxt/kit'
 import { extendServerRpc, onDevToolsInitialized } from '@nuxt/devtools-kit'
+import type { ClientFunctions, ServerFunctions } from './rpc-types'
+import type { ModuleOptions } from './module'
 import { useViteWebSocket } from './util'
 
 const DEVTOOLS_UI_ROUTE = '/__nuxt-a11y-client'
@@ -16,35 +16,43 @@ export function setupDevToolsUI(options: ModuleOptions, moduleResolve: Resolver[
   const clientPath = moduleResolve('./client')
   const isProductionBuild = existsSync(clientPath)
 
-  // Serve production-built client (used when package is published)
-  if (isProductionBuild) {
-    nuxt.hook('vite:serverCreated', async (server) => {
-      const sirv = await import('sirv').then(r => r.default || r)
-      server.middlewares.use(
-        DEVTOOLS_UI_ROUTE,
-        sirv(clientPath, { dev: true, single: true }),
-      )
-    })
-  }
-  // In local development, start a separate Nuxt Server and proxy to serve the client
-  else {
-    nuxt.hook('vite:extendConfig', (config) => {
-      const server = config.server || {}
-      const proxy = server.proxy || {}
-      proxy[DEVTOOLS_UI_ROUTE] = {
-        target: `http://localhost:${DEVTOOLS_UI_LOCAL_PORT}${DEVTOOLS_UI_ROUTE}`,
-        changeOrigin: true,
-        followRedirects: true,
-        rewrite: path => path.replace(DEVTOOLS_UI_ROUTE, ''),
+  addVitePlugin({
+    name: 'nuxt-a11y-devtools-ui',
+    config() {
+      if (!isProductionBuild) {
+        return {
+          server: {
+            // Proxy for Nuxt assets within the DevTools UI (must come first for specificity)
+            proxy: { [`${DEVTOOLS_UI_ROUTE}/_nuxt`]: {
+              target: `http://localhost:${DEVTOOLS_UI_LOCAL_PORT}`,
+              changeOrigin: true,
+              followRedirects: true,
+              rewrite: path => path,
+            },
+
+            // Proxy for the main DevTools UI route
+            [DEVTOOLS_UI_ROUTE]: {
+              target: `http://localhost:${DEVTOOLS_UI_LOCAL_PORT}${DEVTOOLS_UI_ROUTE}`,
+              changeOrigin: true,
+              followRedirects: true,
+              rewrite: path => path.replace(DEVTOOLS_UI_ROUTE, ''),
+            },
+            },
+          },
+        }
       }
-      Object.assign(config, {
-        server: {
-          ...server,
-          proxy,
-        },
-      })
-    })
-  }
+    },
+    async configureServer(server) {
+      // Serve production-built client (used when package is published)
+      if (isProductionBuild) {
+        const sirv = await import('sirv').then(r => r.default || r)
+        server.middlewares.use(
+          DEVTOOLS_UI_ROUTE,
+          sirv(clientPath, { dev: true, single: true }),
+        )
+      }
+    },
+  })
 
   nuxt.hook('devtools:customTabs', (tabs) => {
     tabs.push({

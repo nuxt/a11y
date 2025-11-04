@@ -2,7 +2,7 @@
   "packages": [
     "."
   ],
-  "comment": {
-    "enabled": true
+  "packageJsonTransforms": {
+    "resolutions": false
   }
 }
