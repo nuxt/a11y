@@ -1,0 +1,8 @@
+{
+  "packages": [
+    "."
+  ],
+  "packageJsonTransforms": {
+    "resolutions": false
+  }
+}
