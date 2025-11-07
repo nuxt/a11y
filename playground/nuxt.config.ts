@@ -42,20 +42,7 @@ export default defineNuxtConfig({
 
   devtools: { enabled: true },
 
-  routeRules: {
-    '/__nuxt-a11y-client/**': { proxy: 'http://localhost:3030/__nuxt-a11y-client/**' },
-  },
-
   compatibilityDate: '2024-08-21',
 
-  nitro: {
-    devProxy: {
-      '/__nuxt-a11y-client': {
-        target: 'http://localhost:3030/__nuxt-a11y-client',
-        changeOrigin: true,
-        ws: true,
-      },
-    },
-  },
   a11y: {},
 })

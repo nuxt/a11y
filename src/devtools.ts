@@ -22,21 +22,21 @@ export function setupDevToolsUI(options: ModuleOptions, moduleResolve: Resolver[
       if (!isProductionBuild) {
         return {
           server: {
-            // Proxy for Nuxt assets within the DevTools UI (must come first for specificity)
-            proxy: { [`${DEVTOOLS_UI_ROUTE}/_nuxt`]: {
-              target: `http://localhost:${DEVTOOLS_UI_LOCAL_PORT}`,
-              changeOrigin: true,
-              followRedirects: true,
-              rewrite: path => path,
-            },
-
-            // Proxy for the main DevTools UI route
-            [DEVTOOLS_UI_ROUTE]: {
-              target: `http://localhost:${DEVTOOLS_UI_LOCAL_PORT}${DEVTOOLS_UI_ROUTE}`,
-              changeOrigin: true,
-              followRedirects: true,
-              rewrite: path => path.replace(DEVTOOLS_UI_ROUTE, ''),
-            },
+            proxy: {
+              // Proxy for Nuxt assets within the DevTools UI (must come first for specificity)
+              [`${DEVTOOLS_UI_ROUTE}/_nuxt`]: {
+                target: `http://localhost:${DEVTOOLS_UI_LOCAL_PORT}`,
+                changeOrigin: true,
+                followRedirects: true,
+                rewrite: (path: string) => path,
+              },
+              // Proxy for the main DevTools UI route
+              [DEVTOOLS_UI_ROUTE]: {
+                target: `http://localhost:${DEVTOOLS_UI_LOCAL_PORT}${DEVTOOLS_UI_ROUTE}`,
+                changeOrigin: true,
+                followRedirects: true,
+                rewrite: (path: string) => path.replace(DEVTOOLS_UI_ROUTE, ''),
+              },
             },
           },
         }

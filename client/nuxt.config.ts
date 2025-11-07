@@ -18,5 +18,13 @@ export default defineNuxtConfig({
 
   vite: {
     base: '/__nuxt-a11y-client/',
+    server: {
+      hmr: {
+        protocol: 'ws',
+        host: 'localhost',
+        port: 3030,
+        clientPort: 3030,
+      },
+    },
   },
 })
