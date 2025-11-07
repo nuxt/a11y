@@ -9,7 +9,7 @@ import { handleRouteChange } from './route-watcher'
 const RPC_NAMESPACE = 'nuxt-a11y-rpc'
 
 export const axeViolations = ref<A11yViolation[]>([])
-export const isScanRunning = ref(true)
+export const isScanRunning = ref(false)
 export const isConstantScanningEnabled = ref(false)
 export const currentRoute = ref<string>('/')
 
