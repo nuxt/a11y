@@ -45,9 +45,9 @@ describe('violation-manager', () => {
       ], '/home')
 
       expect(result).toHaveLength(1)
-      expect(result[0].nodes).toHaveLength(2)
-      expect(result[0].nodes[0].target).toEqual(['.button'])
-      expect(result[0].nodes[1].target).toEqual(['.text'])
+      expect(result[0]!.nodes).toHaveLength(2)
+      expect(result[0]!.nodes[0]!.target).toEqual(['.button'])
+      expect(result[0]!.nodes[1]!.target).toEqual(['.text'])
     })
 
     it('should track violations by id, impact, and route separately', () => {
@@ -75,19 +75,19 @@ describe('violation-manager', () => {
       // First scan
       const result1 = manager.processViolations([mockViolation], '/home')
       expect(result1).toHaveLength(1)
-      expect(result1[0].nodes).toHaveLength(1)
+      expect(result1[0]!.nodes).toHaveLength(1)
 
       // Second scan with same violation - should not duplicate
       const result2 = manager.processViolations([mockViolation], '/home')
       expect(result2).toHaveLength(1)
-      expect(result2[0].nodes).toHaveLength(1)
+      expect(result2[0]!.nodes).toHaveLength(1)
 
       // Third scan with new node - should add to existing
       const result3 = manager.processViolations([
         createMockViolation({ nodes: [createNode('<div>New</div>', ['.new'])] }),
       ], '/home')
       expect(result3).toHaveLength(1)
-      expect(result3[0].nodes).toHaveLength(2)
+      expect(result3[0]!.nodes).toHaveLength(2)
     })
 
     it('should normalize highlighted elements to prevent duplicates', () => {
@@ -99,7 +99,7 @@ describe('violation-manager', () => {
         createMockViolation({ nodes: [createNode('<button>Click me</button>', ['.team-member > .__nuxt_a11y_highlight__ > .avatar'])] }),
       ], '/home')
 
-      expect(result[0].nodes).toHaveLength(1) // Should recognize highlighted element as duplicate
+      expect(result[0]!.nodes).toHaveLength(1) // Should recognize highlighted element as duplicate
     })
 
     it('should handle edge cases: spacing variations and complex selectors', () => {
@@ -111,7 +111,7 @@ describe('violation-manager', () => {
         createMockViolation({ nodes: [createNode('<div>Text</div>', ['.container > .text'])] }),
       ], '/home')
 
-      expect(result[0].nodes).toHaveLength(1) // Should handle spacing differences
+      expect(result[0]!.nodes).toHaveLength(1) // Should handle spacing differences
     })
 
     it('should handle non-string targets (cross-tree selectors)', () => {
@@ -150,7 +150,7 @@ describe('violation-manager', () => {
       manager.processViolations([createMockViolation()], '/home')
 
       expect(manager.getAll()).toHaveLength(1)
-      expect(manager.getAll()[0].id).toBe('color-contrast')
+      expect(manager.getAll()[0]!.id).toBe('color-contrast')
     })
   })
 
@@ -176,4 +176,3 @@ describe('violation-manager', () => {
     })
   })
 })
-
