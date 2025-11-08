@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import type axe from 'axe-core'
-import { createViolationManager } from './violation-manager'
+import { createViolationManager } from '../src/runtime/utils/violation-manager'
 
 describe('violation-manager', () => {
   let manager: ReturnType<typeof createViolationManager>

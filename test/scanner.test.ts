@@ -2,8 +2,8 @@
  * @vitest-environment jsdom
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { createScanner } from './scanner'
-import { DEBOUNCE_DELAY, SCAN_EVENTS } from '../constants'
+import { createScanner } from '../src/runtime/utils/scanner'
+import { DEBOUNCE_DELAY, SCAN_EVENTS } from '../src/runtime/constants'
 
 describe('scanner', () => {
   let scanner: ReturnType<typeof createScanner>
