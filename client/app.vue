@@ -154,5 +154,7 @@ const impactStats = computed<ImpactStat[]>(() =>
     />
 
     <ScrollToTop />
+
+    <NNotification />
   </div>
 </template>

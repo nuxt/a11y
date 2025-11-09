@@ -3,6 +3,7 @@ import type { A11yViolation, A11yViolationNode } from '../../src/runtime/types'
 import { highlightElement, unhighlightElement, removeElementIdBadge, scrollToElement, currentRoute } from '../composables/rpc'
 import { computed } from 'vue'
 import { pinElement, unpinElement, getElementId, isElementPinned } from '../composables/pinned-elements'
+import { isRootElementSelector } from '../composables/root-element-checker'
 
 const props = defineProps<{
   violation: A11yViolation
@@ -34,12 +35,33 @@ function getNodeSelector(node: A11yViolationNode): string {
   return Array.isArray(node.target) ? node.target.join(' ') : String(node.target)
 }
 
+// Show notification for root elements
+function showRootElementNotification(isDirectClick: boolean) {
+  const message = isDirectClick
+    ? 'This affected element cannot be highlighted because it is a root-level element (<html>, <body> tag)'
+    : 'One of the affected elements cannot be highlighted because it is a root-level element (<html>, <body> tag)'
+
+  devtoolsUiShowNotification({
+    message,
+    icon: 'i-carbon-warning-alt',
+    classes: 'text-white border-white bg-black/90',
+    duration: 5000,
+    position: 'top-center',
+  })
+}
+
 // Individual node click handler
 function handleNodeClick(node: A11yViolationNode) {
   // Don't allow interaction if not on current route
   if (!isOnCurrentRoute.value) return
 
   const selector = getNodeSelector(node)
+
+  // Check if this is a root element - if so, show notification and return
+  if (isRootElementSelector(selector)) {
+    showRootElementNotification(true)
+    return
+  }
 
   if (isElementPinned(selector)) {
     // Unpin: remove from global state and remove ID badge
@@ -68,6 +90,12 @@ function isNodeOnCurrentRoute(_node: A11yViolationNode): boolean {
 function handleScrollToElement(node: A11yViolationNode) {
   const selector = getNodeSelector(node)
 
+  // Don't scroll or pin root elements
+  if (isRootElementSelector(selector)) {
+    showRootElementNotification(true)
+    return
+  }
+
   // Pin the element if not already pinned
   if (!isElementPinned(selector)) {
     const id = pinElement(selector)
@@ -78,7 +106,7 @@ function handleScrollToElement(node: A11yViolationNode) {
   scrollToElement(selector)
 }
 
-// Parent violation card handlers - REMOVED HOVER FUNCTIONALITY
+// Parent violation card handlers
 function handleViolationClick() {
   // Don't allow interaction if not on current route
   if (!isOnCurrentRoute.value) return
@@ -87,6 +115,9 @@ function handleViolationClick() {
     // Unpin all nodes in this violation
     props.violation.nodes.forEach((node) => {
       const selector = getNodeSelector(node)
+      // Skip root elements
+      if (isRootElementSelector(selector)) return
+
       unpinElement(selector)
       removeElementIdBadge(selector)
       // Always unhighlight to balance the highlight call from when we pinned
@@ -95,11 +126,24 @@ function handleViolationClick() {
   }
   else {
     // Pin all nodes in this violation
+    let hasRootElement = false
     props.violation.nodes.forEach((node) => {
       const selector = getNodeSelector(node)
+
+      // Skip root elements but track if we found one
+      if (isRootElementSelector(selector)) {
+        hasRootElement = true
+        return
+      }
+
       const id = pinElement(selector)
       highlightElement(selector, id, props.impactColor)
     })
+
+    // Show notification once if any root elements were found
+    if (hasRootElement) {
+      showRootElementNotification(false)
+    }
   }
 }
 </script>
@@ -231,9 +275,9 @@ function handleViolationClick() {
                     </p>
                   </div>
                   <div class="flex items-center gap-2 flex-shrink-0">
-                    <!-- Locator button (only show for current route) -->
+                    <!-- Locator button (only show for current route and non-root elements) -->
                     <button
-                      v-if="isNodeOnCurrentRoute(node)"
+                      v-if="isNodeOnCurrentRoute(node) && !isRootElementSelector(getNodeSelector(node))"
                       type="button"
                       class="flex items-center justify-center w-6 h-6 rounded transition-colors hover:bg-gray-500/20 cursor-pointer"
                       title="Scroll to element"
