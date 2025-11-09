@@ -72,7 +72,7 @@ function handleReset() {
 
       <div
         v-if="isConstantScanningEnabled"
-        class="text-xs opacity-60"
+        class="text-xs opacity-70"
       >
         Scanning automatically on mouse, keyboard, and touch events
       </div>

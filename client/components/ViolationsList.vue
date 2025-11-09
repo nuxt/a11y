@@ -110,7 +110,7 @@ const displayGroups = computed(() => {
         <NBadge>
           {{ group.violations.length }}
         </NBadge>
-        <span class="text-xs font-normal opacity-60">
+        <span class="text-xs font-normal opacity-70">
           ({{ group.elementCount }} element{{ group.elementCount !== 1 ? 's' : '' }})
         </span>
       </h3>

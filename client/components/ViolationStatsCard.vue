@@ -37,7 +37,7 @@ defineProps<{
             <div class="text-2xl font-bold">
               {{ stat.count }}
             </div>
-            <div class="text-xs opacity-60 mt-1">
+            <div class="text-xs opacity-70 mt-1">
               {{ stat.elementsCount }} element{{ stat.elementsCount !== 1 ? 's' : '' }}
             </div>
           </div>
