@@ -1,101 +1,75 @@
-import { describe, it, expect } from 'vitest'
+/**
+ * @vitest-environment jsdom
+ */
+import { describe, it, expect, beforeEach } from 'vitest'
 import { isRootElementSelector } from '../client/composables/root-element-checker'
 
 describe('isRootElementSelector', () => {
-  const testCases = (cases: Array<[string, boolean]>) => {
-    cases.forEach(([selector, expected]) => {
-      it(`${expected ? 'returns true' : 'returns false'} for "${selector}"`, () => {
-        expect(isRootElementSelector(selector)).toBe(expected)
-      })
-    })
-  }
+  beforeEach(() => {
+    // Setup a mock DOM structure with Nuxt root
+    document.body.innerHTML = `
+      <div id="__nuxt">
+        <div id="app">
+          <main class="container">
+            <button class="btn">Click me</button>
+          </main>
+        </div>
+      </div>
+    `
+  })
 
   describe('root element selectors', () => {
-    testCases([
-      // Basic root elements
-      ['html', true],
-      ['body', true],
-      ['head', true],
-      ['document', true],
-      ['window', true],
+    it('returns true for html element', () => {
+      expect(isRootElementSelector('html')).toBe(true)
+    })
 
-      // Case insensitivity
-      ['HTML', true],
-      ['BODY', true],
-      ['HEAD', true],
-      ['HtMl', true],
-      ['BoDy', true],
+    it('returns true for body element', () => {
+      expect(isRootElementSelector('body')).toBe(true)
+    })
 
-      // With attributes
-      ['html[lang]', true],
-      ['html[lang="en"]', true],
-      ['body[class]', true],
-      ['head[data-test]', true],
+    it('returns true for html with attributes', () => {
+      document.documentElement.setAttribute('lang', 'en')
+      expect(isRootElementSelector('html[lang]')).toBe(true)
+    })
 
-      // With classes
-      ['body.main', true],
-      ['html.no-js', true],
-      ['head.custom', true],
-
-      // With IDs
-      ['body#app', true],
-      ['html#root', true],
-
-      // With pseudo-classes
-      ['html:lang(en)', true],
-      ['body:not(.loading)', true],
-
-      // With whitespace
-      ['  html  ', true],
-      ['  body  ', true],
-      ['  head  ', true],
-      [' document ', true],
-      [' window ', true],
-    ])
+    it('returns true for body with class', () => {
+      document.body.className = 'main'
+      expect(isRootElementSelector('body.main')).toBe(true)
+    })
   })
 
   describe('non-root element selectors', () => {
-    testCases([
-      // Regular elements
-      ['div', false],
-      ['span', false],
-      ['p', false],
-      ['a', false],
-      ['button', false],
+    it('returns false for elements inside Nuxt root', () => {
+      expect(isRootElementSelector('#app')).toBe(false)
+    })
 
-      // Elements with similar names
-      ['htmldiv', false],
-      ['bodywrapper', false],
-      ['header', false],
-      ['heading', false],
+    it('returns false for nested elements', () => {
+      expect(isRootElementSelector('.container')).toBe(false)
+    })
 
-      // Compound selectors starting with non-root
-      ['div body', false],
-      ['#app html', false],
-      ['.container body', false],
+    it('returns false for deeply nested elements', () => {
+      expect(isRootElementSelector('.btn')).toBe(false)
+    })
 
-      // Complex selectors
-      ['div.body', false],
-      ['span#html', false],
-      ['section.head', false],
+    it('returns false for non-existent selector', () => {
+      expect(isRootElementSelector('.non-existent')).toBe(false)
+    })
 
-      // IDs and classes
-      ['#html', false],
-      ['.body', false],
-      ['#body', false],
-      ['.html', false],
+    it('returns false for invalid selector', () => {
+      expect(isRootElementSelector('>>invalid<<')).toBe(false)
+    })
+  })
 
-      // Attribute selectors
-      ['[data-html]', false],
-      ['[data-body]', false],
+  describe('edge cases', () => {
+    it('treats Nuxt root element itself as a root element', () => {
+      expect(isRootElementSelector('#__nuxt')).toBe(true)
+    })
 
-      // Descendant selectors (not starting with root)
-      ['main > div', false],
-      ['#app > .content', false],
-
-      // Empty or whitespace only
-      ['', false],
-      ['   ', false],
-    ])
+    it('returns false when Nuxt root is missing', () => {
+      document.body.innerHTML = '<div id="app"></div>'
+      expect(isRootElementSelector('html')).toBe(false)
+      expect(isRootElementSelector('body')).toBe(false)
+      expect(isRootElementSelector('#app')).toBe(false)
+    })
   })
 })
