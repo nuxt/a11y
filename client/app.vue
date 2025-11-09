@@ -6,7 +6,7 @@ import { IMPACT_LEVELS, IMPACT_COLORS } from '../src/runtime/constants'
 import type axe from 'axe-core'
 
 const showCurrentPageFirst = ref(true)
-const isShowingSkeleton = ref(false)
+const isShowingSkeleton = ref(true)
 let skeletonTimer: ReturnType<typeof setTimeout> | null = null
 let skeletonStartTime = 0
 const MINIMUM_SKELETON_TIME = 1500 // 1.5 seconds
