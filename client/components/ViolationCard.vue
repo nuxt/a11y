@@ -41,17 +41,13 @@ function showRootElementNotification(isDirectClick: boolean) {
     ? 'This affected element cannot be highlighted because it is a root-level element (<html>, <body> tag)'
     : 'One of the affected elements cannot be highlighted because it is a root-level element (<html>, <body> tag)'
 
-  // @ts-expect-error - auto-imported by Nuxt
-  if (typeof devtoolsUiShowNotification !== 'undefined') {
-    // @ts-expect-error - auto-imported by Nuxt
-    devtoolsUiShowNotification({
-      message,
-      icon: 'i-carbon-warning-alt',
-      classes: 'text-white border-white bg-black/90',
-      duration: 5000,
-      position: 'top-center',
-    })
-  }
+  devtoolsUiShowNotification({
+    message,
+    icon: 'i-carbon-warning-alt',
+    classes: 'text-white border-white bg-black/90',
+    duration: 5000,
+    position: 'top-center',
+  })
 }
 
 // Individual node click handler
