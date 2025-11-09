@@ -19,6 +19,7 @@ function handleTriggerScan() {
 }
 
 function handleReset() {
+  clearAllPinned()
   resetViolations()
 }
 </script>

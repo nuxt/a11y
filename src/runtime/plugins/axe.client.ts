@@ -74,6 +74,7 @@ export default defineNuxtPlugin((nuxtApp) => {
 
   hmr.onReset(() => {
     violationManager.reset()
+    highlighter.unhighlightAll()
     const currentRoutePath = route.path || route.fullPath || 'unknown'
     hmr.broadcast(hmr.HMR_EVENTS.SHOW_VIOLATIONS, { violations: [], currentRoute: currentRoutePath })
   })
