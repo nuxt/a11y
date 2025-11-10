@@ -42,7 +42,11 @@ export function createAxeRunner(config: AxeRunnerConfig, onScanStateChange: (isR
     try {
       const result = await new Promise<Axe.AxeResults>((resolve, reject) => {
         axe.run({
-          exclude: ['nuxt-devtools-frame'],
+          // Exclude any Nuxt DevTools iframe (id starts with "nuxt-devtools-")
+          // In older devtools versions (like v.1.7.0), the iframe used id "nuxt-devtools-iframe" not like the current "nuxt-devtools-frame"
+          exclude: [
+            'iframe[id^="nuxt-devtools-"]',
+          ],
         }, {
           elementRef: true,
           ...config.runOptions,
