@@ -3,3 +3,4 @@ packages:
   - client
 ignoredBuiltDependencies:
   - esbuild
+trustPolicy: no-downgrade
