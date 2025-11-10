@@ -4,17 +4,15 @@ import { computed, ref, watch } from 'vue'
 import type { ViolationsByImpact, ImpactStat, A11yViolation } from '../src/runtime/types'
 import { IMPACT_LEVELS, IMPACT_COLORS } from '../src/runtime/constants'
 import type axe from 'axe-core'
-import { version as axeCoreVersion } from 'axe-core/package.json'
 
 const showCurrentPageFirst = ref(true)
-const isShowingSkeleton = ref(false)
+const isShowingSkeleton = ref(true)
 let skeletonTimer: ReturnType<typeof setTimeout> | null = null
 let skeletonStartTime = 0
 const MINIMUM_SKELETON_TIME = 1500 // 1.5 seconds
 
 // Get axe-core version for documentation link
-const axeVersion = axeCoreVersion.split('.').slice(0, 2).join('.')
-const axeDocsUrl = `https://dequeuniversity.com/rules/axe/html/${axeVersion}`
+const { version: axeVersion, docsUrl: axeDocsUrl } = useAxeVersion()
 
 // Watch for scan state changes
 watch(isScanRunning, (running) => {
@@ -154,7 +152,11 @@ const impactStats = computed<ImpactStat[]>(() =>
     />
 
     <ScrollToTop />
-
-    <NNotification />
+    <div
+      role="status"
+      aria-live="polite"
+    >
+      <NNotification />
+    </div>
   </div>
 </template>

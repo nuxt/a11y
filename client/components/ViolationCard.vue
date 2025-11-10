@@ -154,7 +154,7 @@ function handleViolationClick() {
     :class="{
       'ring-2 ring-primary': isViolationPinned,
       'hover:border-primary cursor-pointer': isOnCurrentRoute,
-      'opacity-60 cursor-not-allowed': !isOnCurrentRoute,
+      'opacity-70 cursor-not-allowed': !isOnCurrentRoute,
     }"
   >
     <div class="p-4">
@@ -166,7 +166,7 @@ function handleViolationClick() {
         <div class="flex-1">
           <div class="flex items-center gap-2 mb-2">
             <NBadge
-              class="uppercase"
+              class="uppercase color-white"
               :style="{
                 borderColor: impactColor,
                 borderWidth: '1.5px',
@@ -176,7 +176,7 @@ function handleViolationClick() {
             >
               {{ violation.impact || 'UNKNOWN' }}
             </NBadge>
-            <span class="text-sm font-mono opacity-60">{{ violation.id }}</span>
+            <span class="text-sm font-mono opacity-70">{{ violation.id }}</span>
             <div
               v-if="hasAnyPinnedNodes"
               class="flex items-center gap-1 ml-auto"
