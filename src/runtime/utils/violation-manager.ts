@@ -15,24 +15,26 @@ export function createViolationManager() {
    * when compared across scans.
    */
   function normalizeSelector(selector: string): string {
-    // Remove the highlight wrapper from the selector path
-    // Example: .team-member > .__nuxt_a11y_highlight__ > .avatar
+    // Remove the highlight wrapper and the scoped styling attribute from the selector path
+    // Example: .team-member[data-v-7f554ff8=""] > .__nuxt_a11y_highlight__ > .avatar[data-v-7f554ff8=""]
     //       -> .team-member > .avatar
-    return selector.replace(/\s*>\s*\.__nuxt_a11y_highlight__\s*>\s*/g, ' > ')
+    return selector
+      .replace(/\s*>\s*\.__nuxt_a11y_highlight__\s*>\s*/g, ' > ')
+      // Remove Vue/Nuxt scoped styling attributes for comparison
+      .replace(/\[data-[vs]-[a-f0-9]+=""\]/g, '')
   }
 
   /**
-   * Normalizes a target selector array by removing highlight wrappers.
-   * Handles different axe-core target types (string arrays, cross-tree selectors, etc.)
+   * Normalizes a target selector array by removing highlight wrappers and scoped attributes.
+   * Handles both simple string arrays and shadow DOM/cross-tree selectors.
    */
   function normalizeTarget(target: axe.NodeResult['target']): string[] {
-    // If it's a simple array of strings
-    if (Array.isArray(target) && target.every(t => typeof t === 'string')) {
+    // Handle simple string arrays (most common case)
+    if (target.every(t => typeof t === 'string')) {
       return (target as string[]).map(normalizeSelector)
     }
-    // For other types (cross-tree, shadow DOM), convert to array if needed
-    const targetArray = Array.isArray(target) ? target : [target]
-    return targetArray.map(t => typeof t === 'string' ? normalizeSelector(t) : String(t))
+    // Handle shadow DOM and cross-tree selectors (arrays with nested arrays)
+    return target.map(t => typeof t === 'string' ? normalizeSelector(t) : String(t))
   }
 
   /**
@@ -50,73 +52,107 @@ export function createViolationManager() {
   }
 
   /**
-   * Processes violations from an axe scan, merging duplicates and tracking new ones
-   * @param violations - The violations from axe scan
-   * @param scanRoute - The route that was active when the scan STARTED (not when processing)
+   * Merges nodes from source violation into target, avoiding duplicates
    */
-  function processViolations(violations: axe.Result[], scanRoute: string): A11yViolation[] {
-    const currentScanViolations = new Map<string, axe.Result>()
+  function mergeViolationNodes(target: axe.Result, source: axe.Result): void {
+    const existingTargets = new Set(
+      target.nodes.map(n => getTargetKey(n.target)),
+    )
 
-    // Group violations by type (id + impact + route)
-    violations.forEach((v: axe.Result) => {
+    const newNodes = source.nodes.filter(n => !existingTargets.has(getTargetKey(n.target)))
+    target.nodes = [...target.nodes, ...newNodes]
+  }
+
+  /**
+   * Groups violations from current scan by type, deduplicating nodes within the scan
+   */
+  function groupCurrentScanViolations(violations: axe.Result[], scanRoute: string): Map<string, axe.Result> {
+    const grouped = new Map<string, axe.Result>()
+
+    violations.forEach((v) => {
       const violationKey = createViolationKey(scanRoute, v.id, v.impact)
 
-      if (!currentScanViolations.has(violationKey)) {
-        currentScanViolations.set(violationKey, v)
+      if (!grouped.has(violationKey)) {
+        grouped.set(violationKey, v)
       }
       else {
-        // Merge nodes from the same violation type
-        const existing = currentScanViolations.get(violationKey)!
-        existing.nodes = [...existing.nodes, ...v.nodes]
+        mergeViolationNodes(grouped.get(violationKey)!, v)
       }
     })
 
-    // Process merged violations
+    return grouped
+  }
+
+  /**
+   * Converts axe.Result to A11yViolation format
+   */
+  function createViolationRecord(v: axe.Result, scanRoute: string): A11yViolation {
+    return {
+      id: v.id,
+      impact: v.impact,
+      help: v.help,
+      helpUrl: v.helpUrl,
+      description: v.description,
+      nodes: v.nodes.map(n => ({
+        target: n.target,
+        html: n.html,
+        failureSummary: n.failureSummary,
+      })),
+      tags: v.tags,
+      timestamp: Date.now(),
+      route: scanRoute,
+    }
+  }
+
+  /**
+   * Adds a new violation to the accumulated violations list
+   */
+  function addNewViolation(v: axe.Result, scanRoute: string, violationKey: string): void {
+    warned.add(violationKey)
+    const violation = createViolationRecord(v, scanRoute)
+    allViolations.push(violation)
+  }
+
+  /**
+   * Updates an existing violation with new nodes from current scan
+   */
+  function updateExistingViolation(v: axe.Result, scanRoute: string): void {
+    const existingViolation = allViolations.find(
+      av => av.route === scanRoute && av.id === v.id && av.impact === v.impact,
+    )
+
+    if (!existingViolation) return
+
+    const existingTargets = new Set(
+      existingViolation.nodes.map(n => getTargetKey(n.target)),
+    )
+
+    const newNodes = v.nodes
+      .filter(n => !existingTargets.has(getTargetKey(n.target)))
+      .map(n => ({
+        target: n.target,
+        html: n.html,
+        failureSummary: n.failureSummary,
+      }))
+
+    existingViolation.nodes.push(...newNodes)
+    existingViolation.timestamp = Date.now()
+  }
+
+  /**
+   * Processes violations from an axe scan, merging duplicates and tracking new ones
+   * @param violations - The violations from axe scan
+   * @param scanRoute - The route that was active when the scan started
+   */
+  function processViolations(violations: axe.Result[], scanRoute: string): A11yViolation[] {
+    const currentScanViolations = groupCurrentScanViolations(violations, scanRoute)
+
     currentScanViolations.forEach((v, violationKey) => {
-      // Only add if we haven't seen this violation before
       if (!warned.has(violationKey)) {
-        warned.add(violationKey)
-
-        // Add to accumulated violations
-        const violation: A11yViolation = {
-          id: v.id,
-          impact: v.impact,
-          help: v.help,
-          helpUrl: v.helpUrl,
-          description: v.description,
-          nodes: v.nodes.map(n => ({
-            target: n.target,
-            html: n.html,
-            failureSummary: n.failureSummary,
-          })),
-          tags: v.tags,
-          timestamp: Date.now(),
-          route: scanRoute,
-        }
-
-        allViolations.push(violation)
+        addNewViolation(v, scanRoute, violationKey)
       }
       else {
-        // Update existing violation with new nodes
-        const existingViolation = allViolations.find(
-          av => av.route === scanRoute && av.id === v.id && av.impact === v.impact,
-        )
-        if (existingViolation) {
-          // Merge new nodes with existing ones, avoiding duplicates
-          // Use normalized selectors for comparison
-          const existingTargets = new Set(
-            existingViolation.nodes.map(n => getTargetKey(n.target)),
-          )
-          const newNodes = v.nodes
-            .filter(n => !existingTargets.has(getTargetKey(n.target)))
-            .map(n => ({
-              target: n.target,
-              html: n.html,
-              failureSummary: n.failureSummary,
-            }))
-          existingViolation.nodes.push(...newNodes)
-          existingViolation.timestamp = Date.now()
-        }
+        updateExistingViolation(v, scanRoute)
       }
     })
 
