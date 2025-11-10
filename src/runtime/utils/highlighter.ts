@@ -21,6 +21,7 @@ interface HighlightedElement {
     position: string
     width: string
     height: string
+    display: string
   }
   idBadge?: HTMLElement
   wrapper?: HTMLElement
@@ -50,6 +51,7 @@ function saveOriginalStyles(element: HTMLElement): HighlightedElement['originalS
     position: element.style.position,
     width: element.style.width,
     height: element.style.height,
+    display: element.style.display,
   }
 }
 
@@ -63,6 +65,7 @@ function restoreOriginalStyles(element: HTMLElement, originalStyles: Highlighted
     { key: 'position', value: originalStyles.position },
     { key: 'width', value: originalStyles.width },
     { key: 'height', value: originalStyles.height },
+    { key: 'display', value: originalStyles.display },
   ]
 
   props.forEach(({ key, value }) => {
@@ -87,21 +90,20 @@ function injectStyles(): void {
   style.id = HIGHLIGHT_STYLE_ID
   style.textContent = `
     .${HIGHLIGHT_CLASS} {
-      outline: 3px solid #f59e0b;
-      outline-offset: 2px !important;
       z-index: 999998 !important;
       transition: outline 0.2s ease, box-shadow 0.2s ease !important;
+      border-radius: 4px !important;
     }
 
     .${HIGHLIGHT_ID_BADGE_CLASS} {
       position: absolute !important;
-      bottom: 2px !important;
+      bottom: -35px !important;
       left: 50% !important;
       transform: translateX(-50%) !important;
-      width: 28px !important;
-      height: 28px !important;
+      width: 23px !important;
+      height: 23px !important;
       border-radius: 50% !important;
-      background-color: #f59e0b;
+      background-color: black !important;
       color: white !important;
       display: flex !important;
       align-items: center !important;
@@ -111,8 +113,7 @@ function injectStyles(): void {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
       z-index: 1000001 !important;
       pointer-events: none !important;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5) !important;
-      border: 2px solid white !important;
+      border: 2px solid black;
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -138,13 +139,21 @@ function parseSelector(target: string[]): string {
 function createWrapper(element: HTMLElement): HTMLElement {
   const wrapper = document.createElement('span')
   wrapper.style.position = 'relative'
+  wrapper.style.display = 'inline-block' // Ensures wrapper wraps tightly around content
 
   const computedStyle = window.getComputedStyle(element)
   const elementDisplay = computedStyle.display
-  wrapper.style.display = elementDisplay
 
-  // Preserve dimensions for block/inline-block elements
-  if (elementDisplay === 'block' || elementDisplay === 'inline-block') {
+  // For images and other inline elements, ensure wrapper matches element dimensions
+  if (element.tagName === 'IMG' || elementDisplay === 'inline' || elementDisplay === 'inline-block') {
+    const elementWidth = element.offsetWidth
+    const elementHeight = element.offsetHeight
+    if (elementWidth > 0) wrapper.style.width = `${elementWidth}px`
+    if (elementHeight > 0) wrapper.style.height = `${elementHeight}px`
+  }
+  // For block elements, match display mode and dimensions
+  else if (elementDisplay === 'block') {
+    wrapper.style.display = 'block'
     const elementWidth = element.offsetWidth
     const elementHeight = element.offsetHeight
     if (elementWidth > 0) wrapper.style.width = `${elementWidth}px`
@@ -161,6 +170,14 @@ function wrapElement(element: HTMLElement, wrapper: HTMLElement): void {
   element.parentNode?.insertBefore(wrapper, element)
   wrapper.appendChild(element)
 
+  // Reset element position to ensure proper containment in wrapper
+  element.style.position = ''
+
+  // For images, ensure they display as block to prevent spacing issues
+  if (element.tagName === 'IMG') {
+    element.style.display = 'block'
+  }
+
   // Ensure certain elements fill the wrapper
   if (FILL_WIDTH_ELEMENTS.has(element.tagName)) {
     element.style.width = '100%'
@@ -168,8 +185,6 @@ function wrapElement(element: HTMLElement, wrapper: HTMLElement): void {
       element.style.height = '100%'
     }
   }
-
-  element.style.position = ''
 }
 
 /**
@@ -179,7 +194,7 @@ function createIdBadge(id: number, color?: string): HTMLElement {
   const badge = document.createElement('div')
   badge.className = HIGHLIGHT_ID_BADGE_CLASS
   badge.textContent = String(id)
-  if (color) badge.style.backgroundColor = color
+  if (color) badge.style.borderColor = color
   return badge
 }
 
@@ -189,8 +204,8 @@ function createIdBadge(id: number, color?: string): HTMLElement {
 function applyHighlightStyles(target: HTMLElement, color?: string): void {
   target.classList.add(HIGHLIGHT_CLASS)
   if (color) {
-    target.style.setProperty('outline', `3px solid ${color}`, 'important')
-    target.style.setProperty('box-shadow', `0 0 0 3px ${color}40`, 'important')
+    target.style.setProperty('outline', `7px double ${color}`, 'important')
+    target.style.setProperty('box-shadow', `0 0 0 5px black`, 'important')
   }
 }
 
