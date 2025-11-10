@@ -16,7 +16,6 @@ export default defineNuxtPlugin((nuxtApp) => {
   const hmr = createHmrBridge()
   const logger = createLogger()
   const highlighter = createHighlighter()
-
   const violationManager = createViolationManager()
 
   const axeRunner = createAxeRunner(config, (isRunning) => {
