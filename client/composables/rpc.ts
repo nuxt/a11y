@@ -12,6 +12,7 @@ export const axeViolations = ref<A11yViolation[]>([])
 export const isScanRunning = ref(false)
 export const isConstantScanningEnabled = ref(false)
 export const currentRoute = ref<string>('/')
+export const isRouteChangeScan = ref(false)
 
 export const devtools = ref<NuxtDevtoolsClient>()
 export const nuxtA11yRpc = ref<BirpcReturn<ServerFunctions>>()

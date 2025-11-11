@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { axeViolations, isScanRunning, currentRoute } from './composables/rpc'
+import { axeViolations, isScanRunning, isRouteChangeScan, currentRoute } from './composables/rpc'
 import { computed, ref, watch } from 'vue'
 import type { ViolationsByImpact, ImpactStat, A11yViolation } from '../src/runtime/types'
 import { IMPACT_LEVELS, IMPACT_COLORS } from '../src/runtime/constants'
@@ -14,10 +14,10 @@ const MINIMUM_SKELETON_TIME = 1500 // 1.5 seconds
 // Get axe-core version for documentation link
 const { version: axeVersion, docsUrl: axeDocsUrl } = useAxeVersion()
 
-// Watch for scan state changes
+// Watch for scan state changes - only show skeleton for route changes or initial load
 watch(isScanRunning, (running) => {
-  if (running) {
-    // Scan started - show skeleton immediately
+  if (running && isRouteChangeScan.value) {
+    // Route change scan started - show skeleton immediately
     isShowingSkeleton.value = true
     skeletonStartTime = Date.now()
 
@@ -30,8 +30,8 @@ watch(isScanRunning, (running) => {
 
 // Watch for violations updates
 watch(axeViolations, () => {
-  // Only hide skeleton if scan is done
-  if (!isScanRunning.value && isShowingSkeleton.value) {
+  // Only hide skeleton if scan is done and it was a route change scan
+  if (!isScanRunning.value && isShowingSkeleton.value && isRouteChangeScan.value) {
     if (skeletonTimer) {
       clearTimeout(skeletonTimer)
     }
@@ -41,6 +41,8 @@ watch(axeViolations, () => {
 
     skeletonTimer = setTimeout(() => {
       isShowingSkeleton.value = false
+      // Reset the route change flag after hiding skeleton
+      isRouteChangeScan.value = false
     }, remainingTime)
   }
 }, { deep: true })
