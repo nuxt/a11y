@@ -116,6 +116,7 @@ function injectStyles(): void {
       left: 0 !important;
       width: 100% !important;
       height: 100% !important;
+      pointer-events: none !important;
       z-index: 999999 !important;
     }
 
@@ -133,6 +134,7 @@ function injectStyles(): void {
       font-weight: bold !important;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
       z-index: 1000000 !important;
+      pointer-events: none !important;
       border: 2px solid white;
     }
   `
