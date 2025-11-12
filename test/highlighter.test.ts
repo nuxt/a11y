@@ -170,7 +170,7 @@ describe('highlighter', () => {
 
       highlightElement('#test', 1, '#ff0000')
       const badge = document.querySelector('.__nuxt_a11y_highlight_id_badge__') as HTMLElement
-      
+
       // Initial position
       expect(badge.style.left).toBe('138px')
       expect(badge.style.top).toBe('158px')
