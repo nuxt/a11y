@@ -42,9 +42,10 @@ export function createAxeRunner(config: AxeRunnerConfig, onScanStateChange: (isR
     try {
       const result = await new Promise<Axe.AxeResults>((resolve, reject) => {
         axe.run({
-          // Exclude any Nuxt DevTools Elements
+          // Exclude any Nuxt DevTools Elements and highlight wrappers
           exclude: [
             '[id^="nuxt-devtools-"]',
+            '#__nuxt_a11y_badge_container__',
           ],
         }, {
           elementRef: true,

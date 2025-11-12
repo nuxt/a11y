@@ -21,7 +21,7 @@ defineProps<{
       >
         <div class="flex items-center justify-between mb-2">
           <NBadge
-            class="text-xs capitalize"
+            class="text-xs capitalize color-white"
             :style="{
               borderColor: stat.color,
               borderWidth: '1.5px',

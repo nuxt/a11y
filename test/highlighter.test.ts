@@ -2,745 +2,605 @@
  * @vitest-environment jsdom
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { createHighlighter } from '../src/runtime/utils/highlighter'
+import {
+  createHighlighter,
+  highlightElement,
+  unhighlightElement,
+  unhighlightAll,
+  isHighlighted,
+  updateElementId,
+  removeElementIdBadge,
+  scrollToElement,
+} from '../src/runtime/utils/highlighter'
 
 describe('highlighter', () => {
-  let highlighter: ReturnType<typeof createHighlighter>
-
-  beforeEach(() => {
-    document.head.innerHTML = ''
-    document.body.innerHTML = ''
-    highlighter = createHighlighter()
-  })
-
-  afterEach(() => {
-    highlighter.unhighlightAll()
-  })
-
   // Helper to create test elements
-  function createTestElement(tag = 'div', id = 'test', className = ''): HTMLElement {
+  function createElement(id: string, tag = 'div'): HTMLElement {
     const el = document.createElement(tag)
-    if (id) el.id = id
-    if (className) el.className = className
+    el.id = id
     document.body.appendChild(el)
     return el
   }
 
-  describe('parseSelector', () => {
-    it('should join selector array into valid CSS selector', () => {
-      expect(highlighter.parseSelector(['#app', 'div.content', 'button'])).toBe('#app div.content button')
-      expect(highlighter.parseSelector(['body', 'main'])).toBe('body main')
-      expect(highlighter.parseSelector(['#single'])).toBe('#single')
-    })
+  beforeEach(() => {
+    document.head.innerHTML = ''
+    document.body.innerHTML = ''
+  })
+
+  afterEach(() => {
+    unhighlightAll()
   })
 
   describe('highlightElement', () => {
-    it('should inject styles on first highlight', () => {
-      createTestElement('div', 'test1')
+    it('should inject styles on first call', () => {
+      createElement('test')
 
-      expect(document.getElementById('__nuxt_a11y_highlight_styles__')).toBeNull()
-      highlighter.highlightElement('#test1')
-      expect(document.getElementById('__nuxt_a11y_highlight_styles__')).not.toBeNull()
+      highlightElement('#test', undefined, '#ff0000')
+
+      expect(document.getElementById('__nuxt_a11y_highlight_styles__')).toBeTruthy()
     })
 
-    it('should only inject styles once', () => {
-      createTestElement('div', 'test1')
-      createTestElement('div', 'test2')
+    it('should create badge container when id provided', () => {
+      createElement('test')
 
-      highlighter.highlightElement('#test1')
-      const styleElement = document.getElementById('__nuxt_a11y_highlight_styles__')
-      highlighter.highlightElement('#test2')
+      highlightElement('#test', 1, '#ff0000')
 
-      expect(document.getElementById('__nuxt_a11y_highlight_styles__')).toBe(styleElement)
+      expect(document.getElementById('__nuxt_a11y_badge_container__')).toBeTruthy()
     })
 
-    it('should add highlight class to regular elements', () => {
-      const el = createTestElement('div', 'test1')
+    it('should apply inline highlight styles with color parameter', () => {
+      const el = createElement('test')
 
-      highlighter.highlightElement('#test1')
+      highlightElement('#test', undefined, '#ff0000')
 
-      expect(el.classList.contains('__nuxt_a11y_highlight__')).toBe(true)
+      expect(el.style.outline).toContain('black')
+      expect(el.style.boxShadow).toContain('#ff0000')
+      expect(el.style.zIndex).toBe('999998')
     })
 
-    it('should apply custom color when provided', () => {
-      const el = createTestElement('div', 'test1')
-      const color = '#ff0000'
-
-      highlighter.highlightElement('#test1', undefined, color)
-
-      expect(el.style.outline).toContain(color)
-    })
-
-    it('should create ID badge when id is provided', () => {
-      createTestElement('div', 'test1')
-
-      highlighter.highlightElement('#test1', 5)
-
-      const badge = document.querySelector('.__nuxt_a11y_highlight_id_badge__')
-      expect(badge).not.toBeNull()
-      expect(badge?.textContent).toBe('5')
-    })
-
-    it('should set position relative for static positioned elements', () => {
-      const el = createTestElement('div', 'test1')
+    it('should set position relative for static elements', () => {
+      const el = createElement('test')
       el.style.position = 'static'
 
-      highlighter.highlightElement('#test1')
+      highlightElement('#test', undefined, '#00ff00')
 
       expect(el.style.position).toBe('relative')
     })
 
-    it('should not change position for non-static elements', () => {
-      const el = createTestElement('div', 'test1')
+    it('should preserve non-static position', () => {
+      const el = createElement('test')
       el.style.position = 'absolute'
 
-      highlighter.highlightElement('#test1')
+      highlightElement('#test', undefined, '#00ff00')
 
       expect(el.style.position).toBe('absolute')
     })
 
-    it('should handle multiple elements with same selector', () => {
-      createTestElement('div', 'test1', 'multi')
-      createTestElement('div', 'test2', 'multi')
-      createTestElement('div', 'test3', 'multi')
+    it('should create ID badge in floating container when id provided', () => {
+      createElement('test')
 
-      highlighter.highlightElement('.multi')
-
-      const elements = document.querySelectorAll('.multi')
-      elements.forEach((el) => {
-        expect(el.classList.contains('__nuxt_a11y_highlight__')).toBe(true)
-      })
-    })
-
-    it('should handle void elements by wrapping them', () => {
-      const img = createTestElement('img', 'test-img') as HTMLImageElement
-      img.src = 'test.jpg'
-
-      highlighter.highlightElement('#test-img')
-
-      const wrapper = img.parentElement
-      expect(wrapper?.tagName).toBe('SPAN')
-      expect(wrapper?.classList.contains('__nuxt_a11y_highlight__')).toBe(true)
-    })
-
-    it('should handle input elements by wrapping them', () => {
-      const input = createTestElement('input', 'test-input')
-
-      highlighter.highlightElement('#test-input')
-
-      const wrapper = input.parentElement
-      expect(wrapper?.tagName).toBe('SPAN')
-      expect(wrapper?.classList.contains('__nuxt_a11y_highlight__')).toBe(true)
-    })
-
-    it('should add ID badge to wrapper for void elements', () => {
-      createTestElement('img', 'test-img')
-
-      highlighter.highlightElement('#test-img', 3)
+      highlightElement('#test', 5, '#ff0000')
 
       const badge = document.querySelector('.__nuxt_a11y_highlight_id_badge__')
-      expect(badge).not.toBeNull()
-      expect(badge?.textContent).toBe('3')
+      expect(badge).toBeTruthy()
+      expect(badge?.textContent).toBe('5')
+      expect(badge?.parentElement?.id).toBe('__nuxt_a11y_badge_container__')
     })
 
-    it('should handle selector not found gracefully', () => {
-      const spy = vi.spyOn(console, 'debug').mockImplementation(() => {})
-
-      highlighter.highlightElement('#nonexistent')
-
-      expect(spy).toHaveBeenCalledWith(expect.stringContaining('No elements found'))
-      spy.mockRestore()
-    })
-
-    it('should handle invalid selector gracefully', () => {
-      const spy = vi.spyOn(console, 'error').mockImplementation(() => {})
-
-      highlighter.highlightElement(':::invalid::selector')
-
-      expect(spy).toHaveBeenCalledWith('[Nuxt A11y] Error highlighting element:', expect.anything())
-      spy.mockRestore()
-    })
-
-    it('should use reference counting for multiple highlights of same selector', () => {
-      const el = createTestElement('div', 'test1')
-
-      highlighter.highlightElement('#test1')
-      expect(highlighter.isHighlighted('#test1')).toBe(true)
-
-      highlighter.highlightElement('#test1')
-      highlighter.highlightElement('#test1')
-
-      // Should still be highlighted after one unhighlight
-      highlighter.unhighlightElement('#test1')
-      expect(highlighter.isHighlighted('#test1')).toBe(true)
-      expect(el.classList.contains('__nuxt_a11y_highlight__')).toBe(true)
-    })
-
-    it('should update ID badge when highlighting same element multiple times with different IDs', () => {
-      createTestElement('div', 'test1')
-
-      highlighter.highlightElement('#test1', 1)
-      let badge = document.querySelector('.__nuxt_a11y_highlight_id_badge__')
-      expect(badge?.textContent).toBe('1')
-
-      highlighter.highlightElement('#test1', 2)
-      badge = document.querySelector('.__nuxt_a11y_highlight_id_badge__')
-      expect(badge?.textContent).toBe('2')
-    })
-
-    it('should create badge when highlighting again with ID after initial highlight without ID', () => {
-      createTestElement('div', 'test1')
-
-      highlighter.highlightElement('#test1')
-      expect(document.querySelector('.__nuxt_a11y_highlight_id_badge__')).toBeNull()
-
-      highlighter.highlightElement('#test1', 7)
-      const badge = document.querySelector('.__nuxt_a11y_highlight_id_badge__')
-      expect(badge).not.toBeNull()
-      expect(badge?.textContent).toBe('7')
-    })
-
-    it('should scroll element into view when scrollIntoView is true', () => {
-      const el = createTestElement('div', 'test1')
-      el.scrollIntoView = vi.fn()
-
-      // Mock element as not visible
+    it('should position badge below element', () => {
+      const el = createElement('test')
       vi.spyOn(el, 'getBoundingClientRect').mockReturnValue({
-        top: -100,
-        left: 0,
-        bottom: -50,
-        right: 100,
+        left: 100,
+        top: 50,
+        right: 200,
+        bottom: 150,
         width: 100,
-        height: 50,
-        x: 0,
-        y: -100,
+        height: 100,
+        x: 100,
+        y: 50,
         toJSON: () => {},
       })
 
-      highlighter.highlightElement('#test1', undefined, undefined, true)
+      highlightElement('#test', 1, '#00ff00')
+
+      const badge = document.querySelector('.__nuxt_a11y_highlight_id_badge__') as HTMLElement
+      expect(badge.style.left).toBe('138px') // 100 + 50 - 12
+      expect(badge.style.top).toBe('158px') // 150 + 8
+    })
+
+    it('should apply custom border color to badge', () => {
+      createElement('test')
+
+      highlightElement('#test', 3, '#0000ff')
+
+      const badge = document.querySelector('.__nuxt_a11y_highlight_id_badge__') as HTMLElement
+      expect(badge.style.borderColor).toBe('rgb(0, 0, 255)')
+    })
+
+    it('should handle multiple elements with same selector', () => {
+      createElement('a').className = 'multi'
+      createElement('b').className = 'multi'
+
+      highlightElement('.multi', 7, '#ff00ff')
+
+      const badges = document.querySelectorAll('.__nuxt_a11y_highlight_id_badge__')
+      expect(badges).toHaveLength(2)
+      badges.forEach(b => expect(b.textContent).toBe('7'))
+    })
+
+    it('should attach scroll and resize listeners', () => {
+      const addEventSpy = vi.spyOn(window, 'addEventListener')
+      createElement('test')
+
+      highlightElement('#test')
+
+      expect(addEventSpy).toHaveBeenCalledWith('scroll', expect.any(Function), expect.objectContaining({ passive: true, capture: true }))
+      expect(addEventSpy).toHaveBeenCalledWith('resize', expect.any(Function), expect.objectContaining({ passive: true }))
+
+      addEventSpy.mockRestore()
+    })
+
+    it('should update badge positions on scroll event', () => {
+      const el = createElement('test')
+      const getBoundingRect = vi.fn()
+        .mockReturnValueOnce({
+          left: 100,
+          top: 50,
+          right: 200,
+          bottom: 150,
+          width: 100,
+          height: 100,
+          x: 100,
+          y: 50,
+          toJSON: () => {},
+        })
+        .mockReturnValueOnce({
+          left: 150,
+          top: 100,
+          right: 250,
+          bottom: 200,
+          width: 100,
+          height: 100,
+          x: 150,
+          y: 100,
+          toJSON: () => {},
+        })
+
+      vi.spyOn(el, 'getBoundingClientRect').mockImplementation(getBoundingRect)
+
+      highlightElement('#test', 1, '#ff0000')
+      const badge = document.querySelector('.__nuxt_a11y_highlight_id_badge__') as HTMLElement
+      
+      // Initial position
+      expect(badge.style.left).toBe('138px')
+      expect(badge.style.top).toBe('158px')
+
+      // Trigger scroll event
+      window.dispatchEvent(new Event('scroll'))
+
+      // Position should be updated
+      expect(badge.style.left).toBe('188px')
+      expect(badge.style.top).toBe('208px')
+    })
+
+    it('should update badge positions on resize event', () => {
+      const el = createElement('test')
+      const getBoundingRect = vi.fn()
+        .mockReturnValueOnce({
+          left: 100,
+          top: 50,
+          right: 200,
+          bottom: 150,
+          width: 100,
+          height: 100,
+          x: 100,
+          y: 50,
+          toJSON: () => {},
+        })
+        .mockReturnValueOnce({
+          left: 200,
+          top: 150,
+          right: 300,
+          bottom: 250,
+          width: 100,
+          height: 100,
+          x: 200,
+          y: 150,
+          toJSON: () => {},
+        })
+
+      vi.spyOn(el, 'getBoundingClientRect').mockImplementation(getBoundingRect)
+
+      highlightElement('#test', 2, '#00ff00')
+      const badge = document.querySelector('.__nuxt_a11y_highlight_id_badge__') as HTMLElement
+
+      // Initial position
+      expect(badge.style.left).toBe('138px')
+
+      // Trigger resize event
+      window.dispatchEvent(new Event('resize'))
+
+      // Position should be updated
+      expect(badge.style.left).toBe('238px')
+      expect(badge.style.top).toBe('258px')
+    })
+
+    it('should use reference counting for repeated highlights', () => {
+      createElement('test')
+
+      highlightElement('#test', undefined, '#ff0000')
+      highlightElement('#test', undefined, '#ff0000')
+      highlightElement('#test', undefined, '#ff0000')
+
+      unhighlightElement('#test')
+      expect(isHighlighted('#test')).toBe(true)
+
+      unhighlightElement('#test')
+      expect(isHighlighted('#test')).toBe(true)
+
+      unhighlightElement('#test')
+      expect(isHighlighted('#test')).toBe(false)
+    })
+
+    it('should update badge on re-highlight with new id', () => {
+      createElement('test')
+
+      highlightElement('#test', 1, '#ff0000')
+      const badge = document.querySelector('.__nuxt_a11y_highlight_id_badge__')
+      expect(badge?.textContent).toBe('1')
+
+      highlightElement('#test', 9, '#ff0000')
+      expect(badge?.textContent).toBe('9')
+    })
+
+    it('should scroll element into view when requested and not visible', () => {
+      const el = createElement('test')
+      el.scrollIntoView = vi.fn()
+      vi.spyOn(el, 'getBoundingClientRect').mockReturnValue({
+        left: 0,
+        top: -200,
+        right: 100,
+        bottom: -100,
+        width: 100,
+        height: 100,
+        x: 0,
+        y: -200,
+        toJSON: () => {},
+      })
+
+      highlightElement('#test', undefined, '#ff0000', true)
 
       expect(el.scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'center' })
     })
 
-    it('should not scroll when element is already visible', () => {
-      const el = createTestElement('div', 'test1')
+    it('should not scroll when element is visible', () => {
+      const el = createElement('test')
       el.scrollIntoView = vi.fn()
-
-      // Mock element as visible
       vi.spyOn(el, 'getBoundingClientRect').mockReturnValue({
-        top: 10,
         left: 10,
-        bottom: 100,
-        right: 100,
-        width: 90,
-        height: 90,
+        top: 10,
+        right: 110,
+        bottom: 110,
+        width: 100,
+        height: 100,
         x: 10,
         y: 10,
         toJSON: () => {},
       })
 
-      highlighter.highlightElement('#test1', undefined, undefined, true)
+      highlightElement('#test', undefined, '#ff0000', true)
 
       expect(el.scrollIntoView).not.toHaveBeenCalled()
+    })
+
+    it('should log debug message for non-existent selector', () => {
+      const spy = vi.spyOn(console, 'debug').mockImplementation(() => {})
+
+      highlightElement('#nonexistent')
+
+      expect(spy).toHaveBeenCalledWith(expect.stringContaining('No elements found'))
+      spy.mockRestore()
+    })
+
+    it('should catch and log error for invalid selector', () => {
+      const spy = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+      highlightElement(':::invalid')
+
+      expect(spy).toHaveBeenCalledWith('[Nuxt A11y] Error highlighting element:', expect.anything())
+      spy.mockRestore()
     })
   })
 
   describe('unhighlightElement', () => {
-    it('should remove highlight class from element', () => {
-      const el = createTestElement('div', 'test1')
-
-      highlighter.highlightElement('#test1')
-      expect(el.classList.contains('__nuxt_a11y_highlight__')).toBe(true)
-
-      highlighter.unhighlightElement('#test1')
-      expect(el.classList.contains('__nuxt_a11y_highlight__')).toBe(false)
-    })
-
     it('should restore original styles', () => {
-      const el = createTestElement('div', 'test1')
-      el.style.outline = '1px solid blue'
-      el.style.boxShadow = '0 0 5px red'
-      const originalOutline = el.style.outline
-      const originalBoxShadow = el.style.boxShadow
+      const el = createElement('test')
+      el.style.outline = '2px solid red'
+      el.style.boxShadow = 'none'
+      const origOutline = el.style.outline
+      const origShadow = el.style.boxShadow
 
-      highlighter.highlightElement('#test1', undefined, '#ff0000')
-      expect(el.style.outline).not.toBe(originalOutline)
+      highlightElement('#test', undefined, '#00ff00')
+      expect(el.style.outline).not.toBe(origOutline)
 
-      highlighter.unhighlightElement('#test1')
-      expect(el.style.outline).toBe(originalOutline)
-      expect(el.style.boxShadow).toBe(originalBoxShadow)
+      unhighlightElement('#test')
+      expect(el.style.outline).toBe(origOutline)
+      expect(el.style.boxShadow).toBe(origShadow)
     })
 
-    it('should remove ID badge', () => {
-      createTestElement('div', 'test1')
+    it('should remove properties that were not originally set', () => {
+      const el = createElement('test')
 
-      highlighter.highlightElement('#test1', 5)
-      expect(document.querySelector('.__nuxt_a11y_highlight_id_badge__')).not.toBeNull()
+      highlightElement('#test', undefined, '#ff0000')
+      unhighlightElement('#test')
 
-      highlighter.unhighlightElement('#test1')
+      expect(el.style.outline).toBe('')
+      expect(el.style.boxShadow).toBe('')
+    })
+
+    it('should remove badge from DOM', () => {
+      createElement('test')
+
+      highlightElement('#test', 5, '#ff0000')
+      expect(document.querySelector('.__nuxt_a11y_highlight_id_badge__')).toBeTruthy()
+
+      unhighlightElement('#test')
       expect(document.querySelector('.__nuxt_a11y_highlight_id_badge__')).toBeNull()
     })
 
-    it('should unwrap void elements', () => {
-      const img = createTestElement('img', 'test-img')
+    it('should handle missing badge gracefully', () => {
+      createElement('test')
 
-      highlighter.highlightElement('#test-img')
-      const wrapper = img.parentElement
-      expect(wrapper?.tagName).toBe('SPAN')
-
-      highlighter.unhighlightElement('#test-img')
-      expect(img.parentElement).toBe(document.body)
-    })
-
-    it('should respect reference counting', () => {
-      const el = createTestElement('div', 'test1')
-
-      highlighter.highlightElement('#test1')
-      highlighter.highlightElement('#test1')
-      highlighter.highlightElement('#test1')
-
-      highlighter.unhighlightElement('#test1')
-      expect(el.classList.contains('__nuxt_a11y_highlight__')).toBe(true)
-
-      highlighter.unhighlightElement('#test1')
-      expect(el.classList.contains('__nuxt_a11y_highlight__')).toBe(true)
-
-      highlighter.unhighlightElement('#test1')
-      expect(el.classList.contains('__nuxt_a11y_highlight__')).toBe(false)
+      highlightElement('#test')
+      expect(() => unhighlightElement('#test')).not.toThrow()
     })
 
     it('should do nothing for non-highlighted selector', () => {
-      createTestElement('div', 'test1')
+      createElement('test')
 
-      // Should not throw
-      expect(() => highlighter.unhighlightElement('#test1')).not.toThrow()
+      expect(() => unhighlightElement('#test')).not.toThrow()
+      expect(isHighlighted('#test')).toBe(false)
     })
 
-    it('should handle missing parent node gracefully', () => {
-      const img = createTestElement('img', 'test-img')
+    it('should respect reference counting', () => {
+      const el = createElement('test')
 
-      highlighter.highlightElement('#test-img')
-      const wrapper = img.parentElement!
+      highlightElement('#test', undefined, '#ff0000')
+      highlightElement('#test', undefined, '#ff0000')
 
-      // Manually remove wrapper from DOM
-      wrapper.remove()
+      unhighlightElement('#test')
+      expect(el.style.outline).toContain('black') // still highlighted
 
-      // Should not throw
-      expect(() => highlighter.unhighlightElement('#test-img')).not.toThrow()
+      unhighlightElement('#test')
+      expect(el.style.outline).toBe('') // now unhighlighted
     })
   })
 
   describe('unhighlightAll', () => {
-    it('should remove all highlights', () => {
-      const el1 = createTestElement('div', 'test1')
-      const el2 = createTestElement('div', 'test2')
-      const el3 = createTestElement('span', 'test3')
+    it('should remove all highlights and badges', () => {
+      const el1 = createElement('a')
+      const el2 = createElement('b')
 
-      highlighter.highlightElement('#test1')
-      highlighter.highlightElement('#test2')
-      highlighter.highlightElement('#test3')
+      highlightElement('#a', 1, '#ff0000')
+      highlightElement('#b', 2, '#00ff00')
 
-      expect(el1.classList.contains('__nuxt_a11y_highlight__')).toBe(true)
-      expect(el2.classList.contains('__nuxt_a11y_highlight__')).toBe(true)
-      expect(el3.classList.contains('__nuxt_a11y_highlight__')).toBe(true)
+      expect(document.querySelectorAll('.__nuxt_a11y_highlight_id_badge__')).toHaveLength(2)
 
-      highlighter.unhighlightAll()
+      unhighlightAll()
 
-      expect(el1.classList.contains('__nuxt_a11y_highlight__')).toBe(false)
-      expect(el2.classList.contains('__nuxt_a11y_highlight__')).toBe(false)
-      expect(el3.classList.contains('__nuxt_a11y_highlight__')).toBe(false)
+      expect(el1.style.outline).toBe('')
+      expect(el2.style.outline).toBe('')
+      expect(document.querySelectorAll('.__nuxt_a11y_highlight_id_badge__')).toHaveLength(0)
     })
 
-    it('should clear reference counts', () => {
-      const el = createTestElement('div', 'test1')
+    it('should force clear reference counts', () => {
+      createElement('test')
 
-      highlighter.highlightElement('#test1')
-      highlighter.highlightElement('#test1')
-      highlighter.highlightElement('#test1')
+      highlightElement('#test', undefined, '#ff0000')
+      highlightElement('#test', undefined, '#ff0000')
+      highlightElement('#test', undefined, '#ff0000')
 
-      highlighter.unhighlightAll()
+      unhighlightAll()
 
-      expect(el.classList.contains('__nuxt_a11y_highlight__')).toBe(false)
-      expect(highlighter.isHighlighted('#test1')).toBe(false)
+      expect(isHighlighted('#test')).toBe(false)
+    })
+
+    it('should remove event listeners', () => {
+      const removeSpy = vi.spyOn(window, 'removeEventListener')
+      createElement('test')
+
+      highlightElement('#test')
+      unhighlightAll()
+
+      expect(removeSpy).toHaveBeenCalledWith('scroll', expect.any(Function), true)
+      expect(removeSpy).toHaveBeenCalledWith('resize', expect.any(Function))
+
+      removeSpy.mockRestore()
+    })
+
+    it('should remove badge container', () => {
+      createElement('test')
+
+      highlightElement('#test', 1, '#ff0000')
+      expect(document.getElementById('__nuxt_a11y_badge_container__')).toBeTruthy()
+
+      unhighlightAll()
+      expect(document.getElementById('__nuxt_a11y_badge_container__')).toBeNull()
     })
 
     it('should handle empty state gracefully', () => {
-      expect(() => highlighter.unhighlightAll()).not.toThrow()
+      expect(() => unhighlightAll()).not.toThrow()
     })
   })
 
   describe('isHighlighted', () => {
-    it('should return true for highlighted elements', () => {
-      createTestElement('div', 'test1')
+    it('should return true when element is highlighted', () => {
+      createElement('test')
 
-      expect(highlighter.isHighlighted('#test1')).toBe(false)
+      expect(isHighlighted('#test')).toBe(false)
 
-      highlighter.highlightElement('#test1')
+      highlightElement('#test', undefined, '#ff0000')
 
-      expect(highlighter.isHighlighted('#test1')).toBe(true)
+      expect(isHighlighted('#test')).toBe(true)
     })
 
     it('should return false after unhighlight', () => {
-      createTestElement('div', 'test1')
+      createElement('test')
 
-      highlighter.highlightElement('#test1')
-      expect(highlighter.isHighlighted('#test1')).toBe(true)
+      highlightElement('#test', undefined, '#ff0000')
+      unhighlightElement('#test')
 
-      highlighter.unhighlightElement('#test1')
-      expect(highlighter.isHighlighted('#test1')).toBe(false)
-    })
-
-    it('should track multiple different highlights', () => {
-      createTestElement('div', 'test1')
-      createTestElement('div', 'test2')
-
-      highlighter.highlightElement('#test1')
-
-      expect(highlighter.isHighlighted('#test1')).toBe(true)
-      expect(highlighter.isHighlighted('#test2')).toBe(false)
-
-      highlighter.highlightElement('#test2')
-
-      expect(highlighter.isHighlighted('#test1')).toBe(true)
-      expect(highlighter.isHighlighted('#test2')).toBe(true)
+      expect(isHighlighted('#test')).toBe(false)
     })
   })
 
   describe('updateElementId', () => {
-    it('should update existing ID badge text', () => {
-      createTestElement('div', 'test1')
+    it('should update existing badge text and reposition', () => {
+      createElement('test')
 
-      highlighter.highlightElement('#test1', 5)
+      highlightElement('#test', 1, '#ff0000')
       const badge = document.querySelector('.__nuxt_a11y_highlight_id_badge__')
-      expect(badge?.textContent).toBe('5')
+      expect(badge?.textContent).toBe('1')
 
-      highlighter.updateElementId('#test1', 10)
-      expect(badge?.textContent).toBe('10')
+      updateElementId('#test', 42)
+      expect(badge?.textContent).toBe('42')
     })
 
-    it('should create badge if it does not exist', () => {
-      createTestElement('div', 'test1')
+    it('should create badge if none exists', () => {
+      createElement('test')
 
-      highlighter.highlightElement('#test1')
+      highlightElement('#test', undefined, '#ff0000')
       expect(document.querySelector('.__nuxt_a11y_highlight_id_badge__')).toBeNull()
 
-      highlighter.updateElementId('#test1', 8)
+      updateElementId('#test', 99)
       const badge = document.querySelector('.__nuxt_a11y_highlight_id_badge__')
-      expect(badge).not.toBeNull()
-      expect(badge?.textContent).toBe('8')
+      expect(badge).toBeTruthy()
+      expect(badge?.textContent).toBe('99')
     })
 
-    it('should do nothing for non-highlighted elements', () => {
-      createTestElement('div', 'test1')
+    it('should do nothing for non-highlighted selector', () => {
+      createElement('test')
 
-      expect(() => highlighter.updateElementId('#test1', 5)).not.toThrow()
+      expect(() => updateElementId('#test', 5)).not.toThrow()
       expect(document.querySelector('.__nuxt_a11y_highlight_id_badge__')).toBeNull()
     })
 
-    it('should update all elements with same selector', () => {
-      createTestElement('div', 'test1', 'multi')
-      createTestElement('div', 'test2', 'multi')
+    it('should update all badges for multi-element selector', () => {
+      createElement('a').className = 'multi'
+      createElement('b').className = 'multi'
 
-      highlighter.highlightElement('.multi', 1)
+      highlightElement('.multi', 1, '#ff0000')
+      updateElementId('.multi', 88)
+
       const badges = document.querySelectorAll('.__nuxt_a11y_highlight_id_badge__')
-      expect(badges).toHaveLength(2)
-
-      highlighter.updateElementId('.multi', 99)
-      badges.forEach((badge) => {
-        expect(badge.textContent).toBe('99')
-      })
+      badges.forEach(b => expect(b.textContent).toBe('88'))
     })
   })
 
   describe('removeElementIdBadge', () => {
-    it('should remove ID badge without unhighlighting', () => {
-      const el = createTestElement('div', 'test1')
+    it('should remove badge without unhighlighting', () => {
+      const el = createElement('test')
 
-      highlighter.highlightElement('#test1', 5)
-      expect(document.querySelector('.__nuxt_a11y_highlight_id_badge__')).not.toBeNull()
-      expect(el.classList.contains('__nuxt_a11y_highlight__')).toBe(true)
+      highlightElement('#test', 5, '#ff0000')
+      expect(document.querySelector('.__nuxt_a11y_highlight_id_badge__')).toBeTruthy()
 
-      highlighter.removeElementIdBadge('#test1')
+      removeElementIdBadge('#test')
 
       expect(document.querySelector('.__nuxt_a11y_highlight_id_badge__')).toBeNull()
-      expect(el.classList.contains('__nuxt_a11y_highlight__')).toBe(true)
+      expect(el.style.outline).toContain('black') // still highlighted
     })
 
-    it('should handle element without badge gracefully', () => {
-      createTestElement('div', 'test1')
+    it('should handle missing badge gracefully', () => {
+      createElement('test')
 
-      highlighter.highlightElement('#test1')
-
-      expect(() => highlighter.removeElementIdBadge('#test1')).not.toThrow()
+      highlightElement('#test', undefined, '#ff0000')
+      expect(() => removeElementIdBadge('#test')).not.toThrow()
     })
 
-    it('should do nothing for non-highlighted elements', () => {
-      createTestElement('div', 'test1')
+    it('should do nothing for non-highlighted selector', () => {
+      createElement('test')
 
-      expect(() => highlighter.removeElementIdBadge('#test1')).not.toThrow()
+      expect(() => removeElementIdBadge('#test')).not.toThrow()
     })
 
-    it('should remove badges from all elements with same selector', () => {
-      createTestElement('div', 'test1', 'multi')
-      createTestElement('div', 'test2', 'multi')
-
-      highlighter.highlightElement('.multi', 1)
-      expect(document.querySelectorAll('.__nuxt_a11y_highlight_id_badge__')).toHaveLength(2)
-
-      highlighter.removeElementIdBadge('.multi')
-      expect(document.querySelectorAll('.__nuxt_a11y_highlight_id_badge__')).toHaveLength(0)
-    })
-
-    it('should remove badge from wrapper for void elements', () => {
-      createTestElement('img', 'test-img')
-
-      highlighter.highlightElement('#test-img', 3)
-      expect(document.querySelector('.__nuxt_a11y_highlight_id_badge__')).not.toBeNull()
-
-      highlighter.removeElementIdBadge('#test-img')
-      expect(document.querySelector('.__nuxt_a11y_highlight_id_badge__')).toBeNull()
-    })
-
-    it('should handle error when removing badge with mismatched parent', () => {
-      createTestElement('div', 'test1')
+    it('should catch and log errors when badge removal fails', () => {
       const spy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+      createElement('test')
 
-      highlighter.highlightElement('#test1', 5)
+      highlightElement('#test', 1, '#ff0000')
       const badge = document.querySelector('.__nuxt_a11y_highlight_id_badge__') as HTMLElement
 
-      // Move badge to a different parent to trigger the else branch
-      const newParent = document.createElement('div')
-      document.body.appendChild(newParent)
-      newParent.appendChild(badge)
+      // Force an error by making parentNode throw
+      Object.defineProperty(badge, 'parentNode', {
+        get() {
+          throw new Error('Test error')
+        },
+      })
 
-      highlighter.removeElementIdBadge('#test1')
+      removeElementIdBadge('#test')
 
-      // Badge should be removed from its actual parent
-      expect(newParent.children.length).toBe(0)
+      expect(spy).toHaveBeenCalledWith('[Nuxt A11y] Error removing ID badge:', expect.anything())
       spy.mockRestore()
     })
   })
 
   describe('scrollToElement', () => {
-    it('should scroll to element', () => {
-      const el = createTestElement('div', 'test1')
+    it('should scroll first matching element into view', () => {
+      const el = createElement('test')
       el.scrollIntoView = vi.fn()
 
-      highlighter.scrollToElement('#test1')
+      scrollToElement('#test')
 
       expect(el.scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'center' })
     })
 
-    it('should scroll to first element when multiple match', () => {
-      const el1 = createTestElement('div', 'test1', 'multi')
-      const el2 = createTestElement('div', 'test2', 'multi')
+    it('should scroll only first element for multi-match selector', () => {
+      const el1 = createElement('a')
+      const el2 = createElement('b')
+      el1.className = 'multi'
+      el2.className = 'multi'
       el1.scrollIntoView = vi.fn()
       el2.scrollIntoView = vi.fn()
 
-      highlighter.scrollToElement('.multi')
+      scrollToElement('.multi')
 
-      expect(el1.scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'center' })
+      expect(el1.scrollIntoView).toHaveBeenCalled()
       expect(el2.scrollIntoView).not.toHaveBeenCalled()
     })
 
     it('should handle invalid selector gracefully', () => {
       const spy = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
-      highlighter.scrollToElement(':::invalid')
+      scrollToElement(':::invalid')
 
       expect(spy).toHaveBeenCalledWith('[Nuxt A11y] Error scrolling to element:', expect.anything())
       spy.mockRestore()
     })
 
     it('should do nothing for non-existent selector', () => {
-      // Should not throw
-      expect(() => highlighter.scrollToElement('#nonexistent')).not.toThrow()
+      expect(() => scrollToElement('#nonexistent')).not.toThrow()
     })
   })
 
-  describe('special element handling', () => {
-    it.each([
-      'img', 'input', 'br', 'hr', 'area', 'base', 'col', 'embed',
-      'link', 'meta', 'param', 'source', 'track', 'wbr',
-    ])('should wrap void element: %s', (tag) => {
-      const el = document.createElement(tag)
-      el.id = 'test'
-      document.body.appendChild(el)
+  describe('createHighlighter', () => {
+    it('should return object with all expected functions', () => {
+      const highlighter = createHighlighter()
 
-      highlighter.highlightElement('#test')
-
-      const parent = el.parentElement
-      expect(parent?.tagName).toBe('SPAN')
-      expect(parent?.style.position).toBe('relative')
+      expect(highlighter).toHaveProperty('highlightElement')
+      expect(highlighter).toHaveProperty('unhighlightElement')
+      expect(highlighter).toHaveProperty('unhighlightAll')
+      expect(highlighter).toHaveProperty('isHighlighted')
+      expect(highlighter).toHaveProperty('updateElementId')
+      expect(highlighter).toHaveProperty('removeElementIdBadge')
+      expect(highlighter).toHaveProperty('scrollToElement')
+      expect(highlighter).toHaveProperty('parseSelector')
     })
 
-    it('should handle iframe as void element', () => {
-      const iframe = createTestElement('iframe', 'test-iframe')
+    it('should have working parseSelector utility', () => {
+      const highlighter = createHighlighter()
 
-      highlighter.highlightElement('#test-iframe')
-
-      const wrapper = iframe.parentElement
-      expect(wrapper?.tagName).toBe('SPAN')
-    })
-
-    it('should handle select as void element', () => {
-      const select = createTestElement('select', 'test-select')
-
-      highlighter.highlightElement('#test-select')
-
-      const wrapper = select.parentElement
-      expect(wrapper?.tagName).toBe('SPAN')
-    })
-
-    it('should handle textarea as void element', () => {
-      const textarea = createTestElement('textarea', 'test-textarea')
-
-      highlighter.highlightElement('#test-textarea')
-
-      const wrapper = textarea.parentElement
-      expect(wrapper?.tagName).toBe('SPAN')
-    })
-
-    it('should set width 100% for select in wrapper', () => {
-      const select = createTestElement('select', 'test-select')
-
-      highlighter.highlightElement('#test-select')
-
-      expect(select.style.width).toBe('100%')
-    })
-
-    it('should set width and height 100% for iframe in wrapper', () => {
-      const iframe = createTestElement('iframe', 'test-iframe')
-      Object.defineProperty(iframe, 'offsetWidth', { value: 300 })
-      Object.defineProperty(iframe, 'offsetHeight', { value: 200 })
-
-      highlighter.highlightElement('#test-iframe')
-
-      expect(iframe.style.width).toBe('100%')
-      expect(iframe.style.height).toBe('100%')
-    })
-
-    it('should set width 100% for textarea in wrapper', () => {
-      const textarea = createTestElement('textarea', 'test-textarea')
-
-      highlighter.highlightElement('#test-textarea')
-
-      expect(textarea.style.width).toBe('100%')
-    })
-
-    it('should handle video element', () => {
-      const video = createTestElement('video', 'test-video')
-
-      highlighter.highlightElement('#test-video')
-
-      const wrapper = video.parentElement
-      expect(wrapper?.tagName).toBe('SPAN')
-    })
-
-    it('should handle audio element', () => {
-      const audio = createTestElement('audio', 'test-audio')
-
-      highlighter.highlightElement('#test-audio')
-
-      const wrapper = audio.parentElement
-      expect(wrapper?.tagName).toBe('SPAN')
-    })
-
-    it('should set image to display block when wrapped', () => {
-      const img = createTestElement('img', 'test-img')
-
-      highlighter.highlightElement('#test-img')
-
-      expect(img.style.display).toBe('block')
-    })
-
-    it('should create wrapper with inline-block display for images', () => {
-      const img = createTestElement('img', 'test-img')
-      Object.defineProperty(img, 'offsetWidth', { value: 100 })
-      Object.defineProperty(img, 'offsetHeight', { value: 50 })
-
-      highlighter.highlightElement('#test-img')
-
-      const wrapper = img.parentElement
-      expect(wrapper?.style.display).toBe('inline-block')
-      expect(wrapper?.style.width).toBe('100px')
-      expect(wrapper?.style.height).toBe('50px')
-    })
-
-    it('should match wrapper dimensions to element', () => {
-      const img = createTestElement('img', 'test-img')
-      Object.defineProperty(img, 'offsetWidth', { value: 200 })
-      Object.defineProperty(img, 'offsetHeight', { value: 150 })
-
-      highlighter.highlightElement('#test-img')
-
-      const wrapper = img.parentElement
-      expect(wrapper?.style.width).toBe('200px')
-      expect(wrapper?.style.height).toBe('150px')
-    })
-  })
-
-  describe('edge cases', () => {
-    it('should handle elements being removed from DOM during highlight', () => {
-      const el = createTestElement('div', 'test1')
-
-      highlighter.highlightElement('#test1')
-      el.remove()
-
-      expect(() => highlighter.unhighlightElement('#test1')).not.toThrow()
-    })
-
-    it('should preserve existing position values', () => {
-      const el = createTestElement('div', 'test1')
-      el.style.position = 'fixed'
-      el.style.top = '10px'
-
-      highlighter.highlightElement('#test1')
-
-      expect(el.style.position).toBe('fixed')
-      expect(el.style.top).toBe('10px')
-    })
-
-    it('should handle empty original styles correctly', () => {
-      const el = createTestElement('div', 'test1')
-
-      highlighter.highlightElement('#test1', undefined, '#ff0000')
-      highlighter.unhighlightElement('#test1')
-
-      // Should remove properties that weren't set originally
-      expect(el.style.outline).toBe('')
-      expect(el.style.boxShadow).toBe('')
-    })
-
-    it('should handle badge color matching highlight color', () => {
-      createTestElement('div', 'test1')
-      const color = '#00ff00'
-
-      highlighter.highlightElement('#test1', 1, color)
-
-      const badge = document.querySelector('.__nuxt_a11y_highlight_id_badge__') as HTMLElement
-      expect(badge.style.borderColor).toBe('rgb(0, 255, 0)')
-    })
-
-    it('should handle complex selectors', () => {
-      const parent = createTestElement('div', 'parent')
-      const child = document.createElement('div')
-      child.className = 'child'
-      parent.appendChild(child)
-
-      highlighter.highlightElement('#parent .child')
-
-      expect(child.classList.contains('__nuxt_a11y_highlight__')).toBe(true)
-    })
-
-    it('should handle elements with existing classes', () => {
-      const el = createTestElement('div', 'test1', 'existing-class another-class')
-
-      highlighter.highlightElement('#test1')
-
-      expect(el.className).toContain('existing-class')
-      expect(el.className).toContain('another-class')
-      expect(el.className).toContain('__nuxt_a11y_highlight__')
+      expect(highlighter.parseSelector(['#app', 'div', 'button'])).toBe('#app div button')
+      expect(highlighter.parseSelector(['body'])).toBe('body')
     })
   })
 })

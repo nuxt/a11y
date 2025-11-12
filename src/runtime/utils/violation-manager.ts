@@ -10,17 +10,10 @@ export function createViolationManager() {
   const allViolations: A11yViolation[] = []
 
   /**
-   * Normalizes a CSS selector by removing the highlight wrapper class.
-   * This ensures that highlighted elements are recognized as the same elements
-   * when compared across scans.
+   * Normalizes a CSS selector by removing scoped styling attributes.
    */
   function normalizeSelector(selector: string): string {
-    // Remove the highlight wrapper and the scoped styling attribute from the selector path
-    // Example: .team-member[data-v-7f554ff8=""] > .__nuxt_a11y_highlight__ > .avatar[data-v-7f554ff8=""]
-    //       -> .team-member > .avatar
     return selector
-      .replace(/\s*>\s*\.__nuxt_a11y_highlight__\s*>\s*/g, ' > ')
-      // Remove Vue/Nuxt scoped styling attributes for comparison
       .replace(/\[data-[vs]-[a-f0-9]+=""\]/g, '')
   }
 

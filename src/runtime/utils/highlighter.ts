@@ -1,17 +1,11 @@
 /**
  * Manages highlighting of elements with accessibility violations
- * Supports multiple simultaneous highlights for different violations
+ * Uses inline styles for highlighting and floating tooltips for ID badges
  */
 
 const HIGHLIGHT_STYLE_ID = '__nuxt_a11y_highlight_styles__'
-const HIGHLIGHT_CLASS = '__nuxt_a11y_highlight__'
 const HIGHLIGHT_ID_BADGE_CLASS = '__nuxt_a11y_highlight_id_badge__'
-
-// Void elements that cannot have children
-const VOID_ELEMENTS = new Set(['IMG', 'INPUT', 'BR', 'HR', 'AREA', 'BASE', 'COL', 'EMBED', 'LINK', 'META', 'PARAM', 'SOURCE', 'TRACK', 'WBR', 'IFRAME', 'SELECT', 'TEXTAREA', 'VIDEO', 'AUDIO'])
-
-// Elements that should fill wrapper width
-const FILL_WIDTH_ELEMENTS = new Set(['SELECT', 'TEXTAREA', 'IFRAME'])
+const BADGE_CONTAINER_ID = '__nuxt_a11y_badge_container__'
 
 interface HighlightedElement {
   element: HTMLElement
@@ -19,12 +13,9 @@ interface HighlightedElement {
     outline: string
     boxShadow: string
     position: string
-    width: string
-    height: string
-    display: string
+    zIndex: string
   }
   idBadge?: HTMLElement
-  wrapper?: HTMLElement
   color?: string
 }
 
@@ -34,11 +25,45 @@ const highlightedElements = new Map<string, HighlightedElement[]>()
 // Reference counting: track how many violations have pinned each selector
 const selectorRefCount = new Map<string, number>()
 
+// Badge container element
+let badgeContainer: HTMLElement | null = null
+
+// Track if position update listener is attached
+let positionUpdateListenerAttached = false
+
 /**
- * Check if an element can have child elements
+ * Updates all badge positions
  */
-function canHaveChildren(element: HTMLElement): boolean {
-  return !VOID_ELEMENTS.has(element.tagName)
+function updateAllBadgePositions(): void {
+  highlightedElements.forEach((highlighted) => {
+    highlighted.forEach((item) => {
+      if (item.idBadge) {
+        positionBadge(item.idBadge, item.element)
+      }
+    })
+  })
+}
+
+/**
+ * Attaches listeners to update badge positions on scroll/resize
+ */
+function attachPositionUpdateListeners(): void {
+  if (positionUpdateListenerAttached) return
+
+  window.addEventListener('scroll', updateAllBadgePositions, { passive: true, capture: true })
+  window.addEventListener('resize', updateAllBadgePositions, { passive: true })
+  positionUpdateListenerAttached = true
+}
+
+/**
+ * Removes position update listeners
+ */
+function removePositionUpdateListeners(): void {
+  if (!positionUpdateListenerAttached) return
+
+  window.removeEventListener('scroll', updateAllBadgePositions, true)
+  window.removeEventListener('resize', updateAllBadgePositions)
+  positionUpdateListenerAttached = false
 }
 
 /**
@@ -49,9 +74,7 @@ function saveOriginalStyles(element: HTMLElement): HighlightedElement['originalS
     outline: element.style.outline,
     boxShadow: element.style.boxShadow,
     position: element.style.position,
-    width: element.style.width,
-    height: element.style.height,
-    display: element.style.display,
+    zIndex: element.style.zIndex,
   }
 }
 
@@ -63,9 +86,7 @@ function restoreOriginalStyles(element: HTMLElement, originalStyles: Highlighted
     { key: 'outline', value: originalStyles.outline },
     { key: 'box-shadow', value: originalStyles.boxShadow },
     { key: 'position', value: originalStyles.position },
-    { key: 'width', value: originalStyles.width },
-    { key: 'height', value: originalStyles.height },
-    { key: 'display', value: originalStyles.display },
+    { key: 'z-index', value: originalStyles.zIndex },
   ]
 
   props.forEach(({ key, value }) => {
@@ -79,7 +100,7 @@ function restoreOriginalStyles(element: HTMLElement, originalStyles: Highlighted
 }
 
 /**
- * Injects CSS styles for highlighting into the document
+ * Injects CSS styles for ID badges into the document
  */
 function injectStyles(): void {
   if (document.getElementById(HIGHLIGHT_STYLE_ID)) {
@@ -89,40 +110,47 @@ function injectStyles(): void {
   const style = document.createElement('style')
   style.id = HIGHLIGHT_STYLE_ID
   style.textContent = `
-    .${HIGHLIGHT_CLASS} {
-      z-index: 999998 !important;
-      transition: outline 0.2s ease, box-shadow 0.2s ease !important;
-      border-radius: 4px !important;
+    #${BADGE_CONTAINER_ID} {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      z-index: 999999 !important;
     }
 
     .${HIGHLIGHT_ID_BADGE_CLASS} {
       position: absolute !important;
-      bottom: -35px !important;
-      left: 50% !important;
-      transform: translateX(-50%) !important;
-      width: 23px !important;
-      height: 23px !important;
+      width: 28px !important;
+      height: 28px !important;
       border-radius: 50% !important;
       background-color: black !important;
       color: white !important;
       display: flex !important;
       align-items: center !important;
       justify-content: center !important;
-      font-size: 14px !important;
+      font-size: 12px !important;
       font-weight: bold !important;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
-      z-index: 1000001 !important;
-      pointer-events: none !important;
-      border: 2px solid black;
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .${HIGHLIGHT_CLASS} {
-        transition: none !important;
-      }
+      z-index: 1000000 !important;
+      border: 2px solid white;
     }
   `
   document.head.appendChild(style)
+}
+
+/**
+ * Gets or creates the badge container
+ */
+function getBadgeContainer(): HTMLElement {
+  if (badgeContainer && document.body.contains(badgeContainer)) {
+    return badgeContainer
+  }
+
+  badgeContainer = document.createElement('div')
+  badgeContainer.id = BADGE_CONTAINER_ID
+  document.body.appendChild(badgeContainer)
+  return badgeContainer
 }
 
 /**
@@ -134,61 +162,7 @@ function parseSelector(target: string[]): string {
 }
 
 /**
- * Creates and configures a wrapper element for void elements
- */
-function createWrapper(element: HTMLElement): HTMLElement {
-  const wrapper = document.createElement('span')
-  wrapper.style.position = 'relative'
-  wrapper.style.display = 'inline-block' // Ensures wrapper wraps tightly around content
-
-  const computedStyle = window.getComputedStyle(element)
-  const elementDisplay = computedStyle.display
-
-  // For images and other inline elements, ensure wrapper matches element dimensions
-  if (element.tagName === 'IMG' || elementDisplay === 'inline' || elementDisplay === 'inline-block') {
-    const elementWidth = element.offsetWidth
-    const elementHeight = element.offsetHeight
-    if (elementWidth > 0) wrapper.style.width = `${elementWidth}px`
-    if (elementHeight > 0) wrapper.style.height = `${elementHeight}px`
-  }
-  // For block elements, match display mode and dimensions
-  else if (elementDisplay === 'block') {
-    wrapper.style.display = 'block'
-    const elementWidth = element.offsetWidth
-    const elementHeight = element.offsetHeight
-    if (elementWidth > 0) wrapper.style.width = `${elementWidth}px`
-    if (elementHeight > 0) wrapper.style.height = `${elementHeight}px`
-  }
-
-  return wrapper
-}
-
-/**
- * Wraps an element and adjusts its styles
- */
-function wrapElement(element: HTMLElement, wrapper: HTMLElement): void {
-  element.parentNode?.insertBefore(wrapper, element)
-  wrapper.appendChild(element)
-
-  // Reset element position to ensure proper containment in wrapper
-  element.style.position = ''
-
-  // For images, ensure they display as block to prevent spacing issues
-  if (element.tagName === 'IMG') {
-    element.style.display = 'block'
-  }
-
-  // Ensure certain elements fill the wrapper
-  if (FILL_WIDTH_ELEMENTS.has(element.tagName)) {
-    element.style.width = '100%'
-    if (element.tagName === 'IFRAME' && wrapper.style.height) {
-      element.style.height = '100%'
-    }
-  }
-}
-
-/**
- * Creates an ID badge element
+ * Creates an ID badge element positioned as a tooltip
  */
 function createIdBadge(id: number, color?: string): HTMLElement {
   const badge = document.createElement('div')
@@ -199,14 +173,35 @@ function createIdBadge(id: number, color?: string): HTMLElement {
 }
 
 /**
- * Applies highlight styles to an element or wrapper
+ * Positions a badge relative to an element
  */
-function applyHighlightStyles(target: HTMLElement, color?: string): void {
-  target.classList.add(HIGHLIGHT_CLASS)
-  if (color) {
-    target.style.setProperty('outline', `7px double ${color}`, 'important')
-    target.style.setProperty('box-shadow', `0 0 0 5px black`, 'important')
+function positionBadge(badge: HTMLElement, element: HTMLElement): void {
+  const rect = element.getBoundingClientRect()
+
+  // Position badge at bottom-center of the element
+  const left = rect.left + rect.width / 2 - 12 // 12 = half of badge width (24px)
+  const top = rect.bottom + 8 // 8px below the element
+
+  badge.style.left = `${left}px`
+  badge.style.top = `${top}px`
+}
+
+/**
+ * Applies highlight styles directly to an element using inline styles
+ */
+function applyHighlightStyles(element: HTMLElement, color: string): void {
+  // Set position to relative if it's static, so absolute positioned badge works
+  const position = window.getComputedStyle(element).position
+  if (position === 'static') {
+    element.style.setProperty('position', 'relative', 'important')
   }
+
+  // Apply highlight outline and shadow
+  element.style.setProperty('outline', `6px dotted black`, 'important')
+  element.style.setProperty('box-shadow', `0 0 0 6px ${color}`, 'important')
+
+  // Ensure element is above other content
+  element.style.setProperty('z-index', '999998', 'important')
 }
 
 /**
@@ -225,20 +220,22 @@ function isElementVisible(element: HTMLElement): boolean {
 function updateOrCreateBadge(
   highlighted: HighlightedElement[],
   element: HTMLElement,
-  wrapper: HTMLElement | undefined,
   idBadge: HTMLElement | undefined,
   id: number,
   color?: string,
 ): HTMLElement {
+  const container = getBadgeContainer()
+
   if (idBadge) {
     idBadge.textContent = String(id)
-    if (color) idBadge.style.backgroundColor = color
+    if (color) idBadge.style.borderColor = color
+    positionBadge(idBadge, element)
     return idBadge
   }
 
   const newBadge = createIdBadge(id, color)
-  const container = wrapper || element
   container.appendChild(newBadge)
+  positionBadge(newBadge, element)
 
   const index = highlighted.findIndex(h => h.element === element)
   if (index !== -1 && highlighted[index]) {
@@ -249,48 +246,15 @@ function updateOrCreateBadge(
 }
 
 /**
- * Processes highlighting for a single element
- */
-function processElementHighlight(
-  element: HTMLElement,
-  id: number | undefined,
-  color: string | undefined,
-): { wrapper?: HTMLElement, idBadge?: HTMLElement } {
-  let wrapper: HTMLElement | undefined
-  let idBadge: HTMLElement | undefined
-
-  if (!canHaveChildren(element)) {
-    // Void elements need wrapping
-    wrapper = createWrapper(element)
-    wrapElement(element, wrapper)
-    if (id !== undefined) {
-      idBadge = createIdBadge(id, color)
-      wrapper.appendChild(idBadge)
-    }
-    applyHighlightStyles(wrapper, color)
-  }
-  else {
-    // Normal elements
-    const position = window.getComputedStyle(element).position
-    if (position === 'static') element.style.position = 'relative'
-
-    if (id !== undefined) {
-      idBadge = createIdBadge(id, color)
-      element.appendChild(idBadge)
-    }
-    applyHighlightStyles(element, color)
-  }
-
-  return { wrapper, idBadge }
-}
-
-/**
  * Highlights elements matching the given selector
  * Supports multiple simultaneous highlights by using a unique key
  * Uses reference counting to support multiple violations affecting the same element
  */
 export function highlightElement(selector: string, id?: number, color?: string, scrollIntoView = false): void {
   injectStyles()
+
+  // Attach position update listeners
+  attachPositionUpdateListeners()
 
   // If already highlighted, increment reference count and update/add ID badge if provided
   if (highlightedElements.has(selector)) {
@@ -299,8 +263,8 @@ export function highlightElement(selector: string, id?: number, color?: string, 
 
     if (id !== undefined) {
       const highlighted = highlightedElements.get(selector)!
-      highlighted.forEach(({ element, idBadge, wrapper }) => {
-        updateOrCreateBadge(highlighted, element, wrapper, idBadge, id, color)
+      highlighted.forEach(({ element, idBadge }) => {
+        updateOrCreateBadge(highlighted, element, idBadge, id, color)
       })
     }
     return
@@ -317,7 +281,18 @@ export function highlightElement(selector: string, id?: number, color?: string, 
 
     elements.forEach((element) => {
       const originalStyles = saveOriginalStyles(element)
-      const { wrapper, idBadge } = processElementHighlight(element, id, color)
+
+      // Apply highlight styles
+      applyHighlightStyles(element, color)
+
+      // Create ID badge if needed (added to floating container)
+      let idBadge: HTMLElement | undefined
+      if (id !== undefined) {
+        const container = getBadgeContainer()
+        idBadge = createIdBadge(id, color)
+        container.appendChild(idBadge)
+        positionBadge(idBadge, element)
+      }
 
       // Scroll into view if needed
       if (scrollIntoView && !isElementVisible(element)) {
@@ -328,7 +303,6 @@ export function highlightElement(selector: string, id?: number, color?: string, 
         element,
         originalStyles,
         idBadge,
-        wrapper,
         color,
       })
     })
@@ -342,28 +316,13 @@ export function highlightElement(selector: string, id?: number, color?: string, 
 }
 
 /**
- * Unwraps a wrapped element and restores it to its original state
+ * Removes ID badge from the DOM
  */
-function unwrapElement(element: HTMLElement, wrapper: HTMLElement, originalStyles: HighlightedElement['originalStyles']): void {
-  if (!wrapper.parentNode) return
-
-  wrapper.classList.remove(HIGHLIGHT_CLASS)
-  wrapper.parentNode.insertBefore(element, wrapper)
-  wrapper.parentNode.removeChild(wrapper)
-  restoreOriginalStyles(element, originalStyles)
-}
-
-/**
- * Removes ID badge from an element
- */
-function removeBadge(idBadge: HTMLElement | undefined, parent: HTMLElement): void {
+function removeBadge(idBadge: HTMLElement | undefined): void {
   if (!idBadge) return
 
   try {
-    if (idBadge.parentNode === parent) {
-      parent.removeChild(idBadge)
-    }
-    else if (idBadge.parentNode) {
+    if (idBadge.parentNode) {
       idBadge.parentNode.removeChild(idBadge)
     }
   }
@@ -390,15 +349,9 @@ export function unhighlightElement(selector: string): void {
   }
 
   // Reference count is 0, remove the highlight
-  highlighted.forEach(({ element, originalStyles, idBadge, wrapper }) => {
-    if (wrapper && wrapper.parentNode) {
-      unwrapElement(element, wrapper, originalStyles)
-    }
-    else {
-      element.classList.remove(HIGHLIGHT_CLASS)
-      restoreOriginalStyles(element, originalStyles)
-      removeBadge(idBadge, element)
-    }
+  highlighted.forEach(({ element, originalStyles, idBadge }) => {
+    restoreOriginalStyles(element, originalStyles)
+    removeBadge(idBadge)
   })
 
   highlightedElements.delete(selector)
@@ -415,6 +368,15 @@ export function unhighlightAll(): void {
     selectorRefCount.set(selector, 1) // Set to 1 so the next call will remove it
     unhighlightElement(selector)
   })
+
+  // Remove position update listeners when no highlights exist
+  removePositionUpdateListeners()
+
+  // Remove badge container if it exists
+  if (badgeContainer && document.body.contains(badgeContainer)) {
+    document.body.removeChild(badgeContainer)
+    badgeContainer = null
+  }
 }
 
 /**
@@ -431,13 +393,17 @@ export function updateElementId(selector: string, id: number): void {
   const highlighted = highlightedElements.get(selector)
   if (!highlighted?.length) return
 
+  const container = getBadgeContainer()
+
   highlighted.forEach((item) => {
     if (item.idBadge) {
       item.idBadge.textContent = String(id)
+      positionBadge(item.idBadge, item.element)
     }
     else {
       const newBadge = createIdBadge(id)
-      item.element.appendChild(newBadge)
+      container.appendChild(newBadge)
+      positionBadge(newBadge, item.element)
       item.idBadge = newBadge
     }
   })
@@ -453,8 +419,7 @@ export function removeElementIdBadge(selector: string): void {
   highlighted.forEach((item) => {
     if (!item.idBadge) return
 
-    const container = item.wrapper || item.element
-    removeBadge(item.idBadge, container)
+    removeBadge(item.idBadge)
     item.idBadge = undefined
   })
 }
