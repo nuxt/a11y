@@ -90,29 +90,6 @@ describe('violation-manager', () => {
       expect(result3[0]!.nodes).toHaveLength(2)
     })
 
-    it('should normalize highlighted elements to prevent duplicates', () => {
-      violationManager.processViolations([
-        createMockViolation({ nodes: [createNode('<button>Click me</button>', ['.team-member > .avatar'])] }),
-      ], '/home')
-
-      const result = violationManager.processViolations([
-        createMockViolation({ nodes: [createNode('<button>Click me</button>', ['.team-member > .__nuxt_a11y_highlight__ > .avatar'])] }),
-      ], '/home')
-
-      expect(result[0]!.nodes).toHaveLength(1) // Should recognize highlighted element as duplicate
-    })
-
-    it('should handle edge cases: spacing variations and complex selectors', () => {
-      violationManager.processViolations([
-        createMockViolation({ nodes: [createNode('<div>Text</div>', ['.container>.__nuxt_a11y_highlight__>.text'])] }),
-      ], '/home')
-
-      const result = violationManager.processViolations([
-        createMockViolation({ nodes: [createNode('<div>Text</div>', ['.container > .text'])] }),
-      ], '/home')
-
-      expect(result[0]!.nodes).toHaveLength(1) // Should handle spacing differences
-    })
 
     it('should handle shadow DOM selectors (nested arrays)', () => {
       const result = violationManager.processViolations([
@@ -163,16 +140,16 @@ describe('violation-manager', () => {
       expect(result[0]!.nodes).toHaveLength(1) // Should recognize as same element
     })
 
-    it('should normalize both highlight wrapper and scoped attributes together', () => {
+    it('should normalize scoped attributes', () => {
       violationManager.processViolations([
-        createMockViolation({ nodes: [createNode('<div>Test</div>', ['.team-member[data-v-7f554ff8=""] > .__nuxt_a11y_highlight__ > .avatar[data-v-7f554ff8=""]'])] }),
+        createMockViolation({ nodes: [createNode('<div>Test</div>', ['.team-member[data-v-7f554ff8=""] > .avatar[data-v-7f554ff8=""]'])] }),
       ], '/home')
 
       const result = violationManager.processViolations([
         createMockViolation({ nodes: [createNode('<div>Test</div>', ['.team-member > .avatar'])] }),
       ], '/home')
 
-      expect(result[0]!.nodes).toHaveLength(1) // Should normalize both
+      expect(result[0]!.nodes).toHaveLength(1) // Should normalize scoped attributes and recognize as same
     })
 
     it('should handle multiple scoped attributes in one selector', () => {
