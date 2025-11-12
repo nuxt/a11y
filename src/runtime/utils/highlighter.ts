@@ -189,7 +189,7 @@ function positionBadge(badge: HTMLElement, element: HTMLElement): void {
 /**
  * Applies highlight styles directly to an element using inline styles
  */
-function applyHighlightStyles(element: HTMLElement, color: string): void {
+function applyHighlightStyles(element: HTMLElement, color?: string): void {
   // Set position to relative if it's static, so absolute positioned badge works
   const position = window.getComputedStyle(element).position
   if (position === 'static') {
@@ -198,7 +198,7 @@ function applyHighlightStyles(element: HTMLElement, color: string): void {
 
   // Apply highlight outline and shadow
   element.style.setProperty('outline', `6px dotted black`, 'important')
-  element.style.setProperty('box-shadow', `0 0 0 6px ${color}`, 'important')
+  element.style.setProperty('box-shadow', `0 0 0 6px ${color ? color : 'white'}`, 'important')
 
   // Ensure element is above other content
   element.style.setProperty('z-index', '999998', 'important')
