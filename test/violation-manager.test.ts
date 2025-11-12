@@ -90,7 +90,6 @@ describe('violation-manager', () => {
       expect(result3[0]!.nodes).toHaveLength(2)
     })
 
-
     it('should handle shadow DOM selectors (nested arrays)', () => {
       const result = violationManager.processViolations([
         createMockViolation({ nodes: [createNode('<button>Click me</button>', [['iframe#main', '.button']] as axe.NodeResult['target'])] }),
