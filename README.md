@@ -21,6 +21,65 @@ npx nuxi module add @nuxt/a11y
 
 That's it! You can now use My Module in your Nuxt app ✨
 
+## Configuration
+
+### DevTools Options
+
+#### `defaultHighlight`
+
+- Type: `boolean`
+- Default: `false`
+
+Automatically highlight all accessibility violations in the DevTools when they are detected. When enabled, all violations on the current page will be pinned and highlighted with numbered badges. Users can still manually unpin individual violations by clicking on them in the DevTools.
+
+```typescript
+export default defineNuxtConfig({
+  modules: ['@nuxt/a11y'],
+  
+  a11y: {
+    defaultHighlight: true, // Auto-highlight all violations
+  },
+})
+```
+
+#### `logIssues`
+
+- Type: `boolean`
+- Default: `true`
+
+Controls whether accessibility violations are logged to the browser console. When enabled, violations will be logged with appropriate styling and severity levels (errors for critical issues, warnings for others).
+
+```typescript
+export default defineNuxtConfig({
+  modules: ['@nuxt/a11y'],
+  
+  a11y: {
+    logIssues: false, // Disable console logging
+  },
+})
+```
+
+### Axe Configuration
+
+You can configure the underlying axe-core runner:
+
+```typescript
+export default defineNuxtConfig({
+  modules: ['@nuxt/a11y'],
+  
+  a11y: {
+    axe: {
+      options: {
+        // axe-core configuration options
+      },
+      runOptions: {
+        // axe-core run options
+      },
+    },
+  },
+})
+```
+
 ## Development
 
 ```bash

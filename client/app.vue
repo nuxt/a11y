@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { axeViolations, currentRoute } from './composables/rpc'
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import type { ViolationsByImpact, ImpactStat, A11yViolation } from '../src/runtime/types'
 import { IMPACT_LEVELS, IMPACT_COLORS } from '../src/runtime/constants'
 import type axe from 'axe-core'
+import { initAutoHighlight } from './composables/auto-highlight'
 
 const showCurrentPageFirst = ref(true)
 
@@ -12,6 +13,11 @@ const { version: axeVersion, docsUrl: axeDocsUrl } = useAxeVersion()
 
 // Skeleton loader logic
 const { isShowingSkeleton } = useSkeletonLoader()
+
+// Initialize auto-highlight feature
+onMounted(async () => {
+  await initAutoHighlight()
+})
 
 const violations = computed(() => axeViolations.value)
 

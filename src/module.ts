@@ -4,6 +4,8 @@ import { setupDevToolsUI } from './devtools'
 
 export interface ModuleOptions {
   enabled: boolean
+  defaultHighlight: boolean
+  logIssues: boolean
   axe: {
     options: AxeOptions
     runOptions: AxeRunOptions
@@ -17,6 +19,8 @@ export default defineNuxtModule<ModuleOptions>({
   },
   defaults: nuxt => ({
     enabled: nuxt.options.dev,
+    defaultHighlight: false,
+    logIssues: true,
     axe: {
       options: {},
       runOptions: {},
@@ -29,6 +33,8 @@ export default defineNuxtModule<ModuleOptions>({
 
     addPlugin(resolver.resolve('./runtime/plugins/axe.client'))
     nuxt.options.runtimeConfig.public.axe = options.axe
+    nuxt.options.runtimeConfig.public.a11yDefaultHighlight = options.defaultHighlight
+    nuxt.options.runtimeConfig.public.a11yLogIssues = options.logIssues
 
     extendViteConfig((config) => {
       config.optimizeDeps = config.optimizeDeps || {}
@@ -43,5 +49,7 @@ export default defineNuxtModule<ModuleOptions>({
 declare module '@nuxt/schema' {
   interface PublicRuntimeConfig {
     axe: ModuleOptions['axe']
+    a11yDefaultHighlight: boolean
+    a11yLogIssues: boolean
   }
 }

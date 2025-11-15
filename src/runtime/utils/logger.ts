@@ -1,4 +1,5 @@
 import type axe from 'axe-core'
+import { useRuntimeConfig } from '#app'
 import { IMPACT_COLORS } from '../constants'
 
 /**
@@ -9,6 +10,13 @@ export function createLogger() {
    * Logs a violation to the console with appropriate styling and severity
    */
   function logViolation(violation: axe.Result): void {
+    const config = useRuntimeConfig()
+
+    // Skip logging if disabled
+    if (!config.public.a11yLogIssues) {
+      return
+    }
+
     const elements = violation.nodes
       .filter(i => !i.target?.includes('html') && i.element)
       .map(i => i.element)
