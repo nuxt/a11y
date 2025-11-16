@@ -13,6 +13,7 @@ export const HMR_EVENTS = {
   TRIGGER_SCAN: 'triggerScan',
   RESET: 'reset',
   ROUTE_CHANGED: 'routeChanged',
+  LEADING_TAB_STATUS_CHANGED: 'leadingTabStatusChanged',
   HIGHLIGHT_ELEMENT: 'highlightElement',
   UNHIGHLIGHT_ELEMENT: 'unhighlightElement',
   UNHIGHLIGHT_ALL: 'unhighlightAll',

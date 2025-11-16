@@ -11,7 +11,7 @@ import {
   updateElementId,
   removeElementIdBadge,
   scrollToElement,
-} from '../src/runtime/utils/highlighter'
+} from '../../src/runtime/utils/highlighter'
 
 describe('highlighter', () => {
   // Helper to create test elements

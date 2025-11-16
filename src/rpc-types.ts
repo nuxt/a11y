@@ -26,4 +26,5 @@ export interface ClientFunctions {
   scanRunning: (running: boolean) => void
   constantScanningEnabled: (enabled: boolean) => void
   routeChanged: (path: string) => void
+  leadingTabStatusChanged: (payload: { isLeader: boolean, tabCount: number }) => void
 }

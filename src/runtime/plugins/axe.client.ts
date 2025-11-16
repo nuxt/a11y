@@ -7,6 +7,7 @@ import { createScanner } from '../utils/scanner'
 import { createHmrBridge } from '../utils/hmr-bridge'
 import { createLogger } from '../utils/logger'
 import { createHighlighter } from '../utils/highlighter'
+import { createLeadingTabManager } from '../utils/leading-tab-manager'
 
 export default defineNuxtPlugin((nuxtApp) => {
   const config = useRuntimeConfig().public.axe
@@ -18,11 +19,22 @@ export default defineNuxtPlugin((nuxtApp) => {
   const highlighter = createHighlighter()
   const violationManager = createViolationManager()
 
+  // Initialize leading tab manager
+  const leadingTabManager = createLeadingTabManager((status) => {
+    // Broadcast status changes to DevTools
+    hmr.broadcast(hmr.HMR_EVENTS.LEADING_TAB_STATUS_CHANGED, status)
+  })
+
+  leadingTabManager.initialize()
+
   const axeRunner = createAxeRunner(config, (isRunning) => {
     hmr.broadcast(hmr.HMR_EVENTS.SCAN_RUNNING, isRunning)
   })
 
   const scanner = createScanner(async () => {
+    // Only the leader tab scans and reports
+    if (!leadingTabManager.isLeader) return
+
     // Capture the route at the start of the scan, not when processing
     const routeAtScanTime = route.path || route.fullPath || 'unknown'
 
@@ -39,6 +51,12 @@ export default defineNuxtPlugin((nuxtApp) => {
 
   // Setup HMR event handlers
   hmr.onConnected(async () => {
+    // Always send leading tab status when DevTools connects
+    hmr.broadcast(hmr.HMR_EVENTS.LEADING_TAB_STATUS_CHANGED, leadingTabManager.getStatus())
+
+    // Only the leader tab responds to DevTools connection with scans
+    if (!leadingTabManager.isLeader) return
+
     // Send current route first
     const currentRoutePath = route.path || route.fullPath || 'unknown'
     hmr.broadcast(hmr.HMR_EVENTS.ROUTE_CHANGED, currentRoutePath)
@@ -62,6 +80,9 @@ export default defineNuxtPlugin((nuxtApp) => {
   })
 
   hmr.onTriggerScan(async () => {
+    // Only the leader tab responds to scan triggers
+    if (!leadingTabManager.isLeader) return
+
     const routeAtScanTime = route.path || route.fullPath || 'unknown'
     const violations = await axeRunner.run()
     if (violations.length > 0) {
@@ -108,16 +129,22 @@ export default defineNuxtPlugin((nuxtApp) => {
       // Unhighlight all elements on the user screen
       highlighter.unhighlightAll()
 
-      // Broadcast route change to DevTools FIRST
-      hmr.broadcast(hmr.HMR_EVENTS.ROUTE_CHANGED, newPath)
+      // Only the leader tab broadcasts route changes
+      if (leadingTabManager.isLeader) {
+        // Broadcast route change to DevTools FIRST
+        hmr.broadcast(hmr.HMR_EVENTS.ROUTE_CHANGED, newPath)
 
-      // Wait for DevTools to process the route change
-      await new Promise(resolve => setTimeout(resolve, 150))
+        // Wait for DevTools to process the route change
+        await new Promise(resolve => setTimeout(resolve, 150))
+      }
     }
   })
 
   // Hook into Nuxt's page lifecycle to scan when page is fully rendered
   nuxtApp.hook('page:finish', async () => {
+    // Only the leader tab scans and reports
+    if (!leadingTabManager.isLeader) return
+
     // Wait for next tick to ensure all Vue components are mounted
     await nextTick()
 
@@ -158,5 +185,12 @@ export default defineNuxtPlugin((nuxtApp) => {
       scanner.disable()
       hmr.broadcast(hmr.HMR_EVENTS.CONSTANT_SCANNING_ENABLED, false)
     }
+  }
+
+  // Cleanup: Close BroadcastChannel when tab/window closes
+  if (typeof window !== 'undefined') {
+    window.addEventListener('beforeunload', () => {
+      leadingTabManager.cleanup()
+    })
   }
 })

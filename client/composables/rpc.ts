@@ -13,6 +13,8 @@ export const isScanRunning = ref(false)
 export const isConstantScanningEnabled = ref(false)
 export const currentRoute = ref<string>('/')
 export const isRouteChangeScan = ref(false)
+export const isLeadingTab = ref(true) // Default to true, will be updated by client
+export const activeTabCount = ref(1) // Number of active tabs
 
 export const devtools = ref<NuxtDevtoolsClient>()
 export const nuxtA11yRpc = ref<BirpcReturn<ServerFunctions>>()
@@ -41,6 +43,10 @@ onDevtoolsClientConnected(async (client) => {
     routeChanged(path: string) {
       currentRoute.value = path
       handleRouteChange()
+    },
+    leadingTabStatusChanged(payload: { isLeader: boolean, tabCount: number }) {
+      isLeadingTab.value = payload.isLeader
+      activeTabCount.value = payload.tabCount
     },
   })
 
