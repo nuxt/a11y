@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { createLeadingTabManager } from '../src/runtime/utils/leading-tab-manager'
+import { createLeadingTabManager } from '../../src/runtime/utils/leading-tab-manager'
 
 interface MockBroadcastChannel {
   postMessage: ReturnType<typeof vi.fn>
