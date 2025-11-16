@@ -52,7 +52,6 @@ const impactStats = computed<ImpactStat[]>(() =>
 
 <template>
   <div class="p-4">
-    <!-- Multi-Tab Status Banner -->
     <LeadingTabStatus />
 
     <div class="mb-4">
