@@ -227,7 +227,7 @@ describe('active-tab-tracker', () => {
       vi.spyOn(Math, 'random').mockReturnValue(random)
 
       mockLocalStorage.set('nuxt-a11y-active-tab-id', 'test-tab-id')
-      
+
       vi.stubGlobal('document', {
         ...document,
         hasFocus: vi.fn(() => false),
