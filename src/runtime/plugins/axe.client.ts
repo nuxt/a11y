@@ -170,14 +170,6 @@ export default defineNuxtPlugin((nuxtApp) => {
         hmr.broadcast(hmr.HMR_EVENTS.SHOW_VIOLATIONS, { violations: allViolations, currentRoute: routeAtScanTime, tabId: TAB_ID })
       }
     }
-    win.__nuxt_a11y_enableConstantScanning__ = () => {
-      scanner.enable()
-      hmr.broadcast(hmr.HMR_EVENTS.CONSTANT_SCANNING_ENABLED, true)
-    }
-    win.__nuxt_a11y_disableConstantScanning__ = () => {
-      scanner.disable()
-      hmr.broadcast(hmr.HMR_EVENTS.CONSTANT_SCANNING_ENABLED, false)
-    }
   }
 
   // Cleanup: Close BroadcastChannel when tab/window closes
