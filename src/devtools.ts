@@ -153,10 +153,10 @@ export function setupDevToolsUI(options: ModuleOptions, moduleResolve: Resolver[
         _rpc.broadcast.routeChanged(payload).catch(() => {})
       }
     })
-    ws.on('nuxt-a11y:leadingTabStatusChanged', async (payload: { isLeader: boolean, tabCount: number }) => {
+    ws.on('nuxt-a11y:activeTabChanged', async (payload: { tabId: string, isActive: boolean, totalTabCount: number }) => {
       if (isConnected) {
         const _rpc = await rpc
-        _rpc.broadcast.leadingTabStatusChanged(payload).catch(() => {})
+        _rpc.broadcast.activeTabChanged(payload).catch(() => {})
       }
     })
   })

@@ -52,8 +52,6 @@ const impactStats = computed<ImpactStat[]>(() =>
 
 <template>
   <div class="p-4">
-    <LeadingTabStatus />
-
     <div class="mb-4">
       <div class="flex items-center gap-3 mb-2">
         <NIcon
@@ -74,6 +72,8 @@ const impactStats = computed<ImpactStat[]>(() =>
         </NLink>
       </p>
     </div>
+
+    <MultiTabStatus />
 
     <ControlPanel :total-violations="totalViolations" />
 

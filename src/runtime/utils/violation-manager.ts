@@ -3,11 +3,24 @@ import type { A11yViolation } from '../types'
 
 /**
  * Manages accessibility violations: tracking, merging, and deduplication.
- * Accumulates violations across multiple scans and routes.
+ * Maintains separate violation stores per browser tab for complete isolation.
  */
 export function createViolationManager() {
-  const warned = new Set<string>()
-  const allViolations: A11yViolation[] = []
+  // Store violations per tab: Map<tabId, { violations: A11yViolation[], warned: Set<string> }>
+  const tabStores = new Map<string, { violations: A11yViolation[], warned: Set<string> }>()
+
+  /**
+   * Gets or creates a store for a specific tab
+   */
+  function getTabStore(tabId: string) {
+    if (!tabStores.has(tabId)) {
+      tabStores.set(tabId, {
+        violations: [],
+        warned: new Set<string>(),
+      })
+    }
+    return tabStores.get(tabId)!
+  }
 
   /**
    * Normalizes a CSS selector by removing scoped styling attributes.
@@ -98,19 +111,21 @@ export function createViolationManager() {
   }
 
   /**
-   * Adds a new violation to the accumulated violations list
+   * Adds a new violation to the accumulated violations list for a specific tab
    */
-  function addNewViolation(v: axe.Result, scanRoute: string, violationKey: string): void {
-    warned.add(violationKey)
+  function addNewViolation(v: axe.Result, scanRoute: string, violationKey: string, tabId: string): void {
+    const store = getTabStore(tabId)
+    store.warned.add(violationKey)
     const violation = createViolationRecord(v, scanRoute)
-    allViolations.push(violation)
+    store.violations.push(violation)
   }
 
   /**
-   * Updates an existing violation with new nodes from current scan
+   * Updates an existing violation with new nodes from current scan for a specific tab
    */
-  function updateExistingViolation(v: axe.Result, scanRoute: string): void {
-    const existingViolation = allViolations.find(
+  function updateExistingViolation(v: axe.Result, scanRoute: string, tabId: string): void {
+    const store = getTabStore(tabId)
+    const existingViolation = store.violations.find(
       av => av.route === scanRoute && av.id === v.id && av.impact === v.impact,
     )
 
@@ -136,40 +151,52 @@ export function createViolationManager() {
    * Processes violations from an axe scan, merging duplicates and tracking new ones
    * @param violations - The violations from axe scan
    * @param scanRoute - The route that was active when the scan started
+   * @param tabId - The unique identifier for the browser tab
    */
-  function processViolations(violations: axe.Result[], scanRoute: string): A11yViolation[] {
+  function processViolations(violations: axe.Result[], scanRoute: string, tabId: string): A11yViolation[] {
     const currentScanViolations = groupCurrentScanViolations(violations, scanRoute)
+    const store = getTabStore(tabId)
 
     currentScanViolations.forEach((v, violationKey) => {
-      if (!warned.has(violationKey)) {
-        addNewViolation(v, scanRoute, violationKey)
+      if (!store.warned.has(violationKey)) {
+        addNewViolation(v, scanRoute, violationKey, tabId)
       }
       else {
-        updateExistingViolation(v, scanRoute)
+        updateExistingViolation(v, scanRoute, tabId)
       }
     })
 
-    return allViolations
+    return store.violations
   }
 
   /**
-   * Gets all accumulated violations
+   * Gets all accumulated violations for a specific tab
    */
-  function getAll(): A11yViolation[] {
-    return allViolations
+  function getAll(tabId: string): A11yViolation[] {
+    const store = getTabStore(tabId)
+    return store.violations
   }
 
   /**
-   * Resets all violations and tracking state
+   * Resets all violations and tracking state for a specific tab
    */
-  function reset(): void {
-    allViolations.length = 0
-    warned.clear()
+  function reset(tabId: string): void {
+    const store = getTabStore(tabId)
+    store.violations.length = 0
+    store.warned.clear()
+  }
+
+  /**
+   * Resets all violations for all tabs (used for complete cleanup)
+   */
+  function resetAll(): void {
+    tabStores.clear()
   }
 
   return {
     processViolations,
     getAll,
     reset,
+    resetAll,
   }
 }
