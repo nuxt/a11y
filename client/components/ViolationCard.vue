@@ -179,13 +179,13 @@ function handleViolationClick() {
             <span class="text-sm font-mono opacity-70">{{ violation.id }}</span>
             <div
               v-if="hasAnyPinnedNodes"
-              class="flex items-center gap-1 ml-auto"
+              class="flex flex-wrap items-center gap-1 ml-auto max-w-md max-h-20 overflow-y-auto p-1 -m-1"
             >
               <button
                 v-for="node in violation.nodes"
                 :key="getNodeSelector(node)"
                 type="button"
-                class="flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold cursor-pointer transition-all"
+                class="flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold cursor-pointer transition-all flex-shrink-0"
                 :class="isNodeHighlighted(node)
                   ? 'bg-primary text-white hover:ring-2 hover:ring-primary hover:ring-offset-2'
                   : 'bg-gray-300 text-gray-600 opacity-50 hover:opacity-75'"
