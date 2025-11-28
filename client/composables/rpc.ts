@@ -2,17 +2,32 @@ import type { NuxtDevtoolsClient } from '@nuxt/devtools-kit/types'
 import type { BirpcReturn } from 'birpc'
 import type { ClientFunctions, ServerFunctions } from '../../src/rpc-types'
 import { onDevtoolsClientConnected } from '@nuxt/devtools-kit/iframe-client'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import type { A11yViolation } from '../../src/runtime/types'
 import { handleRouteChange } from './route-watcher'
 
 const RPC_NAMESPACE = 'nuxt-a11y-rpc'
 
-export const axeViolations = ref<A11yViolation[]>([])
+// Store violations per tab
+const violationsByTab = ref<Map<string, A11yViolation[]>>(new Map())
+export const currentActiveTabId = ref<string>('')
+
+// Current route per tab
+const routeByTab = ref<Map<string, string>>(new Map())
+
 export const isScanRunning = ref(false)
 export const isConstantScanningEnabled = ref(false)
-export const currentRoute = ref<string>('/')
 export const isRouteChangeScan = ref(false)
+export const totalTabCount = ref(1)
+
+// Computed values for the currently active tab
+export const axeViolations = computed(() => {
+  return violationsByTab.value.get(currentActiveTabId.value) || []
+})
+
+export const currentRoute = computed(() => {
+  return routeByTab.value.get(currentActiveTabId.value) || '/'
+})
 
 export const devtools = ref<NuxtDevtoolsClient>()
 export const nuxtA11yRpc = ref<BirpcReturn<ServerFunctions>>()
@@ -27,10 +42,10 @@ onDevtoolsClientConnected(async (client) => {
   // @ts-expect-error untyped
   nuxtA11yRpc.value = client.devtools.extendClientRpc<ServerFunctions, ClientFunctions>(RPC_NAMESPACE, {
     showViolations(payload) {
-      // Update currentRoute from the payload - this is the authoritative source
-      currentRoute.value = payload.currentRoute
-      // Set the violations
-      axeViolations.value = payload.violations
+      // Store violations for this specific tab
+      violationsByTab.value.set(payload.tabId, payload.violations)
+      // Update route for this tab
+      routeByTab.value.set(payload.tabId, payload.currentRoute)
     },
     scanRunning(running: boolean) {
       isScanRunning.value = running
@@ -39,8 +54,16 @@ onDevtoolsClientConnected(async (client) => {
       isConstantScanningEnabled.value = enabled
     },
     routeChanged(path: string) {
-      currentRoute.value = path
-      handleRouteChange()
+      // Only handle route change if it's for the active tab
+      if (currentActiveTabId.value) {
+        routeByTab.value.set(currentActiveTabId.value, path)
+        handleRouteChange()
+      }
+    },
+    activeTabChanged(payload) {
+      // Update which tab is currently active
+      currentActiveTabId.value = payload.tabId
+      totalTabCount.value = payload.totalTabCount
     },
   })
 

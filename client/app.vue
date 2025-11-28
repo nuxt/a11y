@@ -79,6 +79,9 @@ const impactStats = computed<ImpactStat[]>(() =>
       </p>
     </div>
 
+    <!-- Can be uncommented if you want status insights about multi tab -->
+    <!-- <MultiTabStatus /> -->
+
     <ControlPanel :total-violations="totalViolations" />
 
     <div

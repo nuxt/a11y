@@ -14,5 +14,5 @@ export function handleRouteChange() {
   // Set scanning state to true immediately to show loading skeleton
   isScanRunning.value = true
   // Clear violations to prevent flickering - new scan results will arrive shortly
-  axeViolations.value = []
+  axeViolations.value.splice(0, axeViolations.value.length)
 }

@@ -2,7 +2,7 @@
  * @vitest-environment jsdom
  */
 import { describe, it, expect, beforeEach } from 'vitest'
-import { isRootElementSelector } from '../client/composables/root-element-checker'
+import { isRootElementSelector } from '../../client/composables/root-element-checker'
 
 describe('isRootElementSelector', () => {
   beforeEach(() => {

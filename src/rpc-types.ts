@@ -4,6 +4,13 @@ import type { ModuleOptions } from './module'
 export interface ViolationsPayload {
   violations: A11yViolation[]
   currentRoute: string
+  tabId: string
+}
+
+export interface ActiveTabPayload {
+  tabId: string
+  isActive: boolean
+  totalTabCount: number
 }
 
 export interface ServerFunctions {
@@ -26,4 +33,5 @@ export interface ClientFunctions {
   scanRunning: (running: boolean) => void
   constantScanningEnabled: (enabled: boolean) => void
   routeChanged: (path: string) => void
+  activeTabChanged: (payload: ActiveTabPayload) => void
 }
