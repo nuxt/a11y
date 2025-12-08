@@ -49,7 +49,7 @@
     "@nuxt/eslint-config": "1.11.0",
     "@nuxt/module-builder": "1.0.2",
     "@nuxt/schema": "4.2.1",
-    "@nuxt/test-utils": "3.20.1",
+    "@nuxt/test-utils": "3.21.0",
     "@vitest/coverage-v8": "4.0.15",
     "@types/node": "24.10.1",
     "changelogen": "0.6.2",
@@ -59,8 +59,8 @@
     "pkg-pr-new": "0.0.62",
     "playwright-core": "1.57.0",
     "typescript": "~5.9.3",
-    "vitest": "4.0.14",
-    "vue-tsc": "3.1.5"
+    "vitest": "4.0.15",
+    "vue-tsc": "3.1.7"
   },
   "resolutions": {
     "@nuxt/a11y": "workspace:*"
