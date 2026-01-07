@@ -1,7 +1,7 @@
 {
   "name": "@nuxt/a11y",
   "packageManager": "pnpm@10.27.0",
-  "version": "0.0.1",
+  "version": "1.0.0-alpha.1",
   "description": "Nuxt module to provide accessibility hinting and utilities.",
   "repository": "nuxt/a11y",
   "license": "MIT",
