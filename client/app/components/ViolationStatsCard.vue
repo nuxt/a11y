@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ImpactStat } from '../../src/runtime/types'
+import type { ImpactStat } from '../../../src/runtime/types'
 
 defineProps<{
   stats: ImpactStat[]

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { ViolationsByImpact } from '../../src/runtime/types'
-import { IMPACT_COLORS, IMPACT_LEVELS } from '../../src/runtime/constants'
+import type { ViolationsByImpact } from '../../../src/runtime/types'
+import { IMPACT_COLORS, IMPACT_LEVELS } from '../../../src/runtime/constants'
 import { computed } from 'vue'
 
 const props = defineProps<{

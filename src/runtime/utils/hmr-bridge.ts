@@ -1,3 +1,5 @@
+/// <reference types="vite/client" />
+
 import { HMR_EVENT_PREFIX } from '../constants'
 
 /**

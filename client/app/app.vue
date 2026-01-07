@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { axeViolations, currentRoute } from './composables/rpc'
 import { computed, ref, onMounted } from 'vue'
-import type { ViolationsByImpact, ImpactStat, A11yViolation } from '../src/runtime/types'
-import { IMPACT_LEVELS, IMPACT_COLORS } from '../src/runtime/constants'
+import type { ViolationsByImpact, ImpactStat, A11yViolation } from '../../src/runtime/types'
+import { IMPACT_LEVELS, IMPACT_COLORS } from '../../src/runtime/constants'
 import type axe from 'axe-core'
 import { initAutoHighlight } from './composables/auto-highlight'
 

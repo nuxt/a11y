@@ -1,6 +1,6 @@
 import { ref, watch } from 'vue'
-import type { ModuleOptions } from '../../src/module'
-import { IMPACT_COLORS } from '../../src/runtime/constants'
+import type { ModuleOptions } from '../../../src/module'
+import { IMPACT_COLORS } from '../../../src/runtime/constants'
 import { axeViolations, currentRoute, highlightElement, nuxtA11yRpc } from './rpc'
 import { isRootElementSelector } from './root-element-checker'
 import { pinElement, isElementPinned, clearAllPinned } from './pinned-elements'

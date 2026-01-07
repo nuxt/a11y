@@ -1,9 +1,9 @@
 import type { NuxtDevtoolsClient } from '@nuxt/devtools-kit/types'
 import type { BirpcReturn } from 'birpc'
-import type { ClientFunctions, ServerFunctions } from '../../src/rpc-types'
+import type { ClientFunctions, ServerFunctions } from '../../../src/rpc-types'
 import { onDevtoolsClientConnected } from '@nuxt/devtools-kit/iframe-client'
 import { ref, computed } from 'vue'
-import type { A11yViolation } from '../../src/runtime/types'
+import type { A11yViolation } from '../../../src/runtime/types'
 import { handleRouteChange } from './route-watcher'
 
 const RPC_NAMESPACE = 'nuxt-a11y-rpc'

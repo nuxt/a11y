@@ -35,7 +35,7 @@
     "release": "npm run lint && npm run test && npm run prepack && changelogen --release && npm publish && git push --follow-tags",
     "lint": "eslint .",
     "test": "vitest run",
-    "test:types": "vue-tsc --noEmit",
+    "test:types": "vue-tsc --noEmit && cd playground && vue-tsc -b --noEmit && cd ../client && vue-tsc -b --noEmit",
     "test:watch": "vitest watch"
   },
   "dependencies": {
@@ -50,8 +50,9 @@
     "@nuxt/module-builder": "1.0.2",
     "@nuxt/schema": "4.2.2",
     "@nuxt/test-utils": "3.22.0",
-    "@vitest/coverage-v8": "4.0.16",
     "@types/node": "24.10.4",
+    "@vitest/coverage-v8": "4.0.16",
+    "birpc": "2.9.0",
     "changelogen": "0.6.2",
     "eslint": "9.39.2",
     "jsdom": "^27.4.0",
@@ -59,6 +60,7 @@
     "pkg-pr-new": "0.0.62",
     "playwright-core": "1.57.0",
     "typescript": "~5.9.3",
+    "vite": "7.3.0",
     "vitest": "4.0.16",
     "vue-tsc": "3.2.2"
   },
