@@ -1,0 +1,56 @@
+name: release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+# Remove default permissions of GITHUB_TOKEN for security
+# https://docs.github.com/en/actions/using-jobs/assigning-permissions-to-jobs
+permissions: {}
+
+jobs:
+  release:
+    concurrency:
+      group: release
+    permissions:
+      contents: write
+      id-token: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          fetch-depth: 0
+      - run: corepack enable
+      - uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
+        with:
+          node-version: latest
+
+      - name: 📦 Install dependencies
+        run: pnpm install
+
+      - name: 🚧 Build (stub)
+        run: pnpm dev:prepare
+
+      - name: 🛠 Build project
+        run: pnpm build
+
+      - name: 🏷️ Extract tag name
+        id: tag
+        run: |
+          TAG=${GITHUB_REF#refs/tags/v}
+          echo "version=$TAG" >> $GITHUB_OUTPUT
+
+          # Extract pre-release tag (alpha, beta, rc, etc.)
+          if [[ $TAG =~ -([a-zA-Z]+) ]]; then
+            DIST_TAG="${BASH_REMATCH[1]}"
+            echo "dist_tag=$DIST_TAG" >> $GITHUB_OUTPUT
+            echo "Publishing as pre-release with tag: $DIST_TAG"
+          else
+            echo "dist_tag=latest" >> $GITHUB_OUTPUT
+            echo "Publishing as stable release (latest)"
+          fi
+
+      - name: 📦 Release
+        run: pnpm publish --no-git-checks --tag ${{ steps.tag.outputs.dist_tag }}
