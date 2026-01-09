@@ -30,6 +30,7 @@ The module is now automatically installed and added to your `nuxt.config.ts`. No
 - 🔄 **Results based on Routes**: Automatically tracks violations across all routes as you navigate your application.
 - ⚙️ **Auto-Scan - Constant Scanning Mode**: Automatically scans for accessibility issues every time you interact with the app.
 - 🎛️ **Configurable Options**: Auto-highlight all violations, customize axe-core settings, and control console logging.
+- 📋 **Build-Time Reports**: Generate accessibility reports during `nuxt generate` with CI integration support.
 
 ## Visual Interface within DevTools
 
@@ -101,24 +102,36 @@ Enable optional real-time scanning that listens to user interactions:
 ```typescript
 export default defineNuxtConfig({
   modules: ['@nuxt/a11y'],
-  
+
   a11y: {
     // Enable/disable the module (default: true in dev mode)
     enabled: true,
-    
+
     // Auto-highlight all violations when detected
     defaultHighlight: false,
-    
+
     // Log violations to browser console
     logIssues: true,
-    
+
     // Configure axe-core
     axe: {
       // axe-core configuration options
       options: {},
-      
+
       // axe-core run options
       runOptions: {},
+    },
+
+    // Build-time report generation
+    report: {
+      // Enable report generation (default: true in production)
+      enabled: true,
+
+      // Output path for the report
+      output: '.nuxt/a11y-report.md',
+
+      // Exit with code 1 when violations are found
+      failOnViolation: true,
     },
   },
 })
@@ -181,6 +194,75 @@ a11y: {
     },
   },
 }
+```
+
+### Build-Time Report Generation
+
+The module generates accessibility reports during `nuxt generate` or prerendering. Reports are written as markdown files with violations grouped by impact level.
+
+#### `report.enabled`
+
+- Type: `boolean`
+- Default: `true` (in production/generate mode)
+
+Enable or disable build-time report generation. The report runs automatically during `nuxt generate` and scans all prerendered routes.
+
+```typescript
+a11y: {
+  report: {
+    enabled: true,
+  },
+}
+```
+
+#### `report.output`
+
+- Type: `string`
+- Default: `'.nuxt/a11y-report.md'`
+
+The output path for the generated report. The path must be within the `.nuxt/` directory.
+
+```typescript
+a11y: {
+  report: {
+    output: '.nuxt/a11y-report.md',
+  },
+}
+```
+
+#### `report.failOnViolation`
+
+- Type: `boolean`
+- Default: `true`
+
+Exit with a non-zero code when accessibility violations are found. This enables CI pipelines to fail builds that contain accessibility issues.
+
+```typescript
+a11y: {
+  report: {
+    failOnViolation: true, // CI will fail if violations exist
+  },
+}
+```
+
+### Example Report Output
+
+The generated report groups violations by impact level:
+
+```md
+# Accessibility Report
+
+Generated: 2026-01-08
+Routes scanned: 5
+Total violations: 23
+
+## Critical (6)
+
+### image-alt
+**Images must have alternative text** | Routes: /, /about
+
+Elements:
+- `.hero-image` - Fix any of the following: ...
 ```
 
 ## Development
