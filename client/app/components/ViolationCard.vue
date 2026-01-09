@@ -166,7 +166,7 @@ function handleViolationClick() {
         <div class="flex-1">
           <div class="flex items-center gap-2 mb-2">
             <NBadge
-              class="uppercase color-white"
+              class="uppercase text-gray-800 dark:text-white"
               :style="{
                 borderColor: impactColor,
                 borderWidth: '1.5px',
