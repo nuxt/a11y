@@ -70,94 +70,114 @@ export function setupDevToolsUI(options: ModuleOptions, moduleResolve: Resolver[
     })
   })
 
-  let isConnected = false
-  const viteServerWs = useViteWebSocket()
-  const rpc = new Promise<BirpcGroup<ClientFunctions, ServerFunctions>>((promiseResolve) => {
-    onDevToolsInitialized(async () => {
-      const rpc = extendServerRpc<ClientFunctions, ServerFunctions>(RPC_NAMESPACE, {
-        getOptions() {
-          return options
-        },
-        async reset() {
-          const ws = await viteServerWs
-          ws.send('nuxt-a11y:reset')
-        },
-        async connected() {
-          const ws = await viteServerWs
-          ws.send('nuxt-a11y:connected')
-          isConnected = true
-        },
-        async enableConstantScanning() {
-          const ws = await viteServerWs
-          ws.send('nuxt-a11y:enableConstantScanning')
-        },
-        async disableConstantScanning() {
-          const ws = await viteServerWs
-          ws.send('nuxt-a11y:disableConstantScanning')
-        },
-        async triggerScan() {
-          const ws = await viteServerWs
-          ws.send('nuxt-a11y:triggerScan')
-        },
-        async highlightElement(selector: string, id?: number, color?: string) {
-          const ws = await viteServerWs
-          ws.send('nuxt-a11y:highlightElement', { selector, id, color })
-        },
-        async unhighlightElement(selector: string) {
-          const ws = await viteServerWs
-          ws.send('nuxt-a11y:unhighlightElement', selector)
-        },
-        async unhighlightAll() {
-          const ws = await viteServerWs
-          ws.send('nuxt-a11y:unhighlightAll')
-        },
-        async updateElementId(selector: string, id: number) {
-          const ws = await viteServerWs
-          ws.send('nuxt-a11y:updateElementId', { selector, id })
-        },
-        async removeElementIdBadge(selector: string) {
-          const ws = await viteServerWs
-          ws.send('nuxt-a11y:removeElementIdBadge', selector)
-        },
-        async scrollToElement(selector: string) {
-          const ws = await viteServerWs
-          ws.send('nuxt-a11y:scrollToElement', selector)
-        },
-      })
-      promiseResolve(rpc)
+  let isConnected: boolean = false
+  const viteServerWs: Promise<{ send: (event: string, payload?: unknown) => void, on: (event: string, handler: (payload: unknown) => void) => void }>
+    = useViteWebSocket()
+
+  const rpc: Promise<BirpcGroup<ClientFunctions, ServerFunctions>>
+    = new Promise<BirpcGroup<ClientFunctions, ServerFunctions>>((promiseResolve): void => {
+      let rpcRegistered: boolean = false
+
+      const registerRpc = (): void => {
+        if (rpcRegistered) return
+
+        const rpcGroup = extendServerRpc<ClientFunctions, ServerFunctions>(RPC_NAMESPACE, {
+          getOptions(): ModuleOptions {
+            return options
+          },
+          async reset(): Promise<void> {
+            const ws = await viteServerWs
+            ws.send('nuxt-a11y:reset')
+          },
+          async connected(): Promise<void> {
+            const ws = await viteServerWs
+            ws.send('nuxt-a11y:connected')
+            isConnected = true
+          },
+          async enableConstantScanning(): Promise<void> {
+            const ws = await viteServerWs
+            ws.send('nuxt-a11y:enableConstantScanning')
+          },
+          async disableConstantScanning(): Promise<void> {
+            const ws = await viteServerWs
+            ws.send('nuxt-a11y:disableConstantScanning')
+          },
+          async triggerScan(): Promise<void> {
+            const ws = await viteServerWs
+            ws.send('nuxt-a11y:triggerScan')
+          },
+          async highlightElement(selector: string, id?: number, color?: string): Promise<void> {
+            const ws = await viteServerWs
+            ws.send('nuxt-a11y:highlightElement', { selector, id, color })
+          },
+          async unhighlightElement(selector: string): Promise<void> {
+            const ws = await viteServerWs
+            ws.send('nuxt-a11y:unhighlightElement', selector)
+          },
+          async unhighlightAll(): Promise<void> {
+            const ws = await viteServerWs
+            ws.send('nuxt-a11y:unhighlightAll')
+          },
+          async updateElementId(selector: string, id: number): Promise<void> {
+            const ws = await viteServerWs
+            ws.send('nuxt-a11y:updateElementId', { selector, id })
+          },
+          async removeElementIdBadge(selector: string): Promise<void> {
+            const ws = await viteServerWs
+            ws.send('nuxt-a11y:removeElementIdBadge', selector)
+          },
+          async scrollToElement(selector: string): Promise<void> {
+            const ws = await viteServerWs
+            ws.send('nuxt-a11y:scrollToElement', selector)
+          },
+        })
+
+        rpcRegistered = true
+        promiseResolve(rpcGroup)
+      }
+
+      // Normal path: register when DevTools is initialized.
+      onDevToolsInitialized(registerRpc)
+
+      // Ordering edge case: DevTools may have already initialized before this module executed.
+      // Best-effort immediate attempt; if DevTools isn't ready yet, the hook above will register later.
+      try {
+        registerRpc()
+      }
+      catch {
+        console.warn('[nuxt-a11y] DevTools RPC registration deferred until DevTools is initialized.')
+      }
     })
-  })
 
   viteServerWs.then((ws) => {
-    ws.on('nuxt-a11y:showViolations', async (payload) => {
-      if (isConnected) {
-        const _rpc = await rpc
-        _rpc.broadcast.showViolations(payload).catch(() => {})
-      }
+    ws.on('nuxt-a11y:showViolations', async (payload: unknown) => {
+      if (!isConnected) return
+      const _rpc = await rpc
+      _rpc.broadcast.showViolations(payload as never).catch(() => {})
     })
-    ws.on('nuxt-a11y:scanRunning', async (payload: boolean) => {
-      if (isConnected) {
-        const _rpc = await rpc
-        _rpc.broadcast.scanRunning(payload).catch(() => {})
-      }
+
+    ws.on('nuxt-a11y:scanRunning', async (payload: unknown) => {
+      if (!isConnected) return
+      const _rpc = await rpc
+      _rpc.broadcast.scanRunning(payload as never).catch(() => {})
     })
-    ws.on('nuxt-a11y:constantScanningEnabled', async (payload: boolean) => {
-      if (isConnected) {
-        const _rpc = await rpc
-        _rpc.broadcast.constantScanningEnabled(payload).catch(() => {})
-      }
+
+    ws.on('nuxt-a11y:constantScanningEnabled', async (payload: unknown) => {
+      if (!isConnected) return
+      const _rpc = await rpc
+      _rpc.broadcast.constantScanningEnabled(payload as never).catch(() => {})
     })
-    ws.on('nuxt-a11y:routeChanged', async (payload: string) => {
-      if (isConnected) {
-        const _rpc = await rpc
-        _rpc.broadcast.routeChanged(payload).catch(() => {})
-      }
+
+    ws.on('nuxt-a11y:routeChanged', async (payload: unknown) => {
+      if (!isConnected) return
+      const _rpc = await rpc
+      _rpc.broadcast.routeChanged(payload as never).catch(() => {})
     })
-    ws.on('nuxt-a11y:activeTabChanged', async (payload: { tabId: string, isActive: boolean, totalTabCount: number }) => {
-      if (isConnected) {
-        const _rpc = await rpc
-        _rpc.broadcast.activeTabChanged(payload).catch(() => {})
-      }
+
+    ws.on('nuxt-a11y:activeTabChanged', async (payload: unknown) => {
+      if (!isConnected) return
+      const _rpc = await rpc
+      _rpc.broadcast.activeTabChanged(payload as never).catch(() => {})
     })
   })
 }
