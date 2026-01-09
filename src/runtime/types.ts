@@ -20,13 +20,21 @@ export interface A11yViolation {
 
 export type ViolationsByImpact = Record<NonNullable<axe.ImpactValue>, A11yViolation[]>
 
-export type ImpactColor = '#ff1e1eff' | '#FF6E40' | '#FFB300' | '#FFEB3B'
+export interface ImpactColorSet {
+  bg: string
+  text: string
+}
+
+export interface ImpactColors {
+  light: ImpactColorSet
+  dark: ImpactColorSet
+}
 
 export interface ImpactStat {
   impact: NonNullable<axe.ImpactValue>
   count: number
   elementsCount: number
-  color: ImpactColor
+  colors: ImpactColors
 }
 
 /**

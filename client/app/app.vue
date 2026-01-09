@@ -51,7 +51,7 @@ const impactStats = computed<ImpactStat[]>(() =>
     impact,
     count: violationsByImpact.value[impact].length,
     elementsCount: violationsByImpact.value[impact].reduce((sum, v) => sum + v.nodes.length, 0),
-    color: IMPACT_COLORS[impact],
+    colors: IMPACT_COLORS[impact],
   })),
 )
 </script>

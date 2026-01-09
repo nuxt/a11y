@@ -46,8 +46,8 @@ export async function initAutoHighlight() {
 
           // Pin element and highlight with ID badge
           const id = pinElement(selector)
-          const color = IMPACT_COLORS[violation.impact ?? 'moderate']
-          highlightElement(selector, id, color)
+          const colors = IMPACT_COLORS[violation.impact ?? 'moderate']
+          highlightElement(selector, id, colors.light.bg)
         })
       })
   }, { immediate: true })
