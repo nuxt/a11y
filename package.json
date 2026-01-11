@@ -53,7 +53,6 @@
     "@nuxt/test-utils": "3.22.0",
     "@types/node": "24.10.4",
     "@vitest/coverage-v8": "4.0.16",
-    "@vueuse/core": "^14.1.0",
     "birpc": "2.9.0",
     "changelogen": "0.6.2",
     "eslint": "9.39.2",
