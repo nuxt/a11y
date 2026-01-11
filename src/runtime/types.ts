@@ -20,6 +20,8 @@ export interface A11yViolation {
 
 export type ViolationsByImpact = Record<NonNullable<axe.ImpactValue>, A11yViolation[]>
 
+export type WcagLevel = 'all' | 'A' | 'AA' | 'AAA'
+
 export type ImpactColor = '#ff1e1eff' | '#FF6E40' | '#FFB300' | '#FFEB3B'
 
 export interface ImpactStat {

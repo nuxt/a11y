@@ -1,25 +1,39 @@
 <script setup lang="ts">
 import { axeViolations, currentRoute } from './composables/rpc'
 import { computed, ref, onMounted } from 'vue'
-import type { ViolationsByImpact, ImpactStat, A11yViolation } from '../../src/runtime/types'
+import type { ViolationsByImpact, ImpactStat, A11yViolation, WcagLevel } from '../../src/runtime/types'
 import { IMPACT_LEVELS, IMPACT_COLORS } from '../../src/runtime/constants'
 import type axe from 'axe-core'
 import { initAutoHighlight } from './composables/auto-highlight'
 
 const showCurrentPageFirst = ref(true)
+const wcagFilter = ref<WcagLevel>('all')
 
-// Get axe-core version for documentation link
+const wcagLevelOptions: { value: WcagLevel, label: string }[] = [
+  { value: 'all', label: 'All levels' },
+  { value: 'A', label: 'Level A' },
+  { value: 'AA', label: 'Level AA' },
+  { value: 'AAA', label: 'Level AAA' },
+]
+
+function matchesWcagLevel(tags: string[], level: WcagLevel): boolean {
+  if (level === 'all') return true
+  const levelSuffix = level.toLowerCase()
+  return tags.some((tag) => {
+    if (!tag.startsWith('wcag')) return false
+    const match = tag.match(/wcag\d+(a{1,3})$/)
+    return match && match[1] === levelSuffix
+  })
+}
+
 const { version: axeVersion, docsUrl: axeDocsUrl } = useAxeVersion()
-
-// Skeleton loader logic
 const { isShowingSkeleton } = useSkeletonLoader()
 
-// Initialize auto-highlight feature
-onMounted(async () => {
-  await initAutoHighlight()
-})
+onMounted(() => initAutoHighlight())
 
-const violations = computed(() => axeViolations.value)
+const violations = computed(() =>
+  axeViolations.value.filter(v => matchesWcagLevel(v.tags, wcagFilter.value)),
+)
 
 const violationsByImpact = computed<ViolationsByImpact>(() => {
   const grouped: ViolationsByImpact = {
@@ -82,7 +96,12 @@ const impactStats = computed<ImpactStat[]>(() =>
     <!-- Can be uncommented if you want status insights about multi tab -->
     <!-- <MultiTabStatus /> -->
 
-    <ControlPanel :total-violations="totalViolations" />
+    <ControlPanel
+      v-model:wcag-filter="wcagFilter"
+      :total-violations="totalViolations"
+      :wcag-level-options="wcagLevelOptions"
+      :has-violations="axeViolations.length > 0"
+    />
 
     <div
       v-if="totalViolations > 0"
