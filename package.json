@@ -52,7 +52,7 @@
     "@nuxt/schema": "4.2.2",
     "@nuxt/test-utils": "3.23.0",
     "@types/node": "24.10.7",
-    "@vitest/coverage-v8": "4.0.16",
+    "@vitest/coverage-v8": "4.0.17",
     "birpc": "4.0.0",
     "changelogen": "0.6.2",
     "eslint": "9.39.2",
@@ -62,7 +62,7 @@
     "playwright-core": "1.57.0",
     "typescript": "~5.9.3",
     "vite": "7.3.1",
-    "vitest": "4.0.16",
+    "vitest": "4.0.17",
     "vue-tsc": "3.2.2"
   },
   "resolutions": {
