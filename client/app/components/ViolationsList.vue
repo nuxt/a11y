@@ -120,7 +120,7 @@ const displayGroups = computed(() => {
           v-for="v in group.violations"
           :key="v.id + v.timestamp"
           :violation="v"
-          :impact-color="v.impact ? IMPACT_COLORS[v.impact] : 'gray'"
+          :impact-colors="IMPACT_COLORS[v.impact ?? 'minor']"
         />
       </div>
     </div>

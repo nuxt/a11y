@@ -1,9 +1,12 @@
 import { ref, watch } from 'vue'
+import { useDark } from '@vueuse/core'
 import type { ModuleOptions } from '../../../src/module'
 import { IMPACT_COLORS } from '../../../src/runtime/constants'
 import { axeViolations, currentRoute, highlightElement, nuxtA11yRpc } from './rpc'
 import { isRootElementSelector } from './root-element-checker'
 import { pinElement, isElementPinned, clearAllPinned } from './pinned-elements'
+
+const isDark = useDark()
 
 const autoHighlightEnabled = ref(false)
 const isInitialized = ref(false)
@@ -46,8 +49,8 @@ export async function initAutoHighlight() {
 
           // Pin element and highlight with ID badge
           const id = pinElement(selector)
-          const color = IMPACT_COLORS[violation.impact ?? 'moderate']
-          highlightElement(selector, id, color)
+          const colors = IMPACT_COLORS[violation.impact ?? 'moderate']
+          highlightElement(selector, id, isDark.value ? colors.dark.text : colors.light.text)
         })
       })
   }, { immediate: true })

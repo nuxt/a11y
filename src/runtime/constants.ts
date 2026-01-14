@@ -1,13 +1,25 @@
 import type axe from 'axe-core'
-import type { ImpactColor } from './types'
+import type { ImpactColors } from './types'
 
 export const IMPACT_LEVELS: readonly NonNullable<axe.ImpactValue>[] = ['critical', 'serious', 'moderate', 'minor'] as const
 
-export const IMPACT_COLORS: Record<NonNullable<axe.ImpactValue>, ImpactColor> = {
-  critical: '#ff1e1eff',
-  serious: '#FF6E40',
-  moderate: '#FFB300',
-  minor: '#FFEB3B',
+export const IMPACT_COLORS: Record<NonNullable<axe.ImpactValue>, ImpactColors> = {
+  critical: {
+    light: { bg: '#fef2f2', text: '#dc2626' },
+    dark: { bg: '#450a0a', text: '#fca5a5' },
+  },
+  serious: {
+    light: { bg: '#fff7ed', text: '#ea580c' },
+    dark: { bg: '#431407', text: '#fdba74' },
+  },
+  moderate: {
+    light: { bg: '#fefce8', text: '#ca8a04' },
+    dark: { bg: '#422006', text: '#fcd34d' },
+  },
+  minor: {
+    light: { bg: '#f3f4f6', text: '#6b7280' },
+    dark: { bg: '#374151', text: '#d1d5db' },
+  },
 } as const
 
 /**
