@@ -39,46 +39,46 @@ describe('ssr', async () => {
       [
         "%ca11y%c Elements must meet minimum color contrast ratio thresholds
         https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=axeAPI
-       color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #FF6E40;  <a href="#" class="button-primary" style="background:#888;color:#aaa;" data-v-02281a80="">Get Started</a> <p style="color:#999;" data-v-02281a80=""> We create beautiful designs that may or may not be accessible. </p> <p style="color:#999;" data-v-02281a80=""> Building web applications with various accessibility challenges. </p> <p style="color:#999;" data-v-02281a80=""> Creating mobile experiences for testing purposes. </p> <p data-v-433a9abd="">© 2025 A11y Playground. All rights reserved.</p>",
+       color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #431407;  <a href="#" class="button-primary" style="background:#888;color:#aaa;" data-v-02281a80="">Get Started</a> <p style="color:#999;" data-v-02281a80=""> We create beautiful designs that may or may not be accessible. </p> <p style="color:#999;" data-v-02281a80=""> Building web applications with various accessibility challenges. </p> <p style="color:#999;" data-v-02281a80=""> Creating mobile experiences for testing purposes. </p> <p data-v-433a9abd="">© 2025 A11y Playground. All rights reserved.</p>",
         "%ca11y%c Documents must have <title> element to aid in navigation
         https://dequeuniversity.com/rules/axe/4.11/document-title?application=axeAPI
-       color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #FF6E40; ",
+       color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #431407; ",
         "%ca11y%c Heading levels should only increase by one
         https://dequeuniversity.com/rules/axe/4.11/heading-order?application=axeAPI
-       color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #FFB300;  <h4 data-v-02281a80="">Discover common accessibility issues in modern web applications</h4> <h4 data-v-433a9abd="">About Us</h4>",
+       color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #422006;  <h4 data-v-02281a80="">Discover common accessibility issues in modern web applications</h4> <h4 data-v-433a9abd="">About Us</h4>",
         "%ca11y%c <html> element must have a lang attribute
         https://dequeuniversity.com/rules/axe/4.11/html-has-lang?application=axeAPI
-       color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #FF6E40; ",
+       color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #431407; ",
         "%ca11y%c Images must have alternative text
         https://dequeuniversity.com/rules/axe/4.11/image-alt?application=axeAPI
-       color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #ff1e1eff;  <img src="https://placehold.co/150x50/4F46E5/ffffff?text=A11y+Test" class="logo-img" data-v-433a9abd=""> <img src="https://placehold.co/800x400/6366F1/ffffff?text=Hero+Image" class="hero-image" data-v-02281a80=""> <img src="https://placehold.co/300x200/EF4444/ffffff?text=Image+1" data-v-02281a80=""> <img src="https://placehold.co/300x200/10B981/ffffff?text=Image+2" data-v-02281a80=""> <img src="https://placehold.co/300x200/3B82F6/ffffff?text=Image+3" data-v-02281a80=""> <img src="https://placehold.co/300x200/F59E0B/ffffff?text=Image+4" data-v-02281a80="">",
+       color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #450a0a;  <img src="https://placehold.co/150x50/4F46E5/ffffff?text=A11y+Test" class="logo-img" data-v-433a9abd=""> <img src="https://placehold.co/800x400/6366F1/ffffff?text=Hero+Image" class="hero-image" data-v-02281a80=""> <img src="https://placehold.co/300x200/EF4444/ffffff?text=Image+1" data-v-02281a80=""> <img src="https://placehold.co/300x200/10B981/ffffff?text=Image+2" data-v-02281a80=""> <img src="https://placehold.co/300x200/3B82F6/ffffff?text=Image+3" data-v-02281a80=""> <img src="https://placehold.co/300x200/F59E0B/ffffff?text=Image+4" data-v-02281a80="">",
         "%ca11y%c Form elements must have labels
         https://dequeuniversity.com/rules/axe/4.11/label?application=axeAPI
-       color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #ff1e1eff;  <input id="agree" type="checkbox" data-v-02281a80="">",
+       color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #450a0a;  <input id="agree" type="checkbox" data-v-02281a80="">",
         "%ca11y%c Links must have discernible text
         https://dequeuniversity.com/rules/axe/4.11/link-name?application=axeAPI
-       color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #FF6E40;  <a aria-current="page" href="/" class="router-link-active router-link-exact-active logo" data-v-433a9abd=""><img src="https://placehold.co/150x50/4F46E5/ffffff?text=A11y+Test" class="logo-img" data-v-433a9abd=""></a> <a href="#" class="button-secondary" data-v-02281a80=""></a>",
+       color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #431407;  <a aria-current="page" href="/" class="router-link-active router-link-exact-active logo" data-v-433a9abd=""><img src="https://placehold.co/150x50/4F46E5/ffffff?text=A11y+Test" class="logo-img" data-v-433a9abd=""></a> <a href="#" class="button-secondary" data-v-02281a80=""></a>",
         "%ca11y%c Elements must meet minimum color contrast ratio thresholds
         https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=axeAPI
-       color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #FF6E40;  <a href="#" class="button-primary" style="background:#888;color:#aaa;" data-v-02281a80="">Get Started</a> <p style="color:#999;" data-v-02281a80=""> We create beautiful designs that may or may not be accessible. </p> <p style="color:#999;" data-v-02281a80=""> Building web applications with various accessibility challenges. </p> <p style="color:#999;" data-v-02281a80=""> Creating mobile experiences for testing purposes. </p> <p data-v-433a9abd="">© 2025 A11y Playground. All rights reserved.</p>",
+       color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #431407;  <a href="#" class="button-primary" style="background:#888;color:#aaa;" data-v-02281a80="">Get Started</a> <p style="color:#999;" data-v-02281a80=""> We create beautiful designs that may or may not be accessible. </p> <p style="color:#999;" data-v-02281a80=""> Building web applications with various accessibility challenges. </p> <p style="color:#999;" data-v-02281a80=""> Creating mobile experiences for testing purposes. </p> <p data-v-433a9abd="">© 2025 A11y Playground. All rights reserved.</p>",
         "%ca11y%c Documents must have <title> element to aid in navigation
         https://dequeuniversity.com/rules/axe/4.11/document-title?application=axeAPI
-       color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #FF6E40; ",
+       color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #431407; ",
         "%ca11y%c Heading levels should only increase by one
         https://dequeuniversity.com/rules/axe/4.11/heading-order?application=axeAPI
-       color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #FFB300;  <h4 data-v-02281a80="">Discover common accessibility issues in modern web applications</h4> <h4 data-v-433a9abd="">About Us</h4>",
+       color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #422006;  <h4 data-v-02281a80="">Discover common accessibility issues in modern web applications</h4> <h4 data-v-433a9abd="">About Us</h4>",
         "%ca11y%c <html> element must have a lang attribute
         https://dequeuniversity.com/rules/axe/4.11/html-has-lang?application=axeAPI
-       color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #FF6E40; ",
+       color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #431407; ",
         "%ca11y%c Images must have alternative text
         https://dequeuniversity.com/rules/axe/4.11/image-alt?application=axeAPI
-       color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #ff1e1eff;  <img src="https://placehold.co/150x50/4F46E5/ffffff?text=A11y+Test" class="logo-img" data-v-433a9abd=""> <img src="https://placehold.co/800x400/6366F1/ffffff?text=Hero+Image" class="hero-image" data-v-02281a80=""> <img src="https://placehold.co/300x200/EF4444/ffffff?text=Image+1" data-v-02281a80=""> <img src="https://placehold.co/300x200/10B981/ffffff?text=Image+2" data-v-02281a80=""> <img src="https://placehold.co/300x200/3B82F6/ffffff?text=Image+3" data-v-02281a80=""> <img src="https://placehold.co/300x200/F59E0B/ffffff?text=Image+4" data-v-02281a80="">",
+       color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #450a0a;  <img src="https://placehold.co/150x50/4F46E5/ffffff?text=A11y+Test" class="logo-img" data-v-433a9abd=""> <img src="https://placehold.co/800x400/6366F1/ffffff?text=Hero+Image" class="hero-image" data-v-02281a80=""> <img src="https://placehold.co/300x200/EF4444/ffffff?text=Image+1" data-v-02281a80=""> <img src="https://placehold.co/300x200/10B981/ffffff?text=Image+2" data-v-02281a80=""> <img src="https://placehold.co/300x200/3B82F6/ffffff?text=Image+3" data-v-02281a80=""> <img src="https://placehold.co/300x200/F59E0B/ffffff?text=Image+4" data-v-02281a80="">",
         "%ca11y%c Form elements must have labels
         https://dequeuniversity.com/rules/axe/4.11/label?application=axeAPI
-       color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #ff1e1eff;  <input id="agree" type="checkbox" data-v-02281a80="">",
+       color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #450a0a;  <input id="agree" type="checkbox" data-v-02281a80="">",
         "%ca11y%c Links must have discernible text
         https://dequeuniversity.com/rules/axe/4.11/link-name?application=axeAPI
-       color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #FF6E40;  <a aria-current="page" href="/" class="router-link-active router-link-exact-active logo" data-v-433a9abd=""><img src="https://placehold.co/150x50/4F46E5/ffffff?text=A11y+Test" class="logo-img" data-v-433a9abd=""></a> <a href="#" class="button-secondary" data-v-02281a80=""></a>",
+       color: white; border-radius: 3px; padding: 2px 3px; font-size: 0.8em; background: #431407;  <a aria-current="page" href="/" class="router-link-active router-link-exact-active logo" data-v-433a9abd=""><img src="https://placehold.co/150x50/4F46E5/ffffff?text=A11y+Test" class="logo-img" data-v-433a9abd=""></a> <a href="#" class="button-secondary" data-v-02281a80=""></a>",
       ]
     `)
 

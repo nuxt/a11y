@@ -18,7 +18,7 @@ export function createLogger() {
     }
 
     const impact = violation.impact ?? 'moderate'
-    const color = IMPACT_COLORS[impact]
+    const color = IMPACT_COLORS[impact].dark.bg
 
     // Detect if running in e2e test environment
     const isE2ETest = typeof navigator !== 'undefined' && (

@@ -1,14 +1,19 @@
 <script setup lang="ts">
-import type { A11yViolation, A11yViolationNode } from '../../../src/runtime/types'
+import type { A11yViolation, A11yViolationNode, ImpactColors } from '../../../src/runtime/types'
 import { highlightElement, unhighlightElement, removeElementIdBadge, scrollToElement, currentRoute } from '../composables/rpc'
 import { computed } from 'vue'
 import { pinElement, unpinElement, getElementId, isElementPinned } from '../composables/pinned-elements'
 import { isRootElementSelector } from '../composables/root-element-checker'
+import { useDark } from '@vueuse/core'
 
 const props = defineProps<{
   violation: A11yViolation
-  impactColor: string
+  impactColors: ImpactColors
 }>()
+
+const isDark = useDark()
+
+const currentColors = computed(() => isDark.value ? props.impactColors.dark : props.impactColors.light)
 
 // Computed: check if this violation is on the current route
 const isOnCurrentRoute = computed(() => {
@@ -86,7 +91,7 @@ function handleNodeClick(node: A11yViolationNode) {
   else {
     // Pin: add to global state with ID and highlight
     const id = pinElement(selector)
-    highlightElement(selector, id, props.impactColor)
+    highlightElement(selector, id, currentColors.value.text)
   }
 }
 
@@ -112,7 +117,7 @@ function handleScrollToElement(node: A11yViolationNode) {
   // Pin the element if not already pinned
   if (!isElementPinned(selector)) {
     const id = pinElement(selector)
-    highlightElement(selector, id, props.impactColor)
+    highlightElement(selector, id, currentColors.value.text)
   }
 
   // Scroll to the element
@@ -150,7 +155,7 @@ function handleViolationClick() {
       }
 
       const id = pinElement(selector)
-      highlightElement(selector, id, props.impactColor)
+      highlightElement(selector, id, currentColors.value.text)
     })
 
     // Show notification once if any root elements were found
@@ -179,12 +184,10 @@ function handleViolationClick() {
         <div class="flex-1">
           <div class="flex items-center gap-2 mb-2">
             <NBadge
-              class="uppercase text-gray-800 dark:text-white"
+              class="uppercase font-semibold"
               :style="{
-                borderColor: impactColor,
-                borderWidth: '1.5px',
-                borderStyle: 'solid',
-                boxShadow: `0 2px 8px ${impactColor}40`,
+                backgroundColor: currentColors.bg,
+                color: currentColors.text,
               }"
             >
               {{ violation.impact || 'UNKNOWN' }}
