@@ -15,6 +15,19 @@ const isOnCurrentRoute = computed(() => {
   return props.violation.route === currentRoute.value
 })
 
+// Computed: extract WCAG level from violation tags
+const wcagLevel = computed(() => {
+  let maxLevel = ''
+  for (const tag of props.violation.tags) {
+    if (!tag.startsWith('wcag')) continue
+    const match = tag.match(/wcag\d+(a{1,3})$/)
+    if (match?.[1] && match[1].length > maxLevel.length) {
+      maxLevel = match[1]
+    }
+  }
+  return maxLevel.toUpperCase() || null
+})
+
 // Computed: check if ALL nodes in this violation are pinned
 const isViolationPinned = computed(() => {
   return props.violation.nodes.every((node) => {
@@ -175,6 +188,12 @@ function handleViolationClick() {
               }"
             >
               {{ violation.impact || 'UNKNOWN' }}
+            </NBadge>
+            <NBadge
+              v-if="wcagLevel"
+              class="text-gray-800 dark:text-white border border-gray-400 dark:border-gray-600"
+            >
+              WCAG {{ wcagLevel }}
             </NBadge>
             <span class="text-sm font-mono opacity-70">{{ violation.id }}</span>
             <div

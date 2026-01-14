@@ -86,7 +86,7 @@ function handleReset() {
           <NSelect
             :model-value="props.wcagFilter"
             class="text-sm"
-            @update:model-value="emit('update:wcagFilter', $event as WcagLevel)"
+            @change="(e: unknown) => emit('update:wcagFilter', ((e as Event).target as HTMLSelectElement).value as WcagLevel)"
           >
             <option
               v-for="option in props.wcagLevelOptions"

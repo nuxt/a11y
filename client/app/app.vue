@@ -18,11 +18,11 @@ const wcagLevelOptions: { value: WcagLevel, label: string }[] = [
 
 function matchesWcagLevel(tags: string[], level: WcagLevel): boolean {
   if (level === 'all') return true
-  const levelSuffix = level.toLowerCase()
+  const levelLength = level.length
   return tags.some((tag) => {
     if (!tag.startsWith('wcag')) return false
     const match = tag.match(/wcag\d+(a{1,3})$/)
-    return match && match[1] === levelSuffix
+    return match?.[1] && match[1].length <= levelLength
   })
 }
 
