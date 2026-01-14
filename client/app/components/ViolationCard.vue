@@ -78,7 +78,7 @@ function handleNodeClick(node: A11yViolationNode) {
   else {
     // Pin: add to global state with ID and highlight
     const id = pinElement(selector)
-    highlightElement(selector, id, currentColors.value.bg)
+    highlightElement(selector, id, currentColors.value.text)
   }
 }
 
@@ -104,7 +104,7 @@ function handleScrollToElement(node: A11yViolationNode) {
   // Pin the element if not already pinned
   if (!isElementPinned(selector)) {
     const id = pinElement(selector)
-    highlightElement(selector, id, currentColors.value.bg)
+    highlightElement(selector, id, currentColors.value.text)
   }
 
   // Scroll to the element
@@ -142,7 +142,7 @@ function handleViolationClick() {
       }
 
       const id = pinElement(selector)
-      highlightElement(selector, id, currentColors.value.bg)
+      highlightElement(selector, id, currentColors.value.text)
     })
 
     // Show notification once if any root elements were found
