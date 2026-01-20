@@ -27,7 +27,24 @@ function handleReset() {
 
 async function handleCopyReport() {
   const report = formatViolationsReport(axeViolations.value, currentRoute.value)
-  await copyToClipboard(report)
+  const success = await copyToClipboard(report)
+
+  if (success) {
+    devtoolsUiShowNotification({
+      message: 'Report copied to clipboard',
+      icon: 'i-carbon-checkmark',
+      classes: 'text-white bg-green-600/90',
+      duration: 3000,
+    })
+  }
+  else {
+    devtoolsUiShowNotification({
+      message: 'Failed to copy report to clipboard',
+      icon: 'i-carbon-close',
+      classes: 'text-white bg-red-600/90',
+      duration: 5000,
+    })
+  }
 }
 </script>
 
