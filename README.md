@@ -127,8 +127,8 @@ export default defineNuxtConfig({
       // Enable report generation (default: true in production)
       enabled: true,
 
-      // Output path for the report
-      output: '.nuxt/a11y-report.md',
+      // Output path for the report (relative to .nuxt/)
+      output: 'a11y-report.md',
 
       // Exit with code 1 when violations are found
       failOnViolation: true,
@@ -218,14 +218,14 @@ a11y: {
 #### `report.output`
 
 - Type: `string`
-- Default: `'.nuxt/a11y-report.md'`
+- Default: `'a11y-report.md'`
 
-The output path for the generated report. The path must be within the `.nuxt/` directory.
+The output path for the generated report, relative to the `.nuxt/` directory. Paths that attempt to escape the `.nuxt/` directory will be ignored.
 
 ```typescript
 a11y: {
   report: {
-    output: '.nuxt/a11y-report.md',
+    output: 'a11y-report.md', // Results in .nuxt/a11y-report.md
   },
 }
 ```
