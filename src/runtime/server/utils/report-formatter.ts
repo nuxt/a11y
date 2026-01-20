@@ -6,8 +6,8 @@ export interface ReportStats {
   byImpact: Record<string, number>
 }
 
-export function formatMarkdownReport(violations: A11yViolation[]): string {
-  const stats = getStats(violations)
+export function formatMarkdownReport(violations: A11yViolation[], scannedRoutes?: Set<string>): string {
+  const stats = getStats(violations, scannedRoutes)
   const grouped = groupByImpact(violations)
   const lines: string[] = []
 
@@ -52,8 +52,7 @@ export function formatMarkdownReport(violations: A11yViolation[]): string {
   return lines.join('\n')
 }
 
-export function getStats(violations: A11yViolation[]): ReportStats {
-  const routes = new Set<string>()
+export function getStats(violations: A11yViolation[], routes = new Set<string>()): ReportStats {
   const byImpact: Record<string, number> = {}
 
   for (const v of violations) {

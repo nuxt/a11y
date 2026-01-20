@@ -42,7 +42,7 @@ export default defineNitroPlugin((nitroApp: NitroApp) => {
 
     try {
       const violations = await runAxeOnHtml(html, route, { axeOptions: axeConfig?.options, runOptions: axeConfig?.runOptions })
-      collectedViolations.push(...violations)
+      for (const v of violations) collectedViolations.push(v)
     }
     catch (err) {
       logger.warn(`Failed to scan ${route}:`, err)
@@ -58,8 +58,9 @@ export default defineNitroPlugin((nitroApp: NitroApp) => {
     const requestedOutput = reportConfig?.output || 'a11y-report.md'
     const resolved = resolve(baseDir, requestedOutput)
     const rel = relative(baseDir, resolved)
-    const output = rel.startsWith('..') ? resolve(baseDir, 'a11y-report.md') : resolved
-    const report = formatMarkdownReport(collectedViolations)
+    const isOutsideBase = rel.startsWith('..') || resolve(baseDir, rel) !== resolved
+    const output = isOutsideBase ? resolve(baseDir, 'a11y-report.md') : resolved
+    const report = formatMarkdownReport(collectedViolations, scannedRoutes)
 
     try {
       await mkdir(dirname(output), { recursive: true })
