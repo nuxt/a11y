@@ -18,6 +18,7 @@ function restoreGlobal(key: 'window' | 'document' | 'Node', prev: unknown) {
 
 // Mutex to prevent concurrent axe runs (globals conflict)
 let running = false
+let configured = false
 const queue: Array<() => void> = []
 
 async function withMutex<T>(fn: () => Promise<T>): Promise<T> {
@@ -75,8 +76,10 @@ export async function runAxeOnHtml(html: string, route: string, options: AxeServ
     _global.Node = window.Node
 
     try {
-      if (options.axeOptions)
+      if (options.axeOptions && !configured) {
         axe.configure(options.axeOptions)
+        configured = true
+      }
 
       const results = await axe.run(document.documentElement as unknown as axe.ElementContext, options.runOptions || {})
 

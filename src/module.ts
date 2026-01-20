@@ -1,6 +1,12 @@
-import { addPlugin, addServerPlugin, defineNuxtModule, createResolver, extendViteConfig } from '@nuxt/kit'
+import { writeFile, mkdir } from 'node:fs/promises'
+import { dirname, resolve } from 'node:path'
+import { addPlugin, addServerPlugin, defineNuxtModule, createResolver, extendViteConfig, useLogger } from '@nuxt/kit'
 import type { Spec as AxeOptions, RunOptions as AxeRunOptions } from 'axe-core'
+import type { A11yViolation } from './runtime/types'
+import { formatMarkdownReport, getStats } from './runtime/server/utils/report-formatter'
 import { setupDevToolsUI } from './devtools'
+
+const logger = useLogger('a11y')
 
 export interface ModuleOptions {
   enabled: boolean
@@ -59,6 +65,43 @@ export default defineNuxtModule<ModuleOptions>({
     if (options.report.enabled) {
       nuxt.options.runtimeConfig.a11yReport = options.report
       addServerPlugin(resolver.resolve('./runtime/server/plugins/a11y-report'))
+
+      const storageBase = resolve(nuxt.options.buildDir, '.a11y-storage')
+
+      nuxt.hook('nitro:config', (nitroConfig) => {
+        nitroConfig.storage = nitroConfig.storage || {}
+        nitroConfig.storage['a11y'] = { driver: 'fs', base: storageBase }
+      })
+
+      nuxt.hook('nitro:init', (nitro) => {
+        nitro.hooks.hook('prerender:done', async () => {
+          const violations = await nitro.storage.getItem<A11yViolation[]>('a11y:violations') || []
+
+          if (!violations.length) {
+            logger.success('No accessibility violations found!')
+            return
+          }
+
+          const report = formatMarkdownReport(violations)
+          const output = resolve(nuxt.options.buildDir, options.report.output)
+
+          try {
+            await mkdir(dirname(output), { recursive: true })
+            await writeFile(output, report, 'utf-8')
+          }
+          catch (err) {
+            logger.error('Failed to write report:', err)
+            return
+          }
+
+          const stats = getStats(violations)
+          logger.warn(`Found ${stats.totalViolations} violations (${stats.byImpact.critical || 0} critical, ${stats.byImpact.serious || 0} serious)`)
+          logger.info(`Full report: ${output}`)
+
+          if (options.report.failOnViolation)
+            process.exitCode = 1
+        })
+      })
     }
   },
 })
