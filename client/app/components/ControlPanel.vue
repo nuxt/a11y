@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { isScanRunning, isConstantScanningEnabled, enableConstantScanning, disableConstantScanning, triggerScan, resetViolations } from '../composables/rpc'
+import { isScanRunning, isConstantScanningEnabled, enableConstantScanning, disableConstantScanning, triggerScan, resetViolations, axeViolations, currentRoute } from '../composables/rpc'
+import { copyToClipboard } from '../composables/clipboard'
+import { formatViolationsReport } from '../utils/format-report'
 
 defineProps<{
   totalViolations: number
@@ -21,6 +23,28 @@ function handleTriggerScan() {
 function handleReset() {
   clearAllPinned()
   resetViolations()
+}
+
+async function handleCopyReport() {
+  const report = formatViolationsReport(axeViolations.value, currentRoute.value)
+  const success = await copyToClipboard(report)
+
+  if (success) {
+    devtoolsUiShowNotification({
+      message: 'Report copied to clipboard',
+      icon: 'i-carbon-checkmark',
+      classes: 'text-white bg-green-600/90',
+      duration: 3000,
+    })
+  }
+  else {
+    devtoolsUiShowNotification({
+      message: 'Failed to copy report to clipboard',
+      icon: 'i-carbon-close',
+      classes: 'text-white bg-red-600/90',
+      duration: 5000,
+    })
+  }
 }
 </script>
 
@@ -50,6 +74,17 @@ function handleReset() {
           <span class="flex items-center gap-2">
             <NIcon icon="i-carbon-trash-can" />
             Clear Results
+          </span>
+        </button>
+
+        <button
+          class="px-3 py-1.5 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          :disabled="totalViolations === 0"
+          @click="handleCopyReport"
+        >
+          <span class="flex items-center gap-2">
+            <NIcon icon="i-carbon-copy" />
+            Copy Report
           </span>
         </button>
 
