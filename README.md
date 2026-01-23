@@ -4,6 +4,7 @@
 [![npm downloads][npm-downloads-src]][npm-downloads-href]
 [![License][license-src]][license-href]
 [![Nuxt][nuxt-src]][nuxt-href]
+[![nuxt.care health](https://img.shields.io/endpoint?url=https://nuxt.care/api/badge/a11y)](https://nuxt.care/?search=a11y)
 
 A Nuxt module that provides real-time accessibility feedback and automated testing right in your browser during development.
 
