@@ -220,7 +220,7 @@ a11y: {
 - Type: `string`
 - Default: `'a11y-report.md'`
 
-The output path for the generated report, relative to the `.nuxt/` directory. Paths that attempt to escape the `.nuxt/` directory will be ignored.
+The output path for the generated report, resolved relative to the `.nuxt/` directory.
 
 ```typescript
 a11y: {
