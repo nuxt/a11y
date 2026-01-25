@@ -21,7 +21,7 @@ export function formatMarkdownReport(violations: A11yViolation[], scannedRoutes?
     return lines.join('\n')
   }
 
-  for (const impact of ['critical', 'serious', 'moderate', 'minor'] as const) {
+  for (const impact of ['critical', 'serious', 'moderate', 'minor', 'unknown'] as const) {
     const items = grouped[impact]
     if (!items?.length)
       continue
