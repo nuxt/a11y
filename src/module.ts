@@ -39,10 +39,14 @@ export default defineNuxtModule<ModuleOptions>({
   setup(options, nuxt) {
     const resolver = createResolver(import.meta.url)
 
+    // Set axe config for both client and server-side scanning
+    if (options.enabled || options.report.enabled) {
+      nuxt.options.runtimeConfig.public.axe = options.axe
+    }
+
     // Client-side scanning (dev mode)
     if (options.enabled) {
       addPlugin(resolver.resolve('./runtime/plugins/axe.client'))
-      nuxt.options.runtimeConfig.public.axe = options.axe
       nuxt.options.runtimeConfig.public.a11yDefaultHighlight = options.defaultHighlight
       nuxt.options.runtimeConfig.public.a11yLogIssues = options.logIssues
 
