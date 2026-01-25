@@ -120,6 +120,7 @@ async function handleCopyReport() {
           <span class="text-sm opacity-70">WCAG:</span>
           <NSelect
             :model-value="props.wcagFilter"
+            aria-label="WCAG level filter"
             class="text-sm"
             @update:model-value="(value) => emit('update:wcagFilter', value as WcagLevel)"
           >
