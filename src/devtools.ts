@@ -3,7 +3,7 @@ import type { Resolver } from '@nuxt/kit'
 import type { Nuxt } from 'nuxt/schema'
 import type { BirpcGroup } from 'birpc'
 import { addVitePlugin, useNuxt } from '@nuxt/kit'
-import { extendServerRpc, onDevToolsInitialized } from '@nuxt/devtools-kit'
+import { addCustomTab, extendServerRpc, onDevToolsInitialized } from '@nuxt/devtools-kit'
 import type { ClientFunctions, ServerFunctions } from './rpc-types'
 import type { ModuleOptions } from './module'
 import { useViteWebSocket } from './util'
@@ -54,21 +54,15 @@ export function setupDevToolsUI(options: ModuleOptions, moduleResolve: Resolver[
     },
   })
 
-  nuxt.hook('devtools:customTabs', (tabs) => {
-    tabs.push({
-      // unique identifier
-      name: 'nuxt-a11y',
-      // title to display in the tab
-      title: 'Nuxt a11y',
-      // any icon from Iconify, or a URL to an image
-      icon: 'iconoir:accessibility',
-      // iframe view
-      view: {
-        type: 'iframe',
-        src: DEVTOOLS_UI_ROUTE,
-      },
-    })
-  })
+  addCustomTab({
+    name: 'nuxt-a11y',
+    title: 'Nuxt a11y',
+    icon: 'iconoir:accessibility',
+    view: {
+      type: 'iframe',
+      src: DEVTOOLS_UI_ROUTE,
+    },
+  }, nuxt)
 
   let isConnected = false
   const viteServerWs = useViteWebSocket()
