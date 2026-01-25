@@ -10,7 +10,7 @@ const showCurrentPageFirst = ref(true)
 const wcagFilter = ref<WcagLevel>('all')
 
 const wcagLevelOptions: { value: WcagLevel, label: string }[] = [
-  { value: 'all', label: 'All levels' },
+  { value: 'all', label: 'No filter' },
   { value: 'A', label: 'Level A' },
   { value: 'AA', label: 'Level AA' },
   { value: 'AAA', label: 'Level AAA' },
