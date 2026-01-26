@@ -47,23 +47,23 @@
   "devDependencies": {
     "@iconify-json/carbon": "^1.2.18",
     "@nuxt/devtools": "latest",
-    "@nuxt/eslint-config": "1.12.1",
+    "@nuxt/eslint-config": "1.13.0",
     "@nuxt/module-builder": "1.0.2",
     "@nuxt/schema": "4.3.0",
     "@nuxt/test-utils": "3.23.0",
     "@types/node": "24.10.9",
-    "@vitest/coverage-v8": "4.0.17",
+    "@vitest/coverage-v8": "4.0.18",
     "birpc": "4.0.0",
     "changelogen": "0.6.2",
     "eslint": "9.39.2",
     "jsdom": "^27.4.0",
     "nuxt": "4.3.0",
     "pkg-pr-new": "0.0.62",
-    "playwright-core": "1.57.0",
+    "playwright-core": "1.58.0",
     "typescript": "~5.9.3",
     "vite": "7.3.1",
-    "vitest": "4.0.17",
-    "vue-tsc": "3.2.2"
+    "vitest": "4.0.18",
+    "vue-tsc": "3.2.4"
   },
   "resolutions": {
     "@nuxt/a11y": "workspace:*"
