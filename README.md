@@ -165,16 +165,16 @@ a11y: {
 - Type: `object`
 - Default: `{}`
 
-Configure the underlying [axe-core](https://github.com/dequelabs/axe-core) runner. See the [axe-core documentation](https://github.com/dequelabs/axe-core/blob/develop/doc/API.md#options-parameter) for available options.
+Configure the underlying [axe-core](https://github.com/dequelabs/axe-core) runner. See the [axe-core documentation](https://github.com/dequelabs/axe-core/blob/develop/doc/API.md) for available options.
 
 ```typescript
 a11y: {
   axe: {
     options: {
       // Customize which rules to run
-      rules: {
-        'color-contrast': { enabled: true },
-      },
+      rules: [
+        { id: 'color-contrast', enabled: true },
+      ],
     },
     runOptions: {
       // Customize how axe-core runs
