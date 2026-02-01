@@ -7,21 +7,23 @@ import type { RunOptions, Spec } from 'axe-core'
  * Configuration for the axe runner
  */
 export interface AxeRunnerConfig {
-  options: Spec
-  runOptions: RunOptions
+  options?: Spec
+  runOptions?: RunOptions
 }
 
 /**
  * Creates an axe runner that executes accessibility scans
  */
-export function createAxeRunner(config: AxeRunnerConfig, onScanStateChange: (isRunning: boolean) => void) {
+export function createAxeRunner(config: AxeRunnerConfig | undefined, onScanStateChange: (isRunning: boolean) => void) {
   let isScanRunning = false
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const axe = (window as any).axe as typeof Axe
 
   // Configure axe with provided options
-  axe.configure(config.options)
+  if (config?.options) {
+    axe.configure(config.options)
+  }
 
   /**
    * Runs an accessibility scan on the document
@@ -49,7 +51,7 @@ export function createAxeRunner(config: AxeRunnerConfig, onScanStateChange: (isR
           ],
         }, {
           elementRef: true,
-          ...config.runOptions,
+          ...config?.runOptions,
         }, (error, results) => {
           if (error)
             reject(error)
