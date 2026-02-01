@@ -6,9 +6,9 @@ export interface ModuleOptions {
   enabled: boolean
   defaultHighlight: boolean
   logIssues: boolean
-  axe: {
-    options: AxeOptions
-    runOptions: AxeRunOptions
+  axe?: {
+    options?: AxeOptions
+    runOptions?: AxeRunOptions
   }
 }
 
@@ -48,7 +48,7 @@ export default defineNuxtModule<ModuleOptions>({
 
 declare module '@nuxt/schema' {
   interface PublicRuntimeConfig {
-    axe: ModuleOptions['axe']
+    axe?: ModuleOptions['axe']
     a11yDefaultHighlight: boolean
     a11yLogIssues: boolean
   }
