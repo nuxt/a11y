@@ -1,23 +1,22 @@
-import type { A11yViolation } from '../../types'
+import type { A11yViolation } from '../runtime/types'
 
 export interface ReportStats {
-  routes: Set<string>
   totalViolations: number
   byImpact: Record<string, number>
 }
 
-export function formatMarkdownReport(violations: A11yViolation[], scannedRoutes?: Set<string>): string {
-  const stats = getStats(violations, scannedRoutes)
+export function formatMarkdownReport(violations: A11yViolation[], scannedRoutes: number): string {
+  const stats = getStats(violations)
   const grouped = groupByImpact(violations)
   const lines: string[] = []
 
   lines.push('# Accessibility Report\n')
   lines.push(`Generated: ${new Date().toISOString().split('T')[0]}`)
-  lines.push(`Routes scanned: ${stats.routes.size}`)
+  lines.push(`Routes scanned: ${scannedRoutes}`)
   lines.push(`Total violations: ${stats.totalViolations}\n`)
 
   if (violations.length === 0) {
-    lines.push('✅ No accessibility violations found!')
+    lines.push('No accessibility violations found!')
     return lines.join('\n')
   }
 
@@ -39,7 +38,7 @@ export function formatMarkdownReport(violations: A11yViolation[], scannedRoutes?
       const allNodes = ruleViolations.flatMap(v => v.nodes)
       lines.push('Elements:')
       for (const node of allNodes.slice(0, 10)) {
-        const selector = Array.isArray(node.target) ? node.target.join(' > ') : String(node.target)
+        const selector = node.target.flatMap(t => Array.isArray(t) ? t : [t]).join(' > ')
         lines.push(`- \`${selector}\` - ${node.failureSummary?.split('\n')[0] || 'No details'}`)
       }
       if (allNodes.length > 10)
@@ -52,21 +51,39 @@ export function formatMarkdownReport(violations: A11yViolation[], scannedRoutes?
   return lines.join('\n')
 }
 
-export function getStats(violations: A11yViolation[], routes = new Set<string>()): ReportStats {
+export function getStats(violations: A11yViolation[]): ReportStats {
   const byImpact: Record<string, number> = {}
 
   for (const v of violations) {
-    if (v.route) routes.add(v.route)
     byImpact[v.impact || 'unknown'] = (byImpact[v.impact || 'unknown'] || 0) + 1
   }
 
-  return { routes, totalViolations: violations.length, byImpact }
+  return { totalViolations: violations.length, byImpact }
 }
 
 function groupBy<T>(items: T[], keyFn: (item: T) => string): Record<string, T[]> {
   const grouped: Record<string, T[]> = {}
   for (const item of items) (grouped[keyFn(item)] ??= []).push(item)
   return grouped
+}
+
+export function formatConsoleSummary(violations: A11yViolation[], scannedRoutes: number): string {
+  const stats = getStats(violations)
+  const byRule = groupByRule(violations)
+  const lines: string[] = []
+
+  lines.push(`${stats.totalViolations} violations across ${scannedRoutes} routes (${stats.byImpact.critical || 0} critical, ${stats.byImpact.serious || 0} serious)\n`)
+
+  for (const [ruleId, ruleViolations] of Object.entries(byRule)) {
+    const first = ruleViolations[0]!
+    const impact = first.impact || 'unknown'
+    const nodes = ruleViolations.reduce((n, v) => n + v.nodes.length, 0)
+    const routes = [...new Set(ruleViolations.map(v => v.route).filter(Boolean))]
+    lines.push(`  ${impact.padEnd(8)} ${ruleId} (${nodes} elements across ${routes.length} routes)`)
+    lines.push(`           ${first.help}`)
+  }
+
+  return lines.join('\n')
 }
 
 function groupByImpact(violations: A11yViolation[]) {

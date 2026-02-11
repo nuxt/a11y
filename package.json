@@ -42,7 +42,7 @@
     "@nuxt/devtools-kit": "^3.1.1",
     "@nuxt/kit": "^4.2.2",
     "axe-core": "^4.11.1",
-    "jsdom": "^27.0.0",
+    "linkedom": "^0.18.12",
     "sirv": "^3.0.2"
   },
   "devDependencies": {
@@ -52,12 +52,12 @@
     "@nuxt/module-builder": "1.0.2",
     "@nuxt/schema": "4.2.2",
     "@nuxt/test-utils": "3.23.0",
-    "@types/jsdom": "^27.0.0",
     "@types/node": "24.10.9",
     "@vitest/coverage-v8": "4.0.17",
     "birpc": "4.0.0",
     "changelogen": "0.6.2",
     "eslint": "9.39.2",
+    "jsdom": "^27.4.0",
     "nuxt": "4.2.2",
     "pkg-pr-new": "0.0.62",
     "playwright-core": "1.57.0",
