@@ -4,6 +4,7 @@
 [![npm downloads][npm-downloads-src]][npm-downloads-href]
 [![License][license-src]][license-href]
 [![Nuxt][nuxt-src]][nuxt-href]
+[![nuxt.care health](https://img.shields.io/endpoint?url=https://nuxt.care/api/badge/a11y)](https://nuxt.care/?search=a11y)
 
 A Nuxt module that provides real-time accessibility feedback and automated testing right in your browser during development.
 
@@ -177,16 +178,16 @@ a11y: {
 - Type: `object`
 - Default: `{}`
 
-Configure the underlying [axe-core](https://github.com/dequelabs/axe-core) runner. See the [axe-core documentation](https://github.com/dequelabs/axe-core/blob/develop/doc/API.md#options-parameter) for available options.
+Configure the underlying [axe-core](https://github.com/dequelabs/axe-core) runner. See the [axe-core documentation](https://github.com/dequelabs/axe-core/blob/develop/doc/API.md) for available options.
 
 ```typescript
 a11y: {
   axe: {
     options: {
       // Customize which rules to run
-      rules: {
-        'color-contrast': { enabled: true },
-      },
+      rules: [
+        { id: 'color-contrast', enabled: true },
+      ],
     },
     runOptions: {
       // Customize how axe-core runs

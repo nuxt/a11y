@@ -1,5 +1,5 @@
 import type axe from 'axe-core'
-import { useRuntimeConfig } from '#app'
+import { useRuntimeConfig } from '#imports'
 import { IMPACT_COLORS } from '../constants'
 
 /**
