@@ -27,13 +27,13 @@ export function createActiveTabTracker(onStatusChange: StatusChangeCallback) {
       TAB_ID = storedId
     }
     else {
-      TAB_ID = crypto.randomUUID()
+      TAB_ID = Math.random().toString(36).substring(2) 
       sessionStorage.setItem(TAB_ID_STORAGE_KEY, TAB_ID)
     }
   }
   catch {
     // Fallback if sessionStorage is not available
-    TAB_ID = crypto.randomUUID()
+    TAB_ID = Math.random().toString(36).substring(2) 
   }
 
   let isActive = false
