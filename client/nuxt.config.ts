@@ -30,4 +30,6 @@ export default defineNuxtConfig({
   typescript: {
     hoist: ['@vueuse/core'],
   },
+
+  unocss: {},
 })
