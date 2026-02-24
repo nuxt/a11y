@@ -81,7 +81,10 @@ function saveOriginalStyles(element: HTMLElement): HighlightedElement['originalS
 /**
  * Restores original styles to an element
  */
-function restoreOriginalStyles(element: HTMLElement, originalStyles: HighlightedElement['originalStyles']): void {
+function restoreOriginalStyles(
+  element: HTMLElement,
+  originalStyles: HighlightedElement['originalStyles'],
+): void {
   const props = [
     { key: 'outline', value: originalStyles.outline },
     { key: 'box-shadow', value: originalStyles.boxShadow },
@@ -192,17 +195,18 @@ function positionBadge(badge: HTMLElement, element: HTMLElement): void {
  * Applies highlight styles directly to an element using inline styles
  */
 function applyHighlightStyles(element: HTMLElement, color?: string): void {
-  // Set position to relative if it's static, so absolute positioned badge works
-  const position = window.getComputedStyle(element).position
-  if (position === 'static') {
+  try {
+    const position = window.getComputedStyle(element).position
+    if (position === 'static') {
+      element.style.setProperty('position', 'relative', 'important')
+    }
+  }
+  catch {
     element.style.setProperty('position', 'relative', 'important')
   }
 
-  // Apply highlight outline and shadow
   element.style.setProperty('outline', `6px dotted black`, 'important')
   element.style.setProperty('box-shadow', `0 0 0 6px ${color ? color : 'white'}`, 'important')
-
-  // Ensure element is above other content
   element.style.setProperty('z-index', '999998', 'important')
 }
 
@@ -252,7 +256,12 @@ function updateOrCreateBadge(
  * Supports multiple simultaneous highlights by using a unique key
  * Uses reference counting to support multiple violations affecting the same element
  */
-export function highlightElement(selector: string, id?: number, color?: string, scrollIntoView = false): void {
+export function highlightElement(
+  selector: string,
+  id?: number,
+  color?: string,
+  scrollIntoView = false,
+): void {
   injectStyles()
 
   // Attach position update listeners

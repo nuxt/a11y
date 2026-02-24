@@ -20,6 +20,11 @@ describe('active-tab-tracker', () => {
   let mockSessionStorage: Map<string, string>
   let mockLocalStorage: Map<string, string>
 
+  // Helper to compute the tab ID that Math.random would produce
+  const MOCK_RANDOM = 0.5
+  const MOCK_TAB_ID = MOCK_RANDOM.toString(36).substring(2)
+  const tabIdFromRandom = (r: number) => r.toString(36).substring(2)
+
   // Maximum time to wait for initialization (max random delay 150ms + count timeout 100ms)
   const MAX_INIT_TIME = 250
 
@@ -69,21 +74,19 @@ describe('active-tab-tracker', () => {
       }
     })
 
-    // Mock crypto.randomUUID
-    vi.stubGlobal('crypto', {
-      randomUUID: vi.fn(() => 'test-tab-id'),
-    })
+    // Mock Math.random for predictable tab IDs and delays
+    vi.spyOn(Math, 'random').mockReturnValue(MOCK_RANDOM)
 
     // Mock sessionStorage
     vi.stubGlobal('sessionStorage', {
-      getItem: vi.fn((key: string) => mockSessionStorage.get(key) || null),
+      getItem: vi.fn((key: string) => mockSessionStorage.get(key) ?? null),
       setItem: vi.fn((key: string, value: string) => mockSessionStorage.set(key, value)),
       removeItem: vi.fn((key: string) => mockSessionStorage.delete(key)),
     })
 
     // Mock localStorage
     vi.stubGlobal('localStorage', {
-      getItem: vi.fn((key: string) => mockLocalStorage.get(key) || null),
+      getItem: vi.fn((key: string) => mockLocalStorage.get(key) ?? null),
       setItem: vi.fn((key: string, value: string) => mockLocalStorage.set(key, value)),
       removeItem: vi.fn((key: string) => mockLocalStorage.delete(key)),
     })
@@ -126,7 +129,7 @@ describe('active-tab-tracker', () => {
 
       expect(tracker).toBeDefined()
       expect(tracker.isActive).toBe(false)
-      expect(tracker.getTabId()).toBe('test-tab-id')
+      expect(tracker.getTabId()).toBe(MOCK_TAB_ID)
     })
 
     it('should persist tab ID in sessionStorage', () => {
@@ -134,8 +137,8 @@ describe('active-tab-tracker', () => {
         statusChanges.push(status)
       })
 
-      expect(sessionStorage.setItem).toHaveBeenCalledWith('nuxt-a11y-tab-id', 'test-tab-id')
-      expect(tracker.getTabId()).toBe('test-tab-id')
+      expect(sessionStorage.setItem).toHaveBeenCalledWith('nuxt-a11y-tab-id', MOCK_TAB_ID)
+      expect(tracker.getTabId()).toBe(MOCK_TAB_ID)
     })
 
     it('should reuse existing tab ID from sessionStorage', () => {
@@ -146,11 +149,11 @@ describe('active-tab-tracker', () => {
       })
 
       expect(tracker.getTabId()).toBe('existing-tab-id')
-      expect(crypto.randomUUID).not.toHaveBeenCalled()
+      expect(Math.random).not.toHaveBeenCalled()
     })
 
     it.each([
-      { random: 0, initDelay: 0, countDelay: 100 },
+      { random: 0.01, initDelay: 1.5, countDelay: 100 },
       { random: 0.5, initDelay: 75, countDelay: 100 },
       { random: 0.99, initDelay: 148.5, countDelay: 100 },
     ])('should become active when initialized and document is visible and focused (delay: $initDelay ms)', async ({ random, initDelay, countDelay }) => {
@@ -172,7 +175,7 @@ describe('active-tab-tracker', () => {
     })
 
     it.each([
-      { random: 0, initDelay: 0, countDelay: 100 },
+      { random: 0.01, initDelay: 1.5, countDelay: 100 },
       { random: 0.5, initDelay: 75, countDelay: 100 },
       { random: 0.99, initDelay: 148.5, countDelay: 100 },
     ])('should not become active if document is not focused (delay: $initDelay ms)', async ({ random, initDelay, countDelay }) => {
@@ -196,7 +199,7 @@ describe('active-tab-tracker', () => {
     })
 
     it.each([
-      { random: 0, initDelay: 0, countDelay: 100 },
+      { random: 0.01, initDelay: 1.5, countDelay: 100 },
       { random: 0.5, initDelay: 75, countDelay: 100 },
       { random: 0.99, initDelay: 148.5, countDelay: 100 },
     ])('should not become active if document is hidden (delay: $initDelay ms)', async ({ random, initDelay, countDelay }) => {
@@ -220,13 +223,14 @@ describe('active-tab-tracker', () => {
     })
 
     it.each([
-      { random: 0, initDelay: 0, countDelay: 100 },
+      { random: 0.01, initDelay: 1.5, countDelay: 100 },
       { random: 0.5, initDelay: 75, countDelay: 100 },
       { random: 0.99, initDelay: 148.5, countDelay: 100 },
     ])('should restore active status if it was active before reload (delay: $initDelay ms)', async ({ random, initDelay, countDelay }) => {
       vi.spyOn(Math, 'random').mockReturnValue(random)
 
-      mockLocalStorage.set('nuxt-a11y-active-tab-id', 'test-tab-id')
+      const expectedTabId = tabIdFromRandom(random)
+      mockLocalStorage.set('nuxt-a11y-active-tab-id', expectedTabId)
 
       vi.stubGlobal('document', {
         ...document,
@@ -247,7 +251,7 @@ describe('active-tab-tracker', () => {
     })
 
     it.each([
-      { random: 0, initDelay: 0, countDelay: 100 },
+      { random: 0.01, initDelay: 1.5, countDelay: 100 },
       { random: 0.5, initDelay: 75, countDelay: 100 },
       { random: 0.99, initDelay: 148.5, countDelay: 100 },
     ])('should count alive tabs on initialization (delay: $initDelay ms)', async ({ random, initDelay, countDelay }) => {
@@ -273,7 +277,7 @@ describe('active-tab-tracker', () => {
     })
 
     it.each([
-      { random: 0, initDelay: 0, countDelay: 100 },
+      { random: 0.01, initDelay: 1.5, countDelay: 100 },
       { random: 0.5, initDelay: 75, countDelay: 100 },
       { random: 0.99, initDelay: 148.5, countDelay: 100 },
     ])('should store active tab ID in localStorage when becoming active (delay: $initDelay ms)', async ({ random, initDelay, countDelay }) => {
@@ -287,7 +291,8 @@ describe('active-tab-tracker', () => {
 
       await vi.advanceTimersByTimeAsync(initDelay + countDelay)
 
-      expect(localStorage.setItem).toHaveBeenCalledWith('nuxt-a11y-active-tab-id', 'test-tab-id')
+      const expectedTabId = tabIdFromRandom(random)
+      expect(localStorage.setItem).toHaveBeenCalledWith('nuxt-a11y-active-tab-id', expectedTabId)
     })
   })
 
@@ -619,7 +624,7 @@ describe('active-tab-tracker', () => {
       })
 
       const tabId1 = tracker1.getTabId()
-      expect(tabId1).toBe('test-tab-id')
+      expect(tabId1).toBe(MOCK_TAB_ID)
 
       // Simulate HMR reload - create new tracker instance
       const tracker2 = createActiveTabTracker((status) => {
@@ -634,8 +639,8 @@ describe('active-tab-tracker', () => {
 
     it('should prioritize previous active status over current focus state', async () => {
       // Set this tab as previously active
-      mockLocalStorage.set('nuxt-a11y-active-tab-id', 'test-tab-id')
-      mockSessionStorage.set('nuxt-a11y-tab-id', 'test-tab-id')
+      mockLocalStorage.set('nuxt-a11y-active-tab-id', MOCK_TAB_ID)
+      mockSessionStorage.set('nuxt-a11y-tab-id', MOCK_TAB_ID)
 
       // But make the document not focused
       vi.stubGlobal('document', {
