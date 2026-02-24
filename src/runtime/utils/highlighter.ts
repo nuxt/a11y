@@ -81,7 +81,10 @@ function saveOriginalStyles(element: HTMLElement): HighlightedElement['originalS
 /**
  * Restores original styles to an element
  */
-function restoreOriginalStyles(element: HTMLElement, originalStyles: HighlightedElement['originalStyles']): void {
+function restoreOriginalStyles(
+  element: HTMLElement,
+  originalStyles: HighlightedElement['originalStyles'],
+): void {
   const props = [
     { key: 'outline', value: originalStyles.outline },
     { key: 'box-shadow', value: originalStyles.boxShadow },
@@ -92,8 +95,7 @@ function restoreOriginalStyles(element: HTMLElement, originalStyles: Highlighted
   props.forEach(({ key, value }) => {
     if (value) {
       element.style.setProperty(key, value)
-    }
-    else {
+    } else {
       element.style.removeProperty(key)
     }
   })
@@ -192,17 +194,17 @@ function positionBadge(badge: HTMLElement, element: HTMLElement): void {
  * Applies highlight styles directly to an element using inline styles
  */
 function applyHighlightStyles(element: HTMLElement, color?: string): void {
-  // Set position to relative if it's static, so absolute positioned badge works
-  const position = window.getComputedStyle(element).position
-  if (position === 'static') {
+  try {
+    const position = window.getComputedStyle(element).position
+    if (position === 'static') {
+      element.style.setProperty('position', 'relative', 'important')
+    }
+  } catch {
     element.style.setProperty('position', 'relative', 'important')
   }
 
-  // Apply highlight outline and shadow
   element.style.setProperty('outline', `6px dotted black`, 'important')
   element.style.setProperty('box-shadow', `0 0 0 6px ${color ? color : 'white'}`, 'important')
-
-  // Ensure element is above other content
   element.style.setProperty('z-index', '999998', 'important')
 }
 
@@ -239,7 +241,7 @@ function updateOrCreateBadge(
   container.appendChild(newBadge)
   positionBadge(newBadge, element)
 
-  const index = highlighted.findIndex(h => h.element === element)
+  const index = highlighted.findIndex((h) => h.element === element)
   if (index !== -1 && highlighted[index]) {
     highlighted[index].idBadge = newBadge
   }
@@ -252,7 +254,12 @@ function updateOrCreateBadge(
  * Supports multiple simultaneous highlights by using a unique key
  * Uses reference counting to support multiple violations affecting the same element
  */
-export function highlightElement(selector: string, id?: number, color?: string, scrollIntoView = false): void {
+export function highlightElement(
+  selector: string,
+  id?: number,
+  color?: string,
+  scrollIntoView = false,
+): void {
   injectStyles()
 
   // Attach position update listeners
@@ -311,8 +318,7 @@ export function highlightElement(selector: string, id?: number, color?: string, 
 
     highlightedElements.set(selector, highlighted)
     selectorRefCount.set(selector, 1)
-  }
-  catch (error) {
+  } catch (error) {
     console.error('[Nuxt A11y] Error highlighting element:', error)
   }
 }
@@ -327,8 +333,7 @@ function removeBadge(idBadge: HTMLElement | undefined): void {
     if (idBadge.parentNode) {
       idBadge.parentNode.removeChild(idBadge)
     }
-  }
-  catch (error) {
+  } catch (error) {
     console.warn('[Nuxt A11y] Error removing ID badge:', error)
   }
 }
@@ -401,8 +406,7 @@ export function updateElementId(selector: string, id: number): void {
     if (item.idBadge) {
       item.idBadge.textContent = String(id)
       positionBadge(item.idBadge, item.element)
-    }
-    else {
+    } else {
       const newBadge = createIdBadge(id)
       container.appendChild(newBadge)
       positionBadge(newBadge, item.element)
@@ -435,8 +439,7 @@ export function scrollToElement(selector: string): void {
     if (elements.length > 0 && elements[0]) {
       elements[0].scrollIntoView({ behavior: 'smooth', block: 'center' })
     }
-  }
-  catch (error) {
+  } catch (error) {
     console.warn('[Nuxt A11y] Error scrolling to element:', error)
   }
 }
