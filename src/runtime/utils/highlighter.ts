@@ -95,7 +95,8 @@ function restoreOriginalStyles(
   props.forEach(({ key, value }) => {
     if (value) {
       element.style.setProperty(key, value)
-    } else {
+    }
+    else {
       element.style.removeProperty(key)
     }
   })
@@ -199,7 +200,8 @@ function applyHighlightStyles(element: HTMLElement, color?: string): void {
     if (position === 'static') {
       element.style.setProperty('position', 'relative', 'important')
     }
-  } catch {
+  }
+  catch {
     element.style.setProperty('position', 'relative', 'important')
   }
 
@@ -241,7 +243,7 @@ function updateOrCreateBadge(
   container.appendChild(newBadge)
   positionBadge(newBadge, element)
 
-  const index = highlighted.findIndex((h) => h.element === element)
+  const index = highlighted.findIndex(h => h.element === element)
   if (index !== -1 && highlighted[index]) {
     highlighted[index].idBadge = newBadge
   }
@@ -318,7 +320,8 @@ export function highlightElement(
 
     highlightedElements.set(selector, highlighted)
     selectorRefCount.set(selector, 1)
-  } catch (error) {
+  }
+  catch (error) {
     console.error('[Nuxt A11y] Error highlighting element:', error)
   }
 }
@@ -333,7 +336,8 @@ function removeBadge(idBadge: HTMLElement | undefined): void {
     if (idBadge.parentNode) {
       idBadge.parentNode.removeChild(idBadge)
     }
-  } catch (error) {
+  }
+  catch (error) {
     console.warn('[Nuxt A11y] Error removing ID badge:', error)
   }
 }
@@ -406,7 +410,8 @@ export function updateElementId(selector: string, id: number): void {
     if (item.idBadge) {
       item.idBadge.textContent = String(id)
       positionBadge(item.idBadge, item.element)
-    } else {
+    }
+    else {
       const newBadge = createIdBadge(id)
       container.appendChild(newBadge)
       positionBadge(newBadge, item.element)
@@ -439,7 +444,8 @@ export function scrollToElement(selector: string): void {
     if (elements.length > 0 && elements[0]) {
       elements[0].scrollIntoView({ behavior: 'smooth', block: 'center' })
     }
-  } catch (error) {
+  }
+  catch (error) {
     console.warn('[Nuxt A11y] Error scrolling to element:', error)
   }
 }
