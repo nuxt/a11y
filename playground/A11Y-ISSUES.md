@@ -56,6 +56,21 @@ This playground app contains intentional accessibility issues for testing the Nu
 - ❌ iframe without title
 - ❌ FAQ not using proper disclosure pattern (button/details)
 
+### Interactive Page (/interactive)
+This page demonstrates **dynamic** a11y violations that appear on user interaction, designed to showcase the "Auto-scan on user events" feature.
+
+- ❌ Dynamically injected images without alt text (notifications, profile preview, products)
+- ❌ Low contrast text on dynamic content (#bbb, #aaa, #999, #ccc)
+- ❌ Heading level skip (h1 to h4, h4 to h6 in preview)
+- ❌ Form inputs without labels (placeholders only)
+- ❌ Select without label
+- ❌ onClick on div instead of button (product "Buy Now")
+- ❌ Non-descriptive link text ("Learn More")
+- ❌ Button with no accessible name (comment submit)
+- ❌ Checkboxes without proper label association (filters)
+- ❌ Filter toggles using div+click instead of disclosure buttons
+- ❌ Icon without accessible name (comment icon)
+
 ## Testing the A11y Plugin
 
 1. Run the playground: `pnpm run dev`
@@ -74,5 +89,6 @@ This playground app contains intentional accessibility issues for testing the Nu
 - **/** - Home page with hero, services, CTA, gallery, and newsletter
 - **/about-us** - About page with mission, team, values, stats, and timeline
 - **/contact** - Contact page with form, info, map, and FAQ
+- **/interactive** - Interactive dashboard with dynamic content for auto-scan demo
 
 All pages include a shared header and footer with navigation.

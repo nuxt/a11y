@@ -117,7 +117,7 @@ async function handleCopyReport() {
           v-if="props.hasViolations"
           class="flex items-center gap-2"
         >
-          <span class="text-sm opacity-70">WCAG:</span>
+          <span class="text-sm opacity-70">WCAG Level Filter:</span>
           <NSelect
             :model-value="props.wcagFilter"
             aria-label="WCAG level filter"
