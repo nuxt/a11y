@@ -45,15 +45,6 @@ coverage
 *.iml
 .idea
 
-# Beads
-.beads
-.dolt
-.doltcfg
-beads_a11y
-.ralph-tui
-/tasks
-/config.yml
-
 # OSX
 .DS_Store
 .AppleDouble
