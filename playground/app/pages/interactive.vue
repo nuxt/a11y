@@ -67,9 +67,15 @@
                 <option value="">
                   Select role
                 </option>
-                <option>Designer</option>
-                <option>Developer</option>
-                <option>Manager</option>
+                <option>
+                  Designer
+                </option>
+                <option>
+                  Developer
+                </option>
+                <option>
+                  Manager
+                </option>
               </select>
             </div>
           </div>
@@ -170,7 +176,7 @@
       </div>
     </section>
 
-    <!-- Filters — click + keydown events -->
+    <!-- Filters — click events -->
     <section class="filters-section">
       <div class="container">
         <h2>Sidebar Filters</h2>
