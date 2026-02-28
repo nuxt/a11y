@@ -4,6 +4,7 @@ import { runAxeOnHtml } from '../utils/axe-server'
 
 export { runAxeOnHtml } from '../utils/axe-server'
 export { createAutoScan } from './auto-scan'
+export { toHaveNoA11yViolations } from './matchers'
 export type { ScanOptions, ScanResult, MatcherOptions, AutoScanOptions, RunAxeOnPageOptions } from './types'
 export type { A11yViolation, A11yViolationNode } from '../runtime/types'
 
