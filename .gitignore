@@ -45,6 +45,13 @@ coverage
 *.iml
 .idea
 
+# Beads
+.beads
+AGENTS.md
+.dolt
+.doltcfg
+beads_a11y
+
 # OSX
 .DS_Store
 .AppleDouble
