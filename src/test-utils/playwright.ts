@@ -95,8 +95,13 @@ export async function runAxeOnPage(page: Page, options: RunAxeOnPageOptions = {}
   await injectAxe(page)
 
   /* eslint-disable @typescript-eslint/no-explicit-any */
-  const rawViolations: RawAxeViolation[] = await page.evaluate(({ axeOptions: spec, runOptions: run }) => {
+  const rawViolations: RawAxeViolation[] = await page.evaluate(async ({ axeOptions: spec, runOptions: run }) => {
     const w = window as Record<string, any>
+
+    while (w.axe._running) {
+      await new Promise(r => setTimeout(r, 100))
+    }
+
     if (spec) w.axe.configure(spec)
     return w.axe.run(document, run || {}).then((results: any) => results.violations)
   }, { axeOptions: axeOptions || null, runOptions: runOptions || null })
