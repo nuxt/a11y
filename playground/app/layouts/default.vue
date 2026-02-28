@@ -32,6 +32,10 @@
               to="/contact"
               style="color: #aaa"
             >Contact</nuxt-link>
+            <nuxt-link
+              to="/interactive"
+              style="color: #aaa"
+            >Interactive</nuxt-link>
 
             <!-- Issue: Button without accessible name -->
             <button
