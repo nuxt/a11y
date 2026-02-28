@@ -99,7 +99,7 @@ describe('runA11yScan', () => {
   })
 
   it('sets route to "test" on violations', async () => {
-    const result = await runA11yScan(INACCESSIBLE_HTML)
+    const result = await runA11yScan(INACCESSIBLE_HTML, { route: 'test' })
 
     for (const v of result.violations) {
       expect(v.route).toBe('test')
