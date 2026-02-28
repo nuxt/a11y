@@ -52,6 +52,12 @@ export function createAutoScan(options: AutoScanOptions = {}) {
       results.set(url, result)
     },
 
+    addResult(url: string, result: ScanResult): void {
+      if (isExcluded(url))
+        return
+      results.set(url, result)
+    },
+
     /**
      * Get all accumulated scan results keyed by URL.
      *
