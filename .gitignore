@@ -51,6 +51,8 @@ AGENTS.md
 .dolt
 .doltcfg
 beads_a11y
+.ralph-tui
+tasks
 
 # OSX
 .DS_Store
