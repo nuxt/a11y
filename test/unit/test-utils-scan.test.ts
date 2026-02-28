@@ -65,7 +65,7 @@ describe('runA11yScan', () => {
     expect(critical.every(v => v.impact === 'critical')).toBe(true)
 
     const minor = result.getByImpact('minor')
-    expect(minor.every(v => v.impact === 'minor')).toBe(true)
+    expect(minor).toHaveLength(0)
   })
 
   it('getByRule() filters violations by rule ID', async () => {
@@ -95,12 +95,14 @@ describe('runA11yScan', () => {
       runOptions: { runOnly: { type: 'rule', values: ['image-alt'] } },
     })
 
+    expect(result.violationCount).toBeGreaterThan(0)
     expect(result.violations.every(v => v.id === 'image-alt')).toBe(true)
   })
 
   it('sets route to "test" on violations', async () => {
     const result = await runA11yScan(INACCESSIBLE_HTML, { route: 'test' })
 
+    expect(result.violations.length).toBeGreaterThan(0)
     for (const v of result.violations) {
       expect(v.route).toBe('test')
     }
