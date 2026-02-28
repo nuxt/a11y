@@ -7,7 +7,7 @@ export { createAutoScan } from './auto-scan'
 export type { ScanOptions, ScanResult, MatcherOptions, AutoScanOptions, RunAxeOnPageOptions } from './types'
 export type { A11yViolation, A11yViolationNode } from '../runtime/types'
 
-function createScanResult(violations: A11yViolation[]): ScanResult {
+export function createScanResult(violations: A11yViolation[]): ScanResult {
   return {
     violations,
     violationCount: violations.length,
