@@ -26,11 +26,17 @@ export interface ScanOptions {
  *
  * @example
  * ```ts
+ * // With $fetch (server-side scanning)
+ * import { $fetch } from '@nuxt/test-utils'
+ * const html = await $fetch<string>('/', { responseType: 'text' })
  * const result = await runA11yScan(html)
  * console.log(result.violationCount)
+ *
+ * // With mountSuspended (component scanning)
+ * import { mountSuspended } from '@nuxt/test-utils/runtime'
+ * const wrapper = await mountSuspended(MyComponent)
+ * const result = await runA11yScan(wrapper.html())
  * const critical = result.getByImpact('critical')
- * const imageAlt = result.getByRule('image-alt')
- * const wcag2a = result.getByTag('wcag2a')
  * ```
  */
 export interface ScanResult {

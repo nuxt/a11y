@@ -45,9 +45,12 @@ function filterViolations(violations: A11yViolation[], options?: MatcherOptions)
  *
  * @example
  * ```ts
+ * import { $fetch } from '@nuxt/test-utils'
  * import { runA11yScan } from '@nuxt/a11y/test-utils'
  *
+ * const html = await $fetch<string>('/', { responseType: 'text' })
  * const result = await runA11yScan(html)
+ *
  * expect(result).toHaveNoA11yViolations()
  * expect(result).toHaveNoA11yViolations({ impact: 'serious' })
  * expect(result).toHaveNoA11yViolations({ rules: ['image-alt'] })

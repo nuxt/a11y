@@ -8,6 +8,23 @@ export { toHaveNoA11yViolations } from './matchers'
 export type { ScanOptions, ScanResult, MatcherOptions, AutoScanOptions, RunAxeOnPageOptions } from './types'
 export type { A11yViolation, A11yViolationNode } from '../runtime/types'
 
+/**
+ * Create a `ScanResult` from an array of violations.
+ *
+ * Used internally by `runA11yScan` and `runAxeOnPage` to wrap raw violation
+ * arrays with helper methods. Can also be used directly for advanced use cases.
+ *
+ * @param violations - Array of accessibility violations
+ * @returns A `ScanResult` with violation data and filter methods
+ *
+ * @example
+ * ```ts
+ * import { createScanResult } from '@nuxt/a11y/test-utils'
+ *
+ * const result = createScanResult(myViolations)
+ * const critical = result.getByImpact('critical')
+ * ```
+ */
 export function createScanResult(violations: A11yViolation[]): ScanResult {
   return {
     violations,
