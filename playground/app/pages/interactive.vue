@@ -25,8 +25,12 @@
           >
             <img :src="`https://placehold.co/40x40/6366F1/ffffff?text=${n.avatar}`">
             <div>
-              <div class="notification-name">{{ n.name }}</div>
-              <p style="color: #bbb;">{{ n.message }}</p>
+              <div class="notification-name">
+                {{ n.name }}
+              </div>
+              <p style="color: #bbb;">
+                {{ n.message }}
+              </p>
             </div>
           </div>
         </div>
@@ -60,7 +64,9 @@
                 v-model="profile.role"
                 class="form-input"
               >
-                <option value="">Select role</option>
+                <option value="">
+                  Select role
+                </option>
                 <option>Designer</option>
                 <option>Developer</option>
                 <option>Manager</option>
@@ -77,7 +83,9 @@
               :src="`https://placehold.co/80x80/764ba2/ffffff?text=${profile.name.charAt(0)}`"
             >
             <h6>{{ profile.name || 'Name' }}</h6>
-            <p style="color: #aaa;">{{ profile.bio || 'Bio' }}</p>
+            <p style="color: #aaa;">
+              {{ profile.bio || 'Bio' }}
+            </p>
             <div
               v-if="profile.role"
               class="role-badge"
@@ -102,7 +110,9 @@
           >
             <img :src="p.image">
             <h3>{{ p.name }}</h3>
-            <p style="color: #999;">{{ p.price }}</p>
+            <p style="color: #999;">
+              {{ p.price }}
+            </p>
             <div
               class="buy-btn"
               @click="() => {}"
@@ -202,6 +212,8 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+
+defineOptions({ name: 'InteractiveDashboard' })
 
 const notifications = ref([])
 const notificationData = [
