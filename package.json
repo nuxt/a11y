@@ -24,7 +24,8 @@
     "dist"
   ],
   "scripts": {
-    "build": "nuxt-module-build build --stub && nuxt-module-build prepare && nuxt-module-build build && npm run client:build",
+    "build": "nuxt-module-build build --stub && nuxt-module-build prepare && nuxt-module-build build && npm run build:test-utils && npm run client:build",
+    "build:test-utils": "unbuild --config build.config.test-utils",
     "client:build": "nuxt generate client",
     "client:dev": "nuxt dev client --port 3030",
     "dev": "npm run play:dev",
@@ -62,6 +63,7 @@
     "pkg-pr-new": "0.0.63",
     "playwright-core": "1.58.2",
     "typescript": "~5.9.3",
+    "unbuild": "^3.6.1",
     "vite": "7.3.1",
     "vitest": "4.0.18",
     "vue-tsc": "3.2.5"
