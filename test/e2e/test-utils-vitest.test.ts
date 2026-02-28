@@ -58,7 +58,7 @@ describe('vitest test-utils integration with playground', async () => {
     expect(wcag2a.every(v => v.tags.includes('wcag2a'))).toBe(true)
   })
 
-  it('getByImpact returns empty array for non-matching level', async () => {
+  it('getByImpact returns only items with matching impact', async () => {
     const html = await fetchHtml('/')
     const result = await runA11yScan(html)
 

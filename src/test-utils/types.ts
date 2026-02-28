@@ -14,6 +14,8 @@ import type { A11yViolation } from '../runtime/types'
  * ```
  */
 export interface ScanOptions {
+  /** Route identifier attached to each violation for traceability */
+  route?: string
   /** axe-core configuration options passed to `axe.configure()` */
   axeOptions?: axe.Spec
   /** axe-core runtime options passed to `axe.run()` */

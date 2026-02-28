@@ -51,8 +51,8 @@ coverage
 .doltcfg
 beads_a11y
 .ralph-tui
-tasks
-config.yml
+/tasks
+/config.yml
 
 # OSX
 .DS_Store

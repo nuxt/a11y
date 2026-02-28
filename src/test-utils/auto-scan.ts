@@ -48,7 +48,7 @@ export function createAutoScan(options: AutoScanOptions = {}) {
       if (isExcluded(url))
         return
 
-      const result = await runA11yScan(html)
+      const result = await runA11yScan(html, { route: url })
       results.set(url, result)
     },
 

@@ -4,6 +4,7 @@ import { runAxeOnHtml } from '../utils/axe-server'
 
 export { runAxeOnHtml } from '../utils/axe-server'
 export { createAutoScan } from './auto-scan'
+export { formatViolations } from './format'
 export { toHaveNoA11yViolations } from './matchers'
 export type { ScanOptions, ScanResult, MatcherOptions, AutoScanOptions, RunAxeOnPageOptions } from './types'
 export type { A11yViolation, A11yViolationNode } from '../runtime/types'
@@ -42,7 +43,7 @@ export function createScanResult(violations: A11yViolation[]): ScanResult {
  * helper methods for filtering violations.
  *
  * @param html - The HTML string to scan
- * @param options - Optional axe-core configuration and runtime options
+ * @param options - Optional scan options including route identifier and axe-core configuration
  * @returns A `ScanResult` with violations and filter methods
  *
  * @example
@@ -51,13 +52,13 @@ export function createScanResult(violations: A11yViolation[]): ScanResult {
  * import { runA11yScan } from '@nuxt/a11y/test-utils'
  *
  * const html = await $fetch<string>('/', { responseType: 'text' })
- * const result = await runA11yScan(html)
+ * const result = await runA11yScan(html, { route: '/' })
  *
  * console.log(result.violationCount)
  * const critical = result.getByImpact('critical')
  * ```
  */
 export async function runA11yScan(html: string, options?: ScanOptions): Promise<ScanResult> {
-  const violations = await runAxeOnHtml(html, 'test', options)
+  const violations = await runAxeOnHtml(html, options?.route ?? 'unknown', options)
   return createScanResult(violations)
 }
