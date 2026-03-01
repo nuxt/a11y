@@ -115,7 +115,9 @@ export async function runAxeOnPage(page: Page, options: RunAxeOnPageOptions = {}
   const rawViolations: RawAxeViolation[] = await page.evaluate(async ({ axeOptions: spec, runOptions: run }) => {
     const w = window as Record<string, any>
 
+    let attempts = 0
     while (w.axe._running) {
+      if (++attempts > 100) throw new Error('axe-core still running after 10 s')
       await new Promise(r => setTimeout(r, 100))
     }
 
@@ -216,14 +218,16 @@ function buildObserverScript(
     var timer = null;
     var scanning = false;
     var skipInitial = true;
+    var runRetries = 0;
 
     function runScan() {
       if (scanning) return;
       if (typeof window.axe === 'undefined') return;
       if (window.axe._running) {
-        timer = setTimeout(runScan, 100);
+        if (++runRetries < 100) timer = setTimeout(runScan, 100);
         return;
       }
+      runRetries = 0;
       scanning = true;
       Promise.resolve().then(function() {
         var config = ${axeConfigStr};

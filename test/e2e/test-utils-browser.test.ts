@@ -128,24 +128,21 @@ describe('playwright test-utils integration with playground', async () => {
 
     // click "Load Notifications" — injects images without alt text
     await page.click('button.load-btn')
-    await page.waitForTimeout(1500)
+    await expect.poll(() => results.length, { timeout: 10_000 }).toBeGreaterThan(0)
+    expect(results.some(r => r.violationCount > 0)).toBe(true)
 
     const afterClick = results.length
-    expect(afterClick).toBeGreaterThan(0)
-    expect(results.some(r => r.violationCount > 0)).toBe(true)
 
     // fill profile form — triggers Vue reactivity, renders preview section
     await page.fill('input[placeholder="Display name"]', 'Test User')
-    await page.waitForTimeout(1500)
-
-    expect(results.length).toBeGreaterThan(afterClick)
+    await expect.poll(() => results.length, { timeout: 10_000 }).toBeGreaterThan(afterClick)
 
     // select a role — triggers another DOM update
+    const afterFill = results.length
     await page.selectOption('select.form-input', 'Developer')
-    await page.waitForTimeout(1500)
+    await expect.poll(() => results.length, { timeout: 10_000 }).toBeGreaterThan(afterFill)
 
     const afterSelect = results.length
-    expect(afterSelect).toBeGreaterThan(afterClick)
 
     // inject raw DOM element — img without alt
     await page.evaluate(() => {
@@ -153,9 +150,7 @@ describe('playwright test-utils integration with playground', async () => {
       img.src = 'broken.png'
       document.body.appendChild(img)
     })
-    await page.waitForTimeout(1500)
-
-    expect(results.length).toBeGreaterThan(afterSelect)
+    await expect.poll(() => results.length, { timeout: 10_000 }).toBeGreaterThan(afterSelect)
 
     await stop()
     await page.close()
@@ -204,18 +199,16 @@ describe('playwright test-utils integration with playground', async () => {
 
     // interact on /interactive — click "Load Notifications"
     await page.click('button.load-btn')
-    await page.waitForTimeout(1500)
+    await expect.poll(() => results.length, { timeout: 10_000 }).toBeGreaterThan(0)
 
     const afterFirstInteraction = results.length
-    expect(afterFirstInteraction).toBeGreaterThan(0)
 
     // SPA navigate to /contact via NuxtLink — observer survives
     await page.click('a[href="/contact"]')
     await page.waitForFunction(() => window.location.pathname === '/contact')
-    await page.waitForTimeout(1500)
+    await expect.poll(() => results.length, { timeout: 10_000 }).toBeGreaterThan(afterFirstInteraction)
 
     const afterSpaNav = results.length
-    expect(afterSpaNav).toBeGreaterThan(afterFirstInteraction)
 
     // inject a violation on /contact
     await page.evaluate(() => {
@@ -225,25 +218,22 @@ describe('playwright test-utils integration with playground', async () => {
       form.appendChild(input)
       document.body.appendChild(form)
     })
-    await page.waitForTimeout(1500)
+    await expect.poll(() => results.length, { timeout: 10_000 }).toBeGreaterThan(afterSpaNav)
 
     const afterContactMutation = results.length
-    expect(afterContactMutation).toBeGreaterThan(afterSpaNav)
 
     // SPA navigate back to /interactive
     await page.click('a[href="/interactive"]')
     await page.waitForFunction(() => window.location.pathname === '/interactive')
-    await page.waitForTimeout(1500)
+    await expect.poll(() => results.length, { timeout: 10_000 }).toBeGreaterThan(afterContactMutation)
 
     const afterSecondNav = results.length
-    expect(afterSecondNav).toBeGreaterThan(afterContactMutation)
 
     // interact again — fill the comment form and submit
     await page.fill('input[placeholder="Write a comment..."]', 'Test comment')
     await page.click('button[type="submit"]')
-    await page.waitForTimeout(1500)
+    await expect.poll(() => results.length, { timeout: 10_000 }).toBeGreaterThan(afterSecondNav)
 
-    expect(results.length).toBeGreaterThan(afterSecondNav)
     expect(results.every(r => r.url.length > 0)).toBe(true)
 
     await stop()
