@@ -4,7 +4,7 @@ export default defineBuildConfig({
   entries: [
     'src/test-utils/index',
     'src/test-utils/setup',
-    'src/test-utils/playwright',
+    'src/test-utils/browser',
   ],
   outDir: 'dist',
   clean: false,

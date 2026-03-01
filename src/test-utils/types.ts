@@ -133,6 +133,27 @@ export interface AutoScanOptions {
  * const result = await runAxeOnPage(page, { waitForState: 'domcontentloaded' })
  * ```
  */
+/**
+ * Options for `observePage()` to configure continuous MutationObserver-based
+ * accessibility scanning on a Playwright page.
+ *
+ * @example
+ * ```ts
+ * await observePage(page, onViolations, { debounceMs: 300 })
+ * ```
+ */
+export interface ObservePageOptions {
+  /**
+   * Milliseconds to wait after the last DOM mutation before running a scan.
+   * @default 500
+   */
+  debounceMs?: number
+  /** axe-core configuration options passed to `axe.configure()` */
+  axeOptions?: axe.Spec
+  /** axe-core runtime options passed to `axe.run()` */
+  runOptions?: axe.RunOptions
+}
+
 export interface RunAxeOnPageOptions extends ScanOptions {
   /**
    * Load state to wait for before running the scan.

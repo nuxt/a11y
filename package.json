@@ -19,9 +19,9 @@
       "types": "./dist/test-utils/setup.d.mts",
       "import": "./dist/test-utils/setup.mjs"
     },
-    "./test-utils/playwright": {
-      "types": "./dist/test-utils/playwright.d.mts",
-      "import": "./dist/test-utils/playwright.mjs"
+    "./test-utils/browser": {
+      "types": "./dist/test-utils/browser.d.mts",
+      "import": "./dist/test-utils/browser.mjs"
     }
   },
   "main": "./dist/module.mjs",
@@ -36,8 +36,8 @@
       "test-utils/setup": [
         "./dist/test-utils/setup.d.mts"
       ],
-      "test-utils/playwright": [
-        "./dist/test-utils/playwright.d.mts"
+      "test-utils/browser": [
+        "./dist/test-utils/browser.d.mts"
       ]
     }
   },
