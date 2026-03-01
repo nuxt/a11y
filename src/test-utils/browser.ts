@@ -24,6 +24,18 @@ interface RawAxeViolation {
   nodes: RawAxeNode[]
 }
 
+type ViolationCallback = (url: string, result: ScanResult) => void
+const pageCallbacks = new WeakMap<Page, Map<string, ViolationCallback>>()
+
+function getCallbacks(page: Page): Map<string, ViolationCallback> {
+  let map = pageCallbacks.get(page)
+  if (!map) {
+    map = new Map()
+    pageCallbacks.set(page, map)
+  }
+  return map
+}
+
 let axeSource: string | null = null
 
 function getAxeSource(): string {
@@ -162,16 +174,27 @@ export async function observePage(
 ): Promise<() => Promise<void>> {
   const { debounceMs = 500, axeOptions, runOptions } = options
 
-  await page.exposeFunction('__nuxtA11yOnViolations__', (rawViolations: RawAxeViolation[]) => {
-    try {
+  const callbacks = getCallbacks(page)
+  const id = Math.random().toString(36).slice(2)
+  callbacks.set(id, onViolations)
+
+  try {
+    await page.exposeFunction('__nuxtA11yOnViolations__', (rawViolations: RawAxeViolation[]) => {
       const url = page.url()
       const result = createScanResult(mapRawViolations(rawViolations))
-      onViolations(url, result)
-    }
-    catch {
-      // swallow — must not break tests
-    }
-  })
+      for (const cb of callbacks.values()) {
+        try {
+          cb(url, result)
+        }
+        catch {
+          // swallow — must not break tests
+        }
+      }
+    })
+  }
+  catch {
+    // already exposed by a previous observePage call — callbacks map is shared
+  }
 
   const source = getAxeSource()
   await page.addInitScript(source)
@@ -188,17 +211,20 @@ export async function observePage(
   }
 
   return async () => {
-    try {
-      await page.evaluate(() => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const w = window as Record<string, any>
-        if (typeof w.__nuxtA11yStopObserving__ === 'function') {
-          w.__nuxtA11yStopObserving__()
-        }
-      })
-    }
-    catch {
-      // page may already be closed
+    callbacks.delete(id)
+    if (callbacks.size === 0) {
+      try {
+        await page.evaluate(() => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const w = window as Record<string, any>
+          if (typeof w.__nuxtA11yStopObserving__ === 'function') {
+            w.__nuxtA11yStopObserving__()
+          }
+        })
+      }
+      catch {
+        // page may already be closed
+      }
     }
   }
 }
