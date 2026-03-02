@@ -89,6 +89,31 @@ describe('createAutoScan', () => {
     expect(results['/ok']!.violationCount).toBeLessThan(results['/broken-a']!.violationCount)
   })
 
+  it('accumulates repeated scans for the same route', async () => {
+    const autoScan = createAutoScan()
+
+    await autoScan.scanFetchedHtml('/same-route', INACCESSIBLE_HTML)
+    const first = autoScan.getResults()['/same-route']!
+
+    await autoScan.scanFetchedHtml('/same-route', INACCESSIBLE_HTML)
+    const second = autoScan.getResults()['/same-route']!
+
+    expect(second.violationCount).toBe(first.violationCount * 2)
+  })
+
+  it('normalizes absolute and relative URLs into the same route key', async () => {
+    const autoScan = createAutoScan()
+
+    await autoScan.scanFetchedHtml('/about', INACCESSIBLE_HTML)
+    const first = autoScan.getResults()['/about']!
+
+    autoScan.addResult('http://localhost:3000/about', first)
+
+    const results = autoScan.getResults()
+    expect(Object.keys(results)).toEqual(['/about'])
+    expect(results['/about']!.violationCount).toBe(first.violationCount * 2)
+  })
+
   it('exceedsThreshold() returns false when violations are within threshold', async () => {
     const autoScan = createAutoScan({ threshold: 100 })
 

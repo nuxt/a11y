@@ -45,7 +45,6 @@ function patchForAxe(window: Record<string, unknown>, document: Record<string, u
 
 // Cache the axe module once loaded
 let axeModule: typeof axeCore | null = null
-let configured = false
 
 // Mutex to prevent concurrent axe runs (axe.setup/teardown is not reentrant)
 let running: Promise<void> = Promise.resolve()
@@ -121,13 +120,12 @@ export async function runAxeOnHtml(html: string, route: string, options: AxeServ
 
   const axe = await getAxe(window, document)
 
-  if (options.axeOptions && !configured) {
-    axe.configure(options.axeOptions)
-    configured = true
-  }
-
   // axe.setup/teardown is not reentrant — serialize runs
   return withMutex(async () => {
+    if (options.axeOptions) {
+      axe.configure(options.axeOptions)
+    }
+
     axe.setup(document as unknown as Document)
 
     // Suppress axe-core's console.log noise (e.g. "Frame does not have a content window")

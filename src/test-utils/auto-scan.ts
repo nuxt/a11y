@@ -30,10 +30,39 @@ export function createAutoScan(options: AutoScanOptions = {}) {
   const { exclude = [], threshold = 0 } = options
   const results = new Map<string, ScanResult>()
 
+  function normalizeUrl(url: string): string {
+    try {
+      const parsed = new URL(url, 'http://nuxt-a11y.local')
+      return `${parsed.pathname}${parsed.search}`
+    }
+    catch {
+      return url
+    }
+  }
+
   function isExcluded(url: string): boolean {
+    const normalizedUrl = normalizeUrl(url)
     return exclude.some(pattern =>
-      typeof pattern === 'string' ? url.includes(pattern) : pattern.test(url),
+      typeof pattern === 'string' ? normalizedUrl.includes(pattern) : pattern.test(normalizedUrl),
     )
+  }
+
+  function mergeResult(url: string, result: ScanResult): void {
+    const key = normalizeUrl(url)
+    const existing = results.get(key)
+    if (!existing) {
+      results.set(key, result)
+      return
+    }
+
+    results.set(key, {
+      ...result,
+      violations: [...existing.violations, ...result.violations],
+      violationCount: existing.violationCount + result.violationCount,
+      getByImpact: level => [...existing.violations, ...result.violations].filter(v => v.impact === level),
+      getByRule: ruleId => [...existing.violations, ...result.violations].filter(v => v.id === ruleId),
+      getByTag: tag => [...existing.violations, ...result.violations].filter(v => v.tags.includes(tag)),
+    })
   }
 
   return {
@@ -48,14 +77,15 @@ export function createAutoScan(options: AutoScanOptions = {}) {
       if (isExcluded(url))
         return
 
-      const result = await runA11yScan(html, { route: url })
-      results.set(url, result)
+      const normalizedUrl = normalizeUrl(url)
+      const result = await runA11yScan(html, { route: normalizedUrl })
+      mergeResult(normalizedUrl, result)
     },
 
     addResult(url: string, result: ScanResult): void {
       if (isExcluded(url))
         return
-      results.set(url, result)
+      mergeResult(url, result)
     },
 
     /**

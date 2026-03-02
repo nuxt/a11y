@@ -107,4 +107,25 @@ describe('runA11yScan', () => {
       expect(v.route).toBe('test')
     }
   })
+
+  it('applies axeOptions for each scan call', async () => {
+    const disabled = await runA11yScan(INACCESSIBLE_HTML, {
+      axeOptions: {
+        rules: [
+          { id: 'image-alt', enabled: false },
+        ],
+      },
+    })
+
+    const enabled = await runA11yScan(INACCESSIBLE_HTML, {
+      axeOptions: {
+        rules: [
+          { id: 'image-alt', enabled: true },
+        ],
+      },
+    })
+
+    expect(disabled.getByRule('image-alt')).toHaveLength(0)
+    expect(enabled.getByRule('image-alt').length).toBeGreaterThan(0)
+  })
 })
