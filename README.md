@@ -293,14 +293,14 @@ pnpm release
 ```
 
 <!-- Badges -->
-[npm-version-src]: https://img.shields.io/npm/v/@nuxt/a11y/latest.svg?style=flat&colorA=18181B&colorB=28CF8D
-[npm-version-href]: https://npmjs.com/package/@nuxt/a11y
+[npm-version-src]: https://npmx.dev/api/registry/badge/version/@nuxt/a11y
+[npm-version-href]: https://npmx.dev/package/@nuxt/a11y
 
-[npm-downloads-src]: https://img.shields.io/npm/dm/@nuxt/a11y.svg?style=flat&colorA=18181B&colorB=28CF8D
-[npm-downloads-href]: https://npmjs.com/package/@nuxt/a11y
+[npm-downloads-src]: https://npmx.dev/api/registry/badge/downloads/@nuxt/a11y
+[npm-downloads-href]: https://npmx.dev/package/@nuxt/a11y
 
-[license-src]: https://img.shields.io/npm/l/@nuxt/a11y.svg?style=flat&colorA=18181B&colorB=28CF8D
-[license-href]: https://npmjs.com/package/@nuxt/a11y
+[license-src]: https://npmx.dev/api/registry/badge/license/@nuxt/a11y
+[license-href]: https://npmx.dev/package/@nuxt/a11y
 
 [nuxt-src]: https://img.shields.io/badge/Nuxt-18181B?logo=nuxt.js
 [nuxt-href]: https://nuxt.com
