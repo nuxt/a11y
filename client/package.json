@@ -6,7 +6,7 @@
     "@nuxt/devtools-ui-kit": "^3.2.3",
     "@nuxt/kit": "^4.3.1",
     "nuxt": "^4.3.1",
-    "vue": "^3.5.29",
+    "vue": "^3.5.30",
     "vue-router": "^5.0.3"
   },
   "dependencies": {
