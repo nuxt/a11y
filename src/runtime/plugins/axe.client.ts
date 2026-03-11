@@ -34,20 +34,32 @@ export default defineNuxtPlugin((nuxtApp) => {
     hmr.broadcast(hmr.HMR_EVENTS.SCAN_RUNNING, isRunning)
   })
 
-  const scanner = createScanner(async () => {
-    // All tabs can scan independently - each tab maintains its own violations
+  function getCurrentRoute(): string {
+    return route.path || route.fullPath || 'unknown'
+  }
+
+  // All tabs can scan independently - each tab maintains its own violations
+  async function scanAndBroadcast(alwaysBroadcast = false): Promise<void> {
     // Capture the route at the start of the scan, not when processing
-    const routeAtScanTime = route.path || route.fullPath || 'unknown'
-
+    const scanRoute = getCurrentRoute()
     const violations = await axeRunner.run()
-    if (violations.length > 0) {
-      // Log new violations to console
-      violations.forEach(v => logger.logViolation(v))
 
-      // Process and send to DevTools with the route captured at scan start and tab ID
-      const allViolations = violationManager.processViolations(violations, routeAtScanTime, TAB_ID)
-      hmr.broadcast(hmr.HMR_EVENTS.SHOW_VIOLATIONS, { violations: allViolations, currentRoute: routeAtScanTime, tabId: TAB_ID })
+    if (violations.length > 0) {
+      for (const v of violations) logger.logViolation(v)
+      violationManager.processViolations(violations, scanRoute, TAB_ID)
     }
+
+    if (violations.length > 0 || alwaysBroadcast) {
+      hmr.broadcast(hmr.HMR_EVENTS.SHOW_VIOLATIONS, {
+        violations: violationManager.getAll(TAB_ID),
+        currentRoute: getCurrentRoute(),
+        tabId: TAB_ID,
+      })
+    }
+  }
+
+  const scanner = createScanner(() => {
+    scanAndBroadcast()
   })
 
   // Setup HMR event handlers
@@ -57,15 +69,8 @@ export default defineNuxtPlugin((nuxtApp) => {
 
     // All tabs respond with their own data
     // Send current route first
-    const currentRoutePath = route.path || route.fullPath || 'unknown'
-    hmr.broadcast(hmr.HMR_EVENTS.ROUTE_CHANGED, currentRoutePath)
-
-    const violations = await axeRunner.run()
-    if (violations.length > 0) {
-      violations.forEach(v => logger.logViolation(v))
-      const allViolations = violationManager.processViolations(violations, currentRoutePath, TAB_ID)
-      hmr.broadcast(hmr.HMR_EVENTS.SHOW_VIOLATIONS, { violations: allViolations, currentRoute: currentRoutePath, tabId: TAB_ID })
-    }
+    hmr.broadcast(hmr.HMR_EVENTS.ROUTE_CHANGED, getCurrentRoute())
+    await scanAndBroadcast(true)
   })
 
   hmr.onEnableScanning(() => {
@@ -80,20 +85,13 @@ export default defineNuxtPlugin((nuxtApp) => {
 
   hmr.onTriggerScan(async () => {
     // All tabs respond to scan triggers
-    const routeAtScanTime = route.path || route.fullPath || 'unknown'
-    const violations = await axeRunner.run()
-    if (violations.length > 0) {
-      violations.forEach(v => logger.logViolation(v))
-      const allViolations = violationManager.processViolations(violations, routeAtScanTime, TAB_ID)
-      hmr.broadcast(hmr.HMR_EVENTS.SHOW_VIOLATIONS, { violations: allViolations, currentRoute: routeAtScanTime, tabId: TAB_ID })
-    }
+    await scanAndBroadcast(true)
   })
 
   hmr.onReset(() => {
     violationManager.reset(TAB_ID)
     highlighter.unhighlightAll()
-    const currentRoutePath = route.path || route.fullPath || 'unknown'
-    hmr.broadcast(hmr.HMR_EVENTS.SHOW_VIOLATIONS, { violations: [], currentRoute: currentRoutePath, tabId: TAB_ID })
+    hmr.broadcast(hmr.HMR_EVENTS.SHOW_VIOLATIONS, { violations: [], currentRoute: getCurrentRoute(), tabId: TAB_ID })
   })
 
   hmr.onHighlightElement((payload) => {
@@ -144,32 +142,13 @@ export default defineNuxtPlugin((nuxtApp) => {
     // Add a small delay to ensure all async operations are complete
     await new Promise(resolve => setTimeout(resolve, 100))
 
-    const currentRoutePath = route.path || route.fullPath || 'unknown'
-    const violations = await axeRunner.run()
-
-    if (violations.length > 0) {
-      violations.forEach(v => logger.logViolation(v))
-      const allViolations = violationManager.processViolations(violations, currentRoutePath, TAB_ID)
-      hmr.broadcast(hmr.HMR_EVENTS.SHOW_VIOLATIONS, { violations: allViolations, currentRoute: currentRoutePath, tabId: TAB_ID })
-    }
-    else {
-      // Still send the accumulated violations (from other routes) for this tab
-      hmr.broadcast(hmr.HMR_EVENTS.SHOW_VIOLATIONS, { violations: violationManager.getAll(TAB_ID), currentRoute: currentRoutePath, tabId: TAB_ID })
-    }
+    await scanAndBroadcast(true)
   })
 
   // Expose functions for testing
   if (typeof window !== 'undefined') {
     const win = window as A11yWindow
-    win.__nuxt_a11y_run__ = async () => {
-      const routeAtScanTime = route.path || route.fullPath || 'unknown'
-      const violations = await axeRunner.run()
-      if (violations.length > 0) {
-        violations.forEach(v => logger.logViolation(v))
-        const allViolations = violationManager.processViolations(violations, routeAtScanTime, TAB_ID)
-        hmr.broadcast(hmr.HMR_EVENTS.SHOW_VIOLATIONS, { violations: allViolations, currentRoute: routeAtScanTime, tabId: TAB_ID })
-      }
-    }
+    win.__nuxt_a11y_run__ = () => scanAndBroadcast(true)
   }
 
   // Cleanup: Close BroadcastChannel when tab/window closes
