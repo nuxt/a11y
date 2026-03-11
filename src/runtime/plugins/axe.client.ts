@@ -52,7 +52,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     if (violations.length > 0 || alwaysBroadcast) {
       hmr.broadcast(hmr.HMR_EVENTS.SHOW_VIOLATIONS, {
         violations: violationManager.getAll(TAB_ID),
-        currentRoute: scanRoute,
+        currentRoute: getCurrentRoute(),
         tabId: TAB_ID,
       })
     }
