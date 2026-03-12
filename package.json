@@ -10,6 +10,18 @@
     ".": {
       "types": "./dist/types.d.mts",
       "import": "./dist/module.mjs"
+    },
+    "./test-utils": {
+      "types": "./dist/test-utils/index.d.mts",
+      "import": "./dist/test-utils/index.mjs"
+    },
+    "./test-utils/setup": {
+      "types": "./dist/test-utils/setup.d.mts",
+      "import": "./dist/test-utils/setup.mjs"
+    },
+    "./test-utils/browser": {
+      "types": "./dist/test-utils/browser.d.mts",
+      "import": "./dist/test-utils/browser.mjs"
     }
   },
   "main": "./dist/module.mjs",
@@ -17,6 +29,15 @@
     "*": {
       ".": [
         "./dist/types.d.mts"
+      ],
+      "test-utils": [
+        "./dist/test-utils/index.d.mts"
+      ],
+      "test-utils/setup": [
+        "./dist/test-utils/setup.d.mts"
+      ],
+      "test-utils/browser": [
+        "./dist/test-utils/browser.d.mts"
       ]
     }
   },
@@ -24,7 +45,8 @@
     "dist"
   ],
   "scripts": {
-    "build": "nuxt-module-build build --stub && nuxt-module-build prepare && nuxt-module-build build && npm run client:build",
+    "build": "nuxt-module-build build --stub && nuxt-module-build prepare && nuxt-module-build build && npm run build:test-utils && npm run client:build",
+    "build:test-utils": "unbuild --config build.config.test-utils",
     "client:build": "nuxt generate client",
     "client:dev": "nuxt dev client --port 3030",
     "dev": "npm run play:dev",
@@ -45,6 +67,18 @@
     "linkedom": "^0.18.12",
     "sirv": "^3.0.2"
   },
+  "peerDependencies": {
+    "vitest": ">=1.0.0",
+    "playwright-core": ">=1.0.0"
+  },
+  "peerDependenciesMeta": {
+    "vitest": {
+      "optional": true
+    },
+    "playwright-core": {
+      "optional": true
+    }
+  },
   "devDependencies": {
     "@iconify-json/carbon": "^1.2.19",
     "@nuxt/devtools": "latest",
@@ -62,6 +96,7 @@
     "pkg-pr-new": "0.0.65",
     "playwright-core": "1.58.2",
     "typescript": "~5.9.3",
+    "unbuild": "^3.6.1",
     "vite": "7.3.1",
     "vitest": "4.0.18",
     "vue-tsc": "3.2.5"
