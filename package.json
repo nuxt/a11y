@@ -62,7 +62,7 @@
     "pkg-pr-new": "0.0.65",
     "playwright-core": "1.58.2",
     "typescript": "~5.9.3",
-    "vite": "7.3.1",
+    "vite": "8.0.0",
     "vitest": "4.0.18",
     "vue-tsc": "3.2.5"
   },
