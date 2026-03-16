@@ -57,7 +57,7 @@
     "birpc": "4.0.0",
     "changelogen": "0.6.2",
     "eslint": "10.0.3",
-    "jsdom": "^28.1.0",
+    "jsdom": "^29.0.0",
     "nuxt": "4.4.2",
     "pkg-pr-new": "0.0.65",
     "playwright-core": "1.58.2",
