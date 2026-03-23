@@ -39,7 +39,7 @@
     "test:watch": "vitest watch"
   },
   "dependencies": {
-    "@nuxt/devtools-kit": "^3.2.3",
+    "@nuxt/devtools-kit": "^3.2.4",
     "@nuxt/kit": "^4.4.2",
     "axe-core": "^4.11.1",
     "linkedom": "^0.18.12",
@@ -56,15 +56,15 @@
     "@vitest/coverage-v8": "4.1.0",
     "birpc": "4.0.0",
     "changelogen": "0.6.2",
-    "eslint": "10.0.3",
-    "jsdom": "^29.0.0",
+    "eslint": "10.1.0",
+    "jsdom": "^29.0.1",
     "nuxt": "4.4.2",
     "pkg-pr-new": "0.0.66",
     "playwright-core": "1.58.2",
     "typescript": "~5.9.3",
-    "vite": "8.0.0",
+    "vite": "8.0.1",
     "vitest": "4.1.0",
-    "vue-tsc": "3.2.5"
+    "vue-tsc": "3.2.6"
   },
   "resolutions": {
     "@nuxt/a11y": "workspace:*"
