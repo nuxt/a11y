@@ -69,9 +69,9 @@ onDevtoolsClientConnected(async (client) => {
   })
 
   if (!hasConnected) {
-    hasConnected = true
     try {
       await nuxtA11yRpc.value!.connected()
+      hasConnected = true
     }
     catch (error) {
       console.debug('[Nuxt A11y] Initial connection error (expected):', error)
