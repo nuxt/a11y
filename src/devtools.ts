@@ -5,6 +5,7 @@ import type { BirpcGroup } from 'birpc'
 import { addVitePlugin, useNuxt } from '@nuxt/kit'
 import { addCustomTab, extendServerRpc, onDevToolsInitialized } from '@nuxt/devtools-kit'
 import type { ClientFunctions, ServerFunctions } from './rpc-types'
+import { joinURL } from 'ufo'
 import type { ModuleOptions } from './module'
 import { useViteWebSocket } from './util'
 
@@ -60,7 +61,7 @@ export function setupDevToolsUI(options: ModuleOptions, moduleResolve: Resolver[
     icon: 'iconoir:accessibility',
     view: {
       type: 'iframe',
-      src: DEVTOOLS_UI_ROUTE,
+      src: joinURL(nuxt.options.app?.baseURL || '/', DEVTOOLS_UI_ROUTE),
     },
   }, nuxt)
 

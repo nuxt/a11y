@@ -34,6 +34,7 @@ export const nuxtA11yRpc = ref<BirpcReturn<ServerFunctions>>()
 export const devtoolsRpc = ref<NuxtDevtoolsClient['rpc']>()
 
 // Initialize RPC connection and register handlers
+let hasConnected = false
 onDevtoolsClientConnected(async (client) => {
   devtoolsRpc.value = client.devtools.rpc
   devtools.value = client.devtools
@@ -67,11 +68,14 @@ onDevtoolsClientConnected(async (client) => {
     },
   })
 
-  try {
-    await nuxtA11yRpc.value!.connected()
-  }
-  catch (error) {
-    console.debug('[Nuxt A11y] Initial connection error (expected):', error)
+  if (!hasConnected) {
+    hasConnected = true
+    try {
+      await nuxtA11yRpc.value!.connected()
+    }
+    catch (error) {
+      console.debug('[Nuxt A11y] Initial connection error (expected):', error)
+    }
   }
 })
 
