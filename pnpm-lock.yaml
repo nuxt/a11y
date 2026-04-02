@@ -18,8 +18,8 @@ importers:
         specifier: ^4.4.2
         version: 4.4.2(magicast@0.5.2)
       axe-core:
-        specifier: ^4.11.1
-        version: 4.11.1
+        specifier: ^4.11.2
+        version: 4.11.2
       linkedom:
         specifier: ^0.18.12
         version: 0.18.12
@@ -44,7 +44,7 @@ importers:
         version: 4.4.2
       '@nuxt/test-utils':
         specifier: 4.0.0
-        version: 4.0.0(jsdom@29.0.1)(magicast@0.5.2)(playwright-core@1.58.2)(typescript@6.0.2)(vite@8.0.3(@types/node@24.12.0)(@vitejs/devtools@0.1.8)(esbuild@0.27.3)(jiti@2.6.1)(terser@5.46.0)(yaml@2.8.2))(vitest@4.1.2(@types/node@24.12.0)(jsdom@29.0.1)(vite@8.0.3(@types/node@24.12.0)(@vitejs/devtools@0.1.8)(esbuild@0.27.3)(jiti@2.6.1)(terser@5.46.0)(yaml@2.8.2)))
+        version: 4.0.0(jsdom@29.0.1)(magicast@0.5.2)(playwright-core@1.59.1)(typescript@6.0.2)(vite@8.0.3(@types/node@24.12.0)(@vitejs/devtools@0.1.8)(esbuild@0.27.3)(jiti@2.6.1)(terser@5.46.0)(yaml@2.8.2))(vitest@4.1.2(@types/node@24.12.0)(jsdom@29.0.1)(vite@8.0.3(@types/node@24.12.0)(@vitejs/devtools@0.1.8)(esbuild@0.27.3)(jiti@2.6.1)(terser@5.46.0)(yaml@2.8.2)))
       '@types/node':
         specifier: 24.12.0
         version: 24.12.0
@@ -70,8 +70,8 @@ importers:
         specifier: 0.0.66
         version: 0.0.66
       playwright-core:
-        specifier: 1.58.2
-        version: 1.58.2
+        specifier: 1.59.1
+        version: 1.59.1
       typescript:
         specifier: ~6.0.2
         version: 6.0.2
@@ -2774,8 +2774,8 @@ packages:
     peerDependencies:
       postcss: ^8.1.0
 
-  axe-core@4.11.1:
-    resolution: {integrity: sha512-BASOg+YwO2C+346x3LZOeoovTIoTrRqEsqMa6fmfAV0P+U9mFr9NsyOEpiYvFjbc64NMrSswhV50WdXzdb/Z5A==}
+  axe-core@4.11.2:
+    resolution: {integrity: sha512-byD6KPdvo72y/wj2T/4zGEvvlis+PsZsn/yPS3pEO+sFpcrqRpX/TJCxvVaEsNeMrfQbCr7w163YqoD9IYwHXw==}
     engines: {node: '>=4'}
 
   b4a@1.8.0:
@@ -4478,8 +4478,8 @@ packages:
   pkg-types@2.3.0:
     resolution: {integrity: sha512-SIqCzDRg0s9npO5XQ3tNZioRY1uK06lA41ynBC1YmFTmnY6FjUjVt6s4LoADmwoig1qqD0oK8h1p/8mlMx8Oig==}
 
-  playwright-core@1.58.2:
-    resolution: {integrity: sha512-yZkEtftgwS8CsfYo7nm0KE8jsvm6i/PTgVtB8DL726wNf6H2IMsDuxCpJj59KDaxCtSnrWan2AeDqM7JBaultg==}
+  playwright-core@1.59.1:
+    resolution: {integrity: sha512-HBV/RJg81z5BiiZ9yPzIiClYV/QMsDCKUyogwH9p3MCP6IYjUFu/MActgYAvK0oWyV9NlwM3GLBjADyWgydVyg==}
     engines: {node: '>=18'}
     hasBin: true
 
@@ -7003,7 +7003,7 @@ snapshots:
       rc9: 3.0.0
       std-env: 3.10.0
 
-  '@nuxt/test-utils@4.0.0(jsdom@29.0.1)(magicast@0.5.2)(playwright-core@1.58.2)(typescript@6.0.2)(vite@8.0.3(@types/node@24.12.0)(@vitejs/devtools@0.1.8)(esbuild@0.27.3)(jiti@2.6.1)(terser@5.46.0)(yaml@2.8.2))(vitest@4.1.2(@types/node@24.12.0)(jsdom@29.0.1)(vite@8.0.3(@types/node@24.12.0)(@vitejs/devtools@0.1.8)(esbuild@0.27.3)(jiti@2.6.1)(terser@5.46.0)(yaml@2.8.2)))':
+  '@nuxt/test-utils@4.0.0(jsdom@29.0.1)(magicast@0.5.2)(playwright-core@1.59.1)(typescript@6.0.2)(vite@8.0.3(@types/node@24.12.0)(@vitejs/devtools@0.1.8)(esbuild@0.27.3)(jiti@2.6.1)(terser@5.46.0)(yaml@2.8.2))(vitest@4.1.2(@types/node@24.12.0)(jsdom@29.0.1)(vite@8.0.3(@types/node@24.12.0)(@vitejs/devtools@0.1.8)(esbuild@0.27.3)(jiti@2.6.1)(terser@5.46.0)(yaml@2.8.2)))':
     dependencies:
       '@clack/prompts': 1.0.0
       '@nuxt/devtools-kit': 2.7.0(magicast@0.5.2)(vite@8.0.3(@types/node@24.12.0)(@vitejs/devtools@0.1.8)(esbuild@0.27.3)(jiti@2.6.1)(terser@5.46.0)(yaml@2.8.2))
@@ -7032,11 +7032,11 @@ snapshots:
       tinyexec: 1.0.4
       ufo: 1.6.3
       unplugin: 3.0.0
-      vitest-environment-nuxt: 1.0.1(jsdom@29.0.1)(magicast@0.5.2)(playwright-core@1.58.2)(typescript@6.0.2)(vite@8.0.3(@types/node@24.12.0)(@vitejs/devtools@0.1.8)(esbuild@0.27.3)(jiti@2.6.1)(terser@5.46.0)(yaml@2.8.2))(vitest@4.1.2(@types/node@24.12.0)(jsdom@29.0.1)(vite@8.0.3(@types/node@24.12.0)(@vitejs/devtools@0.1.8)(esbuild@0.27.3)(jiti@2.6.1)(terser@5.46.0)(yaml@2.8.2)))
+      vitest-environment-nuxt: 1.0.1(jsdom@29.0.1)(magicast@0.5.2)(playwright-core@1.59.1)(typescript@6.0.2)(vite@8.0.3(@types/node@24.12.0)(@vitejs/devtools@0.1.8)(esbuild@0.27.3)(jiti@2.6.1)(terser@5.46.0)(yaml@2.8.2))(vitest@4.1.2(@types/node@24.12.0)(jsdom@29.0.1)(vite@8.0.3(@types/node@24.12.0)(@vitejs/devtools@0.1.8)(esbuild@0.27.3)(jiti@2.6.1)(terser@5.46.0)(yaml@2.8.2)))
       vue: 3.5.31(typescript@6.0.2)
     optionalDependencies:
       jsdom: 29.0.1
-      playwright-core: 1.58.2
+      playwright-core: 1.59.1
       vitest: 4.1.2(@types/node@24.12.0)(jsdom@29.0.1)(vite@8.0.3(@types/node@24.12.0)(@vitejs/devtools@0.1.8)(esbuild@0.27.3)(jiti@2.6.1)(terser@5.46.0)(yaml@2.8.2))
     transitivePeerDependencies:
       - crossws
@@ -8816,7 +8816,7 @@ snapshots:
       postcss: 8.5.8
       postcss-value-parser: 4.2.0
 
-  axe-core@4.11.1: {}
+  axe-core@4.11.2: {}
 
   b4a@1.8.0: {}
 
@@ -10908,7 +10908,7 @@ snapshots:
       exsolve: 1.0.8
       pathe: 2.0.3
 
-  playwright-core@1.58.2: {}
+  playwright-core@1.59.1: {}
 
   pluralize@8.0.0: {}
 
@@ -12005,9 +12005,9 @@ snapshots:
       terser: 5.46.0
       yaml: 2.8.2
 
-  vitest-environment-nuxt@1.0.1(jsdom@29.0.1)(magicast@0.5.2)(playwright-core@1.58.2)(typescript@6.0.2)(vite@8.0.3(@types/node@24.12.0)(@vitejs/devtools@0.1.8)(esbuild@0.27.3)(jiti@2.6.1)(terser@5.46.0)(yaml@2.8.2))(vitest@4.1.2(@types/node@24.12.0)(jsdom@29.0.1)(vite@8.0.3(@types/node@24.12.0)(@vitejs/devtools@0.1.8)(esbuild@0.27.3)(jiti@2.6.1)(terser@5.46.0)(yaml@2.8.2))):
+  vitest-environment-nuxt@1.0.1(jsdom@29.0.1)(magicast@0.5.2)(playwright-core@1.59.1)(typescript@6.0.2)(vite@8.0.3(@types/node@24.12.0)(@vitejs/devtools@0.1.8)(esbuild@0.27.3)(jiti@2.6.1)(terser@5.46.0)(yaml@2.8.2))(vitest@4.1.2(@types/node@24.12.0)(jsdom@29.0.1)(vite@8.0.3(@types/node@24.12.0)(@vitejs/devtools@0.1.8)(esbuild@0.27.3)(jiti@2.6.1)(terser@5.46.0)(yaml@2.8.2))):
     dependencies:
-      '@nuxt/test-utils': 4.0.0(jsdom@29.0.1)(magicast@0.5.2)(playwright-core@1.58.2)(typescript@6.0.2)(vite@8.0.3(@types/node@24.12.0)(@vitejs/devtools@0.1.8)(esbuild@0.27.3)(jiti@2.6.1)(terser@5.46.0)(yaml@2.8.2))(vitest@4.1.2(@types/node@24.12.0)(jsdom@29.0.1)(vite@8.0.3(@types/node@24.12.0)(@vitejs/devtools@0.1.8)(esbuild@0.27.3)(jiti@2.6.1)(terser@5.46.0)(yaml@2.8.2)))
+      '@nuxt/test-utils': 4.0.0(jsdom@29.0.1)(magicast@0.5.2)(playwright-core@1.59.1)(typescript@6.0.2)(vite@8.0.3(@types/node@24.12.0)(@vitejs/devtools@0.1.8)(esbuild@0.27.3)(jiti@2.6.1)(terser@5.46.0)(yaml@2.8.2))(vitest@4.1.2(@types/node@24.12.0)(jsdom@29.0.1)(vite@8.0.3(@types/node@24.12.0)(@vitejs/devtools@0.1.8)(esbuild@0.27.3)(jiti@2.6.1)(terser@5.46.0)(yaml@2.8.2)))
     transitivePeerDependencies:
       - '@cucumber/cucumber'
       - '@jest/globals'
