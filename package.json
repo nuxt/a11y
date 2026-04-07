@@ -66,11 +66,6 @@
     "vitest": "4.1.2",
     "vue-tsc": "3.2.6"
   },
-  "pnpm": {
-    "overrides": {
-      "@types/node": "24.12.2"
-    }
-  },
   "resolutions": {
     "@nuxt/a11y": "workspace:*"
   }
