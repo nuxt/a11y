@@ -18,8 +18,8 @@ importers:
         specifier: ^4.4.2
         version: 4.4.2(magicast@0.5.2)
       axe-core:
-        specifier: ^4.11.2
-        version: 4.11.2
+        specifier: ^4.11.3
+        version: 4.11.3
       linkedom:
         specifier: ^0.18.12
         version: 0.18.12
@@ -2781,8 +2781,8 @@ packages:
     peerDependencies:
       postcss: ^8.1.0
 
-  axe-core@4.11.2:
-    resolution: {integrity: sha512-byD6KPdvo72y/wj2T/4zGEvvlis+PsZsn/yPS3pEO+sFpcrqRpX/TJCxvVaEsNeMrfQbCr7w163YqoD9IYwHXw==}
+  axe-core@4.11.3:
+    resolution: {integrity: sha512-zBQouZixDTbo3jMGqHKyePxYxr1e5W8UdTmBQ7sNtaA9M2bE32daxxPLS/jojhKOHxQ7LWwPjfiwf/fhaJWzlg==}
     engines: {node: '>=4'}
 
   b4a@1.8.0:
@@ -8823,7 +8823,7 @@ snapshots:
       postcss: 8.5.8
       postcss-value-parser: 4.2.0
 
-  axe-core@4.11.2: {}
+  axe-core@4.11.3: {}
 
   b4a@1.8.0: {}
 
