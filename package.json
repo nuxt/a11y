@@ -65,8 +65,5 @@
     "vite": "8.0.10",
     "vitest": "4.1.5",
     "vue-tsc": "3.2.7"
-  },
-  "resolutions": {
-    "@nuxt/a11y": "workspace:*"
   }
 }

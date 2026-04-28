@@ -3,3 +3,6 @@ packages:
   - client
 ignoredBuiltDependencies:
   - esbuild
+
+overrides:
+  "@nuxt/a11y": "workspace:*"
