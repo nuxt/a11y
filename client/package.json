@@ -4,9 +4,9 @@
   "devDependencies": {
     "@nuxt/devtools-kit": "^3.2.4",
     "@nuxt/devtools-ui-kit": "^3.2.4",
-    "@nuxt/kit": "^4.4.2",
+    "@nuxt/kit": "^4.4.4",
     "@types/node": "24.12.2",
-    "nuxt": "^4.4.2",
+    "nuxt": "^4.4.4",
     "vue": "^3.5.33",
     "vue-router": "^5.0.6"
   },
