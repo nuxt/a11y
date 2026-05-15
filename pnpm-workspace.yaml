@@ -6,4 +6,6 @@ overrides:
   "@nuxt/a11y": "workspace:*"
 
 allowBuilds:
+  "@parcel/watcher": false
   esbuild: false
+  unrs-resolver: false
