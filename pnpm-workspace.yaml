@@ -1,8 +1,9 @@
 packages:
   - playground
   - client
-ignoredBuiltDependencies:
-  - esbuild
 
 overrides:
   "@nuxt/a11y": "workspace:*"
+
+allowBuilds:
+  esbuild: false
