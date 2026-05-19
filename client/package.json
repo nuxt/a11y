@@ -5,10 +5,10 @@
     "@nuxt/devtools-kit": "^3.2.4",
     "@nuxt/devtools-ui-kit": "^3.2.4",
     "@nuxt/kit": "^4.4.6",
-    "@types/node": "24.12.2",
+    "@types/node": "24.12.4",
     "nuxt": "^4.4.6",
-    "vue": "^3.5.33",
-    "vue-router": "^5.0.6"
+    "vue": "^3.5.34",
+    "vue-router": "^5.0.7"
   },
   "dependencies": {
     "pathe": "^2.0.3"
