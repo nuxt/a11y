@@ -58,7 +58,7 @@
     "changelogen": "0.6.2",
     "eslint": "10.4.0",
     "jsdom": "^29.1.1",
-    "nuxt": "4.4.2",
+    "nuxt": "4.4.6",
     "pkg-pr-new": "0.0.75",
     "playwright-core": "1.60.0",
     "typescript": "~6.0.3",
