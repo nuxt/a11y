@@ -118,7 +118,7 @@ export default defineNuxtModule<ModuleOptions>({
   },
 })
 
-declare module '@nuxt/schema' {
+declare module 'nuxt/schema' {
   interface PublicRuntimeConfig {
     axe?: ModuleOptions['axe']
     a11yDefaultHighlight: boolean
