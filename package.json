@@ -1,6 +1,6 @@
 {
   "name": "@nuxt/a11y",
-  "packageManager": "pnpm@11.3.0",
+  "packageManager": "pnpm@11.5.0",
   "version": "1.0.0-alpha.1",
   "description": "Nuxt module to provide accessibility hinting and utilities.",
   "repository": "nuxt/a11y",
@@ -56,7 +56,7 @@
     "@vitest/coverage-v8": "4.1.7",
     "birpc": "4.0.0",
     "changelogen": "0.6.2",
-    "eslint": "10.4.0",
+    "eslint": "10.4.1",
     "jsdom": "^29.1.1",
     "nuxt": "4.4.6",
     "pkg-pr-new": "0.0.75",
@@ -64,6 +64,6 @@
     "typescript": "~6.0.3",
     "vite": "8.0.14",
     "vitest": "4.1.7",
-    "vue-tsc": "3.3.1"
+    "vue-tsc": "3.3.3"
   }
 }
