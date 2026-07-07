@@ -44,7 +44,7 @@ Nuxt Accessibility provides a rich, interactive UI inside the Nuxt DevTools pane
 A central hub showing:
 - Total violations and affected elements across your application
 - Violations grouped by impact level (critical, serious, moderate, minor)
-- Quick stats for violations per page
+- Violation counts per page
 - Control panel for manual scans, auto-scanning, and clearing results
 
 ### Violation Cards
@@ -58,23 +58,23 @@ Each violation displays:
 - **Affected elements count** with expandable details
 - **Interactive element badges** to pin/unpin specific elements
 - **CSS selectors** for each affected element
-- **Scroll-to-element** button for quick navigation
+- **Scroll-to-element** button to jump to the affected element on the page
 
 ### Highlighting
 
 ![a11y devtools running in the playground app showing issue highlights](./.github/assets/devtools-highlight.png)
 
 - **Click violation cards** to highlight all affected elements on your page
-- **Numbered badges** appear on highlighted elements for easy identification
+- **Numbered badges** label each highlighted element so it maps to its violation
 - **Click individual elements** to toggle highlighting for specific nodes
-- **Scroll to element** button jumps to the element's location on the page
+- **Scroll-to-element** button jumps to the element's location on the page
 - **Route-aware highlighting** shows which violations belong to the current page
 
 ## How It Works
 
 ### Automated Accessibility Testing
 
-Nuxt a11y uses **axe-core** to perform comprehensive accessibility audits. The module automatically:
+Nuxt Accessibility uses **axe-core** to perform comprehensive accessibility audits. The module automatically:
 1. Runs accessibility scans when you navigate to a new page
 2. Detects violations against WCAG 2.0, WCAG 2.1, WCAG 2.2, and best practices
 3. Groups violations by impact level and tracks them across routes
@@ -88,7 +88,7 @@ The module hooks into your application to provide interactive debugging:
 - **Route tracking**: Violations are associated with specific routes for better organization
 - **Smart root element handling**: Prevents highlighting of `<html>` and `<body>` tags with helpful notifications
 
-### Auto-Scan -  Constant Scanning Mode
+### Auto-Scan - Constant Scanning Mode
 
 Enable optional real-time scanning that listens to user interactions:
 - Monitors mouse, keyboard, and touch events
@@ -152,7 +152,7 @@ Enable or disable the accessibility module. By default, the module only runs in 
 - Type: `boolean`
 - Default: `false`
 
-Automatically highlight all accessibility violations when they are detected. When enabled, all violations on the current page will be pinned and highlighted with numbered badges.
+Automatically highlight all accessibility violations when they are detected. When enabled, the module pins and highlights all violations on the current page with numbered badges.
 
 ```typescript
 a11y: {
@@ -165,7 +165,7 @@ a11y: {
 - Type: `boolean`
 - Default: `true`
 
-Controls whether accessibility violations are logged to the browser console. When enabled, violations will be logged with appropriate styling and severity levels.
+Controls whether the module logs accessibility violations to the browser console. When enabled, the module logs violations with appropriate styling and severity levels.
 
 ```typescript
 a11y: {
@@ -199,7 +199,7 @@ a11y: {
 
 ### Build-Time Report Generation
 
-The module generates accessibility reports during `nuxt generate` or prerendering. Reports are written as markdown files with violations grouped by impact level.
+The module generates accessibility reports during `nuxt generate` or prerendering. It writes the reports as markdown files, grouping violations by impact level.
 
 #### `report.enabled`
 
@@ -278,8 +278,8 @@ pnpm dev:prepare
 # Develop with the playground
 pnpm dev
 
-# Build the playground
-pnpm dev:build
+# Build the module and client
+pnpm build
 
 # Run ESLint
 pnpm lint
