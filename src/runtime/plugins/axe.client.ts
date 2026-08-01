@@ -1,6 +1,6 @@
 import { defineNuxtPlugin, useRuntimeConfig, useRoute } from '#imports'
 import { watch, nextTick } from 'vue'
-import type { Plugin, ObjectPlugin } from 'nuxt/app'
+import type { Plugin, ObjectPlugin } from '#app'
 import type { A11yWindow } from '../types'
 import { createAxeRunner } from '../utils/axe-runner'
 import { createViolationManager } from '../utils/violation-manager'
