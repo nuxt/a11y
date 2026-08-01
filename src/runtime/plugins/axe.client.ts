@@ -10,13 +10,12 @@ import { createLogger } from '../utils/logger'
 import { createHighlighter } from '../utils/highlighter'
 import { createActiveTabTracker } from '../utils/active-tab-tracker'
 
-// A named interface keeps the exported plugin type portable for dts emit
-// (TS2883 with nuxt >= 4.5). The annotated const (not a cast on the export
-// expression) is what breaks the circular NuxtAppInjections check (TS7022):
-// only a declaration with an explicit annotation stops self-referential inference.
-interface A11yClientPlugin extends Plugin, ObjectPlugin {}
-
-const plugin: A11yClientPlugin = defineNuxtPlugin((nuxtApp) => {
+// The explicit annotation on a const (not a cast on the export expression)
+// keeps the emitted d.ts portable (TS2883 with nuxt >= 4.5) and breaks the
+// circular NuxtAppInjections inference in consuming apps (TS7022). It must
+// match defineNuxtPlugin's return type exactly so no structural comparison
+// (which would re-enter the cycle) is needed.
+const plugin: Plugin & ObjectPlugin = defineNuxtPlugin((nuxtApp) => {
   const config = useRuntimeConfig().public.axe
   const route = useRoute()
 
