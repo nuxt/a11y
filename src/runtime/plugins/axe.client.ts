@@ -11,11 +11,12 @@ import { createHighlighter } from '../utils/highlighter'
 import { createActiveTabTracker } from '../utils/active-tab-tracker'
 
 // A named interface keeps the exported plugin type portable for dts emit
-// (TS2883 with nuxt >= 4.5) while staying lazily resolved, unlike an inline
-// intersection which can hit the circular NuxtAppInjections check (TS7022)
+// (TS2883 with nuxt >= 4.5). The annotated const (not a cast on the export
+// expression) is what breaks the circular NuxtAppInjections check (TS7022):
+// only a declaration with an explicit annotation stops self-referential inference.
 interface A11yClientPlugin extends Plugin, ObjectPlugin {}
 
-export default defineNuxtPlugin((nuxtApp) => {
+const plugin: A11yClientPlugin = defineNuxtPlugin((nuxtApp) => {
   const config = useRuntimeConfig().public.axe
   const route = useRoute()
 
@@ -163,4 +164,6 @@ export default defineNuxtPlugin((nuxtApp) => {
       activeTabTracker.cleanup()
     })
   }
-}) as A11yClientPlugin
+})
+
+export default plugin
