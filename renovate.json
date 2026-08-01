@@ -8,7 +8,9 @@
       "matchPackageNames": [
         "typescript"
       ],
-      "groupName": "typescript"
+      "groupName": "typescript",
+      "allowedVersions": "<7",
+      "description": "TypeScript 7 (native compiler) drops the JS compiler API that @nuxt/module-builder, mkdist and vue-tsc rely on. Stay on the 6.x line until the toolchain supports it."
     }
   ]
 }
