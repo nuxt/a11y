@@ -1,5 +1,6 @@
 import { defineNuxtPlugin, useRuntimeConfig, useRoute } from '#imports'
 import { watch, nextTick } from 'vue'
+import type { Plugin, ObjectPlugin } from 'nuxt/app'
 import type { A11yWindow } from '../types'
 import { createAxeRunner } from '../utils/axe-runner'
 import { createViolationManager } from '../utils/violation-manager'
@@ -157,4 +158,5 @@ export default defineNuxtPlugin((nuxtApp) => {
       activeTabTracker.cleanup()
     })
   }
-})
+  // Explicit annotation keeps the emitted d.ts portable (TS2883 with nuxt >= 4.5)
+}) as Plugin & ObjectPlugin
