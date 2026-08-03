@@ -46,7 +46,7 @@
     "sirv": "^3.0.2"
   },
   "devDependencies": {
-    "@iconify-json/carbon": "^1.2.24",
+    "@iconify-json/carbon": "^1.2.25",
     "@nuxt/devtools": "^3.4.0",
     "@nuxt/eslint-config": "1.16.0",
     "@nuxt/module-builder": "1.0.3",
@@ -64,6 +64,6 @@
     "typescript": "~6.0.3",
     "vite": "8.2.0",
     "vitest": "4.1.10",
-    "vue-tsc": "3.3.8"
+    "vue-tsc": "3.3.9"
   }
 }
