@@ -40,7 +40,7 @@
   },
   "dependencies": {
     "@nuxt/devtools-kit": "^3.4.0",
-    "@nuxt/kit": "^4.5.1",
+    "@nuxt/kit": "^4.5.2",
     "axe-core": "^4.12.1",
     "linkedom": "^0.18.13",
     "sirv": "^3.0.2"
@@ -50,7 +50,7 @@
     "@nuxt/devtools": "^3.4.0",
     "@nuxt/eslint-config": "1.16.0",
     "@nuxt/module-builder": "1.0.3",
-    "@nuxt/schema": "4.5.1",
+    "@nuxt/schema": "4.5.2",
     "@nuxt/test-utils": "4.1.0",
     "@types/node": "24.13.3",
     "@vitest/coverage-v8": "4.1.10",
@@ -58,7 +58,7 @@
     "changelogen": "0.6.2",
     "eslint": "10.8.0",
     "jsdom": "^30.0.1",
-    "nuxt": "4.5.1",
+    "nuxt": "4.5.2",
     "pkg-pr-new": "0.0.86",
     "playwright-core": "1.62.1",
     "typescript": "~6.0.3",
