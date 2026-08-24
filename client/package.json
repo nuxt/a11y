@@ -2,12 +2,12 @@
   "name": "nuxt-a11y-client",
   "private": true,
   "devDependencies": {
-    "@nuxt/devtools-kit": "^3.4.0",
-    "@nuxt/devtools-ui-kit": "^3.4.0",
+    "@nuxt/devtools-kit": "^3.4.2",
+    "@nuxt/devtools-ui-kit": "^3.4.2",
     "@nuxt/kit": "^4.5.2",
     "@types/node": "24.13.3",
     "nuxt": "^4.5.2",
-    "vue": "^3.5.40",
+    "vue": "^3.5.41",
     "vue-router": "^5.2.0"
   },
   "dependencies": {
