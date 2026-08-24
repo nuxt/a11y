@@ -1,6 +1,6 @@
 {
   "name": "@nuxt/a11y",
-  "packageManager": "pnpm@11.18.0",
+  "packageManager": "pnpm@11.22.0",
   "version": "1.0.0-alpha.1",
   "description": "Nuxt module to provide accessibility hinting and utilities.",
   "repository": "nuxt/a11y",
@@ -39,31 +39,31 @@
     "test:watch": "vitest watch"
   },
   "dependencies": {
-    "@nuxt/devtools-kit": "^3.4.0",
+    "@nuxt/devtools-kit": "^3.4.2",
     "@nuxt/kit": "^4.5.2",
-    "axe-core": "^4.12.1",
+    "axe-core": "^4.13.0",
     "linkedom": "^0.18.13",
     "sirv": "^3.0.2"
   },
   "devDependencies": {
     "@iconify-json/carbon": "^1.2.25",
-    "@nuxt/devtools": "^3.4.0",
-    "@nuxt/eslint-config": "1.16.0",
+    "@nuxt/devtools": "^3.4.2",
+    "@nuxt/eslint-config": "1.17.0",
     "@nuxt/module-builder": "1.0.3",
     "@nuxt/schema": "4.5.2",
     "@nuxt/test-utils": "4.1.0",
     "@types/node": "24.13.3",
-    "@vitest/coverage-v8": "4.1.10",
-    "birpc": "4.0.0",
+    "@vitest/coverage-v8": "4.1.11",
+    "birpc": "4.2.0",
     "changelogen": "0.6.2",
-    "eslint": "10.8.0",
+    "eslint": "10.9.0",
     "jsdom": "^30.0.1",
     "nuxt": "4.5.2",
-    "pkg-pr-new": "0.0.86",
+    "pkg-pr-new": "0.0.88",
     "playwright-core": "1.62.1",
     "typescript": "~6.0.3",
-    "vite": "8.2.0",
-    "vitest": "4.1.10",
-    "vue-tsc": "3.3.9"
+    "vite": "8.2.2",
+    "vitest": "4.1.11",
+    "vue-tsc": "3.3.11"
   }
 }
