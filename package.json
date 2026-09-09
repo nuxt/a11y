@@ -1,6 +1,17 @@
 {
   "name": "@nuxt/a11y",
-  "packageManager": "pnpm@12.3.4",
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": ">=24.0.0",
+      "onFail": "download"
+    },
+    "packageManager": {
+      "name": "pnpm",
+      "version": "12.3.4",
+      "onFail": "download"
+    }
+  },
   "version": "1.0.0-alpha.1",
   "description": "Nuxt module to provide accessibility hinting and utilities.",
   "repository": "nuxt/a11y",
@@ -24,15 +35,15 @@
     "dist"
   ],
   "scripts": {
-    "build": "nuxt-module-build build --stub && nuxt-module-build prepare && nuxt-module-build build && npm run client:build",
+    "build": "nuxt-module-build build --stub && nuxt-module-build prepare && nuxt-module-build build && pnpm run client:build",
     "client:build": "nuxt generate client",
     "client:dev": "nuxt dev client --port 3030",
-    "dev": "npm run play:dev",
+    "dev": "pnpm run play:dev",
     "prepack": "pnpm run build",
     "dev:prepare": "nuxt-module-build build --stub && nuxt-module-build prepare && nuxt prepare client && nuxt prepare playground",
     "play:dev": "nuxt dev playground",
-    "play:prod": "npm run build && nuxt dev playground",
-    "release": "npm run lint && npm run test && npm run prepack && changelogen --release && npm publish && git push --follow-tags",
+    "play:prod": "pnpm run build && nuxt dev playground",
+    "release": "pnpm run lint && pnpm run test && pnpm run prepack && changelogen --release && pnpm publish && git push --follow-tags",
     "lint": "eslint .",
     "test": "vitest run",
     "test:types": "vue-tsc --noEmit && cd playground && vue-tsc -b --noEmit && cd ../client && vue-tsc -b --noEmit",
