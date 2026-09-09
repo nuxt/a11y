@@ -29,10 +29,10 @@ jobs:
           cache: "pnpm"
 
       - name: 📦 Install dependencies
-        run: pnpm install
+        run: pnpm install --no-runtime
 
       - name: 🚧 Build (stub)
         run: pnpm dev:prepare
 
       - name: 📦 release pkg.pr.new
-        run: pnpm pkg-pr-new publish
+        run: pnpm pkg-pr-new publish --pnpm
