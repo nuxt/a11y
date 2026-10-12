@@ -4,8 +4,11 @@ import { fileURLToPath } from 'node:url'
 import { execSync } from 'node:child_process'
 import { describe, it, expect, beforeAll } from 'vitest'
 
-describe('build-time report generation', () => {
-  const rootDir = fileURLToPath(new URL('../../playground', import.meta.url))
+describe.each([
+  { name: 'nuxt v4', root: '../../playground', minRoutes: 3 },
+  { name: 'nuxt v5', root: '../fixtures/nuxt-v5', minRoutes: 2 },
+])('build-time report generation ($name)', ({ root, minRoutes }) => {
+  const rootDir = fileURLToPath(new URL(root, import.meta.url))
   // Nuxt 4 uses node_modules/.cache/nuxt/.nuxt as buildDir by default
   const buildDir = resolve(rootDir, 'node_modules/.cache/nuxt/.nuxt')
   const reportPath = resolve(buildDir, 'a11y-report.md')
@@ -53,8 +56,7 @@ describe('build-time report generation', () => {
     expect(match).not.toBeNull()
 
     const scannedCount = Number.parseInt(match![1]!, 10)
-    // Playground has at least 3 pages: /, /about-us, /contact
-    expect(scannedCount).toBeGreaterThanOrEqual(3)
+    expect(scannedCount).toBeGreaterThanOrEqual(minRoutes)
   })
 
   it('report groups violations by impact level', () => {

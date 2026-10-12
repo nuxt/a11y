@@ -1,0 +1,10 @@
+{
+  "private": true,
+  "name": "nuxt-a11y-fixture-v5",
+  "type": "module",
+  "devDependencies": {
+    "@nuxt/a11y": "latest",
+    "nuxt": "npm:nuxt-nightly@5x",
+    "vue": "^3.5.43"
+  }
+}

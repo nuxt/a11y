@@ -19,7 +19,7 @@ export default defineNuxtConfig({
           {
             command: 'npx',
             args: ['nuxt', 'dev', '--port', '3030'],
-            cwd: resolve(__dirname, '../client'),
+            cwd: resolve(import.meta.dirname, '../client'),
           },
           {
             id: 'nuxt-a11y:client',

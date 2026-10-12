@@ -1,6 +1,8 @@
 packages:
   - playground
+  - playground-v5
   - client
+  - test/fixtures/*
 
 overrides:
   "@nuxt/a11y": "workspace:*"
