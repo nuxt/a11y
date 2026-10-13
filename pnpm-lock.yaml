@@ -259,7 +259,7 @@ importers:
         specifier: ^3.4.2
         version: 3.4.2(f2d7cd336de46c1ae907df82ce5c321b)
       '@nuxt/kit':
-        specifier: ^4.5.2
+        specifier: ^4.6.1
         version: 4.6.1(@nuxt/schema@4.6.1)(confbox@0.3.1)(dotenv@17.4.2)(giget@3.3.1)(jiti@2.7.0)(magic-string@1.4.3)(mlly@1.8.2)(oxc-parser@0.150.0)(rolldown@1.2.13)(unplugin@3.4.0(esbuild@0.28.2)(rolldown@1.2.13)(rollup@4.64.5)(vite@8.3.4(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1))(webpack@5.111.1(cssnano@9.6.0(postcss@8.5.29))(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.33.0)(postcss@8.5.29)(svgo@4.1.0)))
       '@types/node':
         specifier: 24.19.2
@@ -1062,8 +1062,8 @@ packages:
     resolution: {integrity: sha512-oGB+UxlgWcgQkgwo8GcEGwemoTFt3FIO9ababBmaGwXIoBKZ+GTy0pP185beGg7Llih/NSHSV2XAs1lnznocSg==}
     engines: {node: '>= 8'}
 
-  '@nuxt/cli-nightly@4.0.1-2610121054-bb805cd':
-    resolution: {integrity: sha512-jU+XTHHS/X8FQpZ3ZTZ6yn4KXQae6PGTcUPaHuDZm5FpLvfRz6GAxmtV2s+508RPkcEVZVrQqn+BH4R4XEntTA==}
+  '@nuxt/cli-nightly@4.0.1-2610121948-3074e65':
+    resolution: {integrity: sha512-uiBhW0t2J+Sbv4dG8XuBOwwgxpvg4ukgPHy0Sy13psBycVzJngKKeoGW7mWVv5qHkhMdXWqRuskizlU9EODvjQ==}
     engines: {node: ^22.21.0 || ^24.11.0 || >=26.0.0}
     hasBin: true
     peerDependencies:
@@ -6788,7 +6788,7 @@ snapshots:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.20.3
 
-  '@nuxt/cli-nightly@4.0.1-2610121054-bb805cd(@nuxt/schema-nightly@5.0.0-2610121449-e69fd4e)(jiti@2.7.0)(oxc-parser@0.150.0)(rolldown@1.2.13)(vite@8.3.4(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1))':
+  '@nuxt/cli-nightly@4.0.1-2610121948-3074e65(@nuxt/schema-nightly@5.0.0-2610121449-e69fd4e)(jiti@2.7.0)(oxc-parser@0.150.0)(rolldown@1.2.13)(vite@8.3.4(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1))':
     dependencies:
       '@clack/prompts': 1.8.1
       args-tokenizer: 0.3.0
@@ -10960,7 +10960,7 @@ snapshots:
     dependencies:
       '@dxup/nuxt': 0.5.10(@nuxt/schema-nightly@5.0.0-2610121449-e69fd4e)(confbox@0.3.1)(dotenv@17.4.2)(esbuild@0.28.2)(giget@3.3.1)(jiti@2.7.0)(mlly@1.8.2)(oxc-parser@0.150.0)(rolldown@1.2.13)(rollup@4.64.5)(vite@8.3.4(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1))(webpack@5.111.1(cssnano@9.6.0(postcss@8.5.29))(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.33.0)(postcss@8.5.29)(svgo@4.1.0))
       '@jridgewell/trace-mapping': 0.3.31
-      '@nuxt/cli': '@nuxt/cli-nightly@4.0.1-2610121054-bb805cd(@nuxt/schema-nightly@5.0.0-2610121449-e69fd4e)(jiti@2.7.0)(oxc-parser@0.150.0)(rolldown@1.2.13)(vite@8.3.4(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1))'
+      '@nuxt/cli': '@nuxt/cli-nightly@4.0.1-2610121948-3074e65(@nuxt/schema-nightly@5.0.0-2610121449-e69fd4e)(jiti@2.7.0)(oxc-parser@0.150.0)(rolldown@1.2.13)(vite@8.3.4(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1))'
       '@nuxt/devtools-onboard': 4.0.0-beta.4(2359d8e912c6264f247ab2bd81878e92)
       '@nuxt/kit': '@nuxt/kit-nightly@5.0.0-2610121449-e69fd4e(@nuxt/schema-nightly@5.0.0-2610121449-e69fd4e)(confbox@0.3.1)(dotenv@17.4.2)(giget@3.3.1)(jiti@2.7.0)(magic-string@1.4.3)(mlly@1.8.2)(oxc-parser@0.150.0)(rolldown@1.2.13)(unplugin@3.4.0(esbuild@0.28.2)(rolldown@1.2.13)(rollup@4.64.5)(vite@8.3.4(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1))(webpack@5.111.1(cssnano@9.6.0(postcss@8.5.29))(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.33.0)(postcss@8.5.29)(svgo@4.1.0)))'
       '@nuxt/nitro-server': '@nuxt/nitro-server-nightly@5.0.0-2610121449-e69fd4e(@babel/plugin-syntax-typescript@7.29.7(@babel/core@7.29.7(supports-color@10.2.2)))(@nuxt/schema-nightly@5.0.0-2610121449-e69fd4e)(@oxc-project/types@0.153.0)(acorn@8.19.0)(confbox@0.3.1)(dotenv@17.4.2)(esbuild@0.28.2)(giget@3.3.1)(jiti@2.7.0)(lightningcss@1.33.0)(mlly@1.8.2)(nuxt-nightly@5.0.0-2610121449-e69fd4e(acfb8cb0dcf67f1ce849a52e6ca1eebf))(oxc-parser@0.150.0)(rollup@4.64.5)(typescript@6.0.3)(vite@8.3.4(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1))(webpack@5.111.1(cssnano@9.6.0(postcss@8.5.29))(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.33.0)(postcss@8.5.29)(svgo@4.1.0))'
