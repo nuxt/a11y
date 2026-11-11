@@ -2,7 +2,7 @@
   "name": "nuxt-a11y-client",
   "private": true,
   "devDependencies": {
-    "@nuxt/devtools-kit": "^3.4.2",
+    "@nuxt/devtools-kit": "^4.1.0",
     "@nuxt/devtools-ui-kit": "^3.4.2",
     "@nuxt/kit": "^4.6.4",
     "@types/node": "24.19.2",
