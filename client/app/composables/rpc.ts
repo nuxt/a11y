@@ -1,12 +1,40 @@
-import type { NuxtDevtoolsClient } from '@nuxt/devtools-kit/types'
-import type { BirpcReturn } from 'birpc'
+import { onDevtoolsReady } from '@nuxt/devtools-kit/iframe-client'
+import { ref, computed, shallowRef } from 'vue'
+import { RPC_NAMESPACE } from '../../../src/rpc-types'
 import type { ClientFunctions, ServerFunctions } from '../../../src/rpc-types'
-import { onDevtoolsClientConnected } from '@nuxt/devtools-kit/iframe-client'
-import { ref, computed } from 'vue'
 import type { A11yViolation } from '../../../src/runtime/types'
 import { handleRouteChange } from './route-watcher'
 
-const RPC_NAMESPACE = 'nuxt-a11y-rpc'
+type DevtoolsKit = Parameters<Parameters<typeof onDevtoolsReady>[0]>[0]
+type AsyncServerFunctions = {
+  [K in keyof ServerFunctions]: (...args: Parameters<ServerFunctions[K]>) => Promise<Awaited<ReturnType<ServerFunctions[K]>>>
+}
+
+const SERVER_FUNCTION_NAMES: Record<keyof ServerFunctions, true> = {
+  getOptions: true,
+  reset: true,
+  connected: true,
+  enableConstantScanning: true,
+  disableConstantScanning: true,
+  triggerScan: true,
+  highlightElement: true,
+  unhighlightElement: true,
+  unhighlightAll: true,
+  updateElementId: true,
+  removeElementIdBadge: true,
+  scrollToElement: true,
+}
+
+function createServerRpc(kit: DevtoolsKit): AsyncServerFunctions {
+  // Our functions aren't in the kit's global RPC registry types, so widen `call`
+  const call = kit.call.bind(kit) as (method: string, ...args: unknown[]) => Promise<unknown>
+  const rpc: Record<string, (...args: unknown[]) => Promise<unknown>> = {}
+
+  for (const name of Object.keys(SERVER_FUNCTION_NAMES))
+    rpc[name] = (...args) => call(`${RPC_NAMESPACE}:${name}`, ...args)
+
+  return rpc as AsyncServerFunctions
+}
 
 // Store violations per tab
 const violationsByTab = ref<Map<string, A11yViolation[]>>(new Map())
@@ -29,18 +57,17 @@ export const currentRoute = computed(() => {
   return routeByTab.value.get(currentActiveTabId.value) || '/'
 })
 
-export const devtools = ref<NuxtDevtoolsClient>()
-export const nuxtA11yRpc = ref<BirpcReturn<ServerFunctions>>()
-export const devtoolsRpc = ref<NuxtDevtoolsClient['rpc']>()
+export const nuxtA11yRpc = shallowRef<AsyncServerFunctions>()
 
 // Initialize RPC connection and register handlers
-onDevtoolsClientConnected(async (client) => {
-  devtoolsRpc.value = client.devtools.rpc
-  devtools.value = client.devtools
+let initializedKit: DevtoolsKit | undefined
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error untyped
-  nuxtA11yRpc.value = client.devtools.extendClientRpc<ServerFunctions, ClientFunctions>(RPC_NAMESPACE, {
+onDevtoolsReady(async (kit) => {
+  if (kit === initializedKit) return
+
+  initializedKit = kit
+
+  const clientFunctions: ClientFunctions = {
     showViolations(payload) {
       // Store violations for this specific tab
       violationsByTab.value.set(payload.tabId, payload.violations)
@@ -65,7 +92,12 @@ onDevtoolsClientConnected(async (client) => {
       currentActiveTabId.value = payload.tabId
       totalTabCount.value = payload.totalTabCount
     },
-  })
+  }
+
+  for (const [name, handler] of Object.entries(clientFunctions))
+    kit.client.register({ name: `${RPC_NAMESPACE}:${name}`, type: 'event', handler })
+
+  nuxtA11yRpc.value = createServerRpc(kit)
 
   try {
     await nuxtA11yRpc.value!.connected()

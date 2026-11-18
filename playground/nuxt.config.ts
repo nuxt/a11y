@@ -1,5 +1,5 @@
 import { resolve } from 'node:path'
-import { startSubprocess } from '@nuxt/devtools-kit'
+import { onDevtoolsReady } from '@nuxt/devtools-kit'
 import { defineNuxtModule } from '@nuxt/kit'
 import { defineNuxtConfig } from 'nuxt/config'
 
@@ -15,27 +15,27 @@ export default defineNuxtConfig({
       setup(_, nuxt) {
         if (!nuxt.options.dev) return
 
-        const subprocess = startSubprocess(
-          {
-            command: 'npx',
-            args: ['nuxt', 'dev', '--port', '3030'],
-            cwd: resolve(import.meta.dirname, '../client'),
-          },
-          {
-            id: 'nuxt-a11y:client',
-            name: 'Nuxt a11y Client Dev',
-          },
-        )
-        subprocess.getProcess().stdout?.on('data', (data) => {
-          console.log(` sub: ${data.toString()}`)
-        })
+        onDevtoolsReady(async (ctx) => {
+          const session = await ctx.terminals.startChildProcess(
+            {
+              command: 'npx',
+              args: ['nuxt', 'dev', '--port', '3030'],
+              cwd: resolve(import.meta.dirname, '../client'),
+            },
+            {
+              id: 'nuxt-a11y:client',
+              title: 'Nuxt a11y Client Dev',
+            },
+          )
 
-        process.on('exit', () => {
-          subprocess.terminate()
-        })
+          session.getChildProcess()?.stdout?.on('data', (data) => {
+            console.log(` sub: ${data.toString()}`)
+          })
 
-        // process.getProcess().stdout?.pipe(process.stdout)
-        // process.getProcess().stderr?.pipe(process.stderr)
+          process.on('exit', () => {
+            session.terminate()
+          })
+        }, nuxt)
       },
     }),
   ],
