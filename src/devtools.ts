@@ -164,7 +164,7 @@ export function setupDevToolsUI(options: ModuleOptions, moduleResolve: Resolver[
     })
 
     broadcast = (method, ...args) => ctx.rpc.broadcast({
-      method: `${RPC_NAMESPACE}:${method}` as never,
+      method: `${RPC_NAMESPACE}:${method}`,
       args: args as never,
       event: true,
       optional: true,

@@ -1,41 +1,10 @@
 import { getDevToolsRpcClient } from '@vitejs/devtools-kit/client'
 import type { DevToolsRpcClient } from '@vitejs/devtools-kit/client'
 import { ref, computed, shallowRef } from 'vue'
-import { RPC_NAMESPACE } from '../../../src/rpc-types'
-import type { ClientFunctions, ServerFunctions } from '../../../src/rpc-types'
+// Side-effect import: registers the `nuxt-a11y:*` functions in the kit's RPC types
+import '../../../src/rpc-types'
 import type { A11yViolation } from '../../../src/runtime/types'
 import { handleRouteChange } from './route-watcher'
-
-type DevtoolsKit = DevToolsRpcClient
-type AsyncServerFunctions = {
-  [K in keyof ServerFunctions]: (...args: Parameters<ServerFunctions[K]>) => Promise<Awaited<ReturnType<ServerFunctions[K]>>>
-}
-
-const SERVER_FUNCTION_NAMES: Record<keyof ServerFunctions, true> = {
-  getOptions: true,
-  reset: true,
-  connected: true,
-  enableConstantScanning: true,
-  disableConstantScanning: true,
-  triggerScan: true,
-  highlightElement: true,
-  unhighlightElement: true,
-  unhighlightAll: true,
-  updateElementId: true,
-  removeElementIdBadge: true,
-  scrollToElement: true,
-}
-
-function createServerRpc(kit: DevtoolsKit): AsyncServerFunctions {
-  // functions aren't in the kit's global RPC registry types, so widen `call`
-  const call = kit.call.bind(kit) as (method: string, ...args: unknown[]) => Promise<unknown>
-  const rpc: Record<string, (...args: unknown[]) => Promise<unknown>> = {}
-
-  for (const name of Object.keys(SERVER_FUNCTION_NAMES))
-    rpc[name] = (...args) => call(`${RPC_NAMESPACE}:${name}`, ...args)
-
-  return rpc as AsyncServerFunctions
-}
 
 // Store violations per tab
 const violationsByTab = ref<Map<string, A11yViolation[]>>(new Map())
@@ -58,7 +27,7 @@ export const currentRoute = computed(() => {
   return routeByTab.value.get(currentActiveTabId.value) || '/'
 })
 
-export const nuxtA11yRpc = shallowRef<AsyncServerFunctions>()
+const nuxtA11yRpc = shallowRef<DevToolsRpcClient>()
 
 if (import.meta.client) {
   getDevToolsRpcClient()
@@ -68,103 +37,106 @@ if (import.meta.client) {
     })
 }
 
-async function setupRpc(kit: DevtoolsKit) {
-  const clientFunctions: ClientFunctions = {
-    showViolations(payload) {
+async function setupRpc(rpc: DevToolsRpcClient) {
+  rpc.client.register({
+    name: 'nuxt-a11y:showViolations',
+    type: 'event',
+    handler(payload) {
       // Store violations for this specific tab
       violationsByTab.value.set(payload.tabId, payload.violations)
       // Update route for this tab
       routeByTab.value.set(payload.tabId, payload.currentRoute)
     },
-    scanRunning(running: boolean) {
+  })
+
+  rpc.client.register({
+    name: 'nuxt-a11y:scanRunning',
+    type: 'event',
+    handler(running) {
       isScanRunning.value = running
     },
-    constantScanningEnabled(enabled: boolean) {
+  })
+
+  rpc.client.register({
+    name: 'nuxt-a11y:constantScanningEnabled',
+    type: 'event',
+    handler(enabled) {
       isConstantScanningEnabled.value = enabled
     },
-    routeChanged(path: string) {
+  })
+
+  rpc.client.register({
+    name: 'nuxt-a11y:routeChanged',
+    type: 'event',
+    handler(path) {
       // Only handle route change if it's for the active tab
       if (currentActiveTabId.value) {
         routeByTab.value.set(currentActiveTabId.value, path)
         handleRouteChange()
       }
     },
-    activeTabChanged(payload) {
+  })
+
+  rpc.client.register({
+    name: 'nuxt-a11y:activeTabChanged',
+    type: 'event',
+    handler(payload) {
       // Update which tab is currently active
       currentActiveTabId.value = payload.tabId
       totalTabCount.value = payload.totalTabCount
     },
-  }
+  })
 
-  for (const [name, handler] of Object.entries(clientFunctions))
-    kit.client.register({ name: `${RPC_NAMESPACE}:${name}`, type: 'event', handler })
-
-  nuxtA11yRpc.value = createServerRpc(kit)
+  nuxtA11yRpc.value = rpc
 
   try {
-    await nuxtA11yRpc.value!.connected()
+    await rpc.call('nuxt-a11y:connected')
   }
   catch (error) {
     console.debug('[Nuxt A11y] Initial connection error (expected):', error)
   }
 }
 
-export function enableConstantScanning() {
-  if (!nuxtA11yRpc.value) return
+export function getOptions() {
+  return nuxtA11yRpc.value?.call('nuxt-a11y:getOptions')
+}
 
-  nuxtA11yRpc.value.enableConstantScanning().catch(() => {})
+export function enableConstantScanning() {
+  nuxtA11yRpc.value?.call('nuxt-a11y:enableConstantScanning').catch(() => {})
 }
 
 export function disableConstantScanning() {
-  if (!nuxtA11yRpc.value) return
-
-  nuxtA11yRpc.value.disableConstantScanning().catch(() => {})
+  nuxtA11yRpc.value?.call('nuxt-a11y:disableConstantScanning').catch(() => {})
 }
 
 export function triggerScan() {
-  if (!nuxtA11yRpc.value) return
-
-  nuxtA11yRpc.value.triggerScan().catch(() => {})
+  nuxtA11yRpc.value?.call('nuxt-a11y:triggerScan').catch(() => {})
 }
 
 export function resetViolations() {
-  if (!nuxtA11yRpc.value) return
-
-  nuxtA11yRpc.value.reset().catch(() => {})
+  nuxtA11yRpc.value?.call('nuxt-a11y:reset').catch(() => {})
 }
 
 export async function highlightElement(selector: string, id?: number, color?: string) {
-  if (!nuxtA11yRpc.value)
-    return
-  await nuxtA11yRpc.value.highlightElement(selector, id, color)
+  await nuxtA11yRpc.value?.call('nuxt-a11y:highlightElement', selector, id, color)
 }
 
 export function unhighlightElement(selector: string) {
-  if (!nuxtA11yRpc.value) return
-
-  nuxtA11yRpc.value.unhighlightElement(selector).catch(() => {})
+  nuxtA11yRpc.value?.call('nuxt-a11y:unhighlightElement', selector).catch(() => {})
 }
 
 export function unhighlightAll() {
-  if (!nuxtA11yRpc.value) return
-
-  nuxtA11yRpc.value.unhighlightAll().catch(() => {})
+  nuxtA11yRpc.value?.call('nuxt-a11y:unhighlightAll').catch(() => {})
 }
 
 export function updateElementId(selector: string, id: number) {
-  if (!nuxtA11yRpc.value) return
-
-  nuxtA11yRpc.value.updateElementId(selector, id).catch(() => {})
+  nuxtA11yRpc.value?.call('nuxt-a11y:updateElementId', selector, id).catch(() => {})
 }
 
 export function removeElementIdBadge(selector: string) {
-  if (!nuxtA11yRpc.value) return
-
-  nuxtA11yRpc.value.removeElementIdBadge(selector).catch(() => {})
+  nuxtA11yRpc.value?.call('nuxt-a11y:removeElementIdBadge', selector).catch(() => {})
 }
 
 export function scrollToElement(selector: string) {
-  if (!nuxtA11yRpc.value) return
-
-  nuxtA11yRpc.value.scrollToElement(selector).catch(() => {})
+  nuxtA11yRpc.value?.call('nuxt-a11y:scrollToElement', selector).catch(() => {})
 }

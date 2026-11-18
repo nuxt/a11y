@@ -66,6 +66,7 @@
     "@nuxt/schema": "4.6.4",
     "@nuxt/test-utils": "4.3.3",
     "@types/node": "24.19.2",
+    "@vitejs/devtools-kit": "^0.8.3",
     "@vitest/coverage-v8": "5.0.3",
     "birpc": "4.2.0",
     "changelogen": "0.6.2",
