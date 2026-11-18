@@ -126,31 +126,31 @@ export function setupDevToolsUI(options: ModuleOptions, moduleResolve: Resolver[
     ws.on('nuxt-a11y:showViolations', async (payload) => {
       if (isConnected) {
         const _rpc = await rpc
-        _rpc.broadcast.showViolations(payload).catch(() => {})
+        Promise.resolve(_rpc.broadcast.showViolations(payload)).catch(() => {})
       }
     })
     ws.on('nuxt-a11y:scanRunning', async (payload: boolean) => {
       if (isConnected) {
         const _rpc = await rpc
-        _rpc.broadcast.scanRunning(payload).catch(() => {})
+        Promise.resolve(_rpc.broadcast.scanRunning(payload)).catch(() => {})
       }
     })
     ws.on('nuxt-a11y:constantScanningEnabled', async (payload: boolean) => {
       if (isConnected) {
         const _rpc = await rpc
-        _rpc.broadcast.constantScanningEnabled(payload).catch(() => {})
+        Promise.resolve(_rpc.broadcast.constantScanningEnabled(payload)).catch(() => {})
       }
     })
     ws.on('nuxt-a11y:routeChanged', async (payload: string) => {
       if (isConnected) {
         const _rpc = await rpc
-        _rpc.broadcast.routeChanged(payload).catch(() => {})
+        Promise.resolve(_rpc.broadcast.routeChanged(payload)).catch(() => {})
       }
     })
     ws.on('nuxt-a11y:activeTabChanged', async (payload: { tabId: string, isActive: boolean, totalTabCount: number }) => {
       if (isConnected) {
         const _rpc = await rpc
-        _rpc.broadcast.activeTabChanged(payload).catch(() => {})
+        Promise.resolve(_rpc.broadcast.activeTabChanged(payload)).catch(() => {})
       }
     })
   })
