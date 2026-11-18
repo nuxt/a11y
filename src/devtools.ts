@@ -1,20 +1,22 @@
 import { existsSync } from 'node:fs'
 import type { Resolver } from '@nuxt/kit'
 import type { Nuxt } from 'nuxt/schema'
-import type { BirpcGroup } from 'birpc'
 import { addVitePlugin, useNuxt } from '@nuxt/kit'
-import { addCustomTab, extendServerRpc, onDevToolsInitialized } from '@nuxt/devtools-kit'
-import type { ClientFunctions, ServerFunctions } from './rpc-types'
+import { NUXT_DEVTOOLS_GROUP_ID, onDevtoolsReady } from '@nuxt/devtools-kit'
+import { HMR_EVENT_PREFIX } from './runtime/constants'
+import { RPC_NAMESPACE } from './rpc-types'
+import type { ServerFunctions } from './rpc-types'
+import type { ClientFunctions, PageEvents } from './runtime/types'
 import type { ModuleOptions } from './module'
 import { useViteWebSocket } from './util'
+import { join } from 'node:path'
 
 const DEVTOOLS_UI_ROUTE = '/__nuxt-a11y-client'
 const DEVTOOLS_UI_LOCAL_PORT = 3030
-const RPC_NAMESPACE = 'nuxt-a11y-rpc'
 
 export function setupDevToolsUI(options: ModuleOptions, moduleResolve: Resolver['resolve'], nuxt: Nuxt = useNuxt()) {
   const clientPath = moduleResolve('./client')
-  const isProductionBuild = existsSync(clientPath)
+  const isProductionBuild = existsSync(join(clientPath, 'index.html'))
 
   addVitePlugin({
     name: 'nuxt-a11y-devtools-ui',
@@ -54,104 +56,133 @@ export function setupDevToolsUI(options: ModuleOptions, moduleResolve: Resolver[
     },
   })
 
-  addCustomTab({
-    name: 'nuxt-a11y',
-    title: 'Nuxt a11y',
-    icon: 'iconoir:accessibility',
-    view: {
-      type: 'iframe',
-      src: DEVTOOLS_UI_ROUTE,
-    },
-  }, nuxt)
-
   let isConnected = false
   const viteServerWs = useViteWebSocket()
-  const rpc = new Promise<BirpcGroup<ClientFunctions, ServerFunctions>>((promiseResolve) => {
-    onDevToolsInitialized(async () => {
-      const rpc = extendServerRpc<ClientFunctions, ServerFunctions>(RPC_NAMESPACE, {
-        getOptions() {
-          return options
-        },
-        async reset() {
-          const ws = await viteServerWs
-          ws.send('nuxt-a11y:reset')
-        },
-        async connected() {
-          const ws = await viteServerWs
-          ws.send('nuxt-a11y:connected')
-          isConnected = true
-        },
-        async enableConstantScanning() {
-          const ws = await viteServerWs
-          ws.send('nuxt-a11y:enableConstantScanning')
-        },
-        async disableConstantScanning() {
-          const ws = await viteServerWs
-          ws.send('nuxt-a11y:disableConstantScanning')
-        },
-        async triggerScan() {
-          const ws = await viteServerWs
-          ws.send('nuxt-a11y:triggerScan')
-        },
-        async highlightElement(selector: string, id?: number, color?: string) {
-          const ws = await viteServerWs
-          ws.send('nuxt-a11y:highlightElement', { selector, id, color })
-        },
-        async unhighlightElement(selector: string) {
-          const ws = await viteServerWs
-          ws.send('nuxt-a11y:unhighlightElement', selector)
-        },
-        async unhighlightAll() {
-          const ws = await viteServerWs
-          ws.send('nuxt-a11y:unhighlightAll')
-        },
-        async updateElementId(selector: string, id: number) {
-          const ws = await viteServerWs
-          ws.send('nuxt-a11y:updateElementId', { selector, id })
-        },
-        async removeElementIdBadge(selector: string) {
-          const ws = await viteServerWs
-          ws.send('nuxt-a11y:removeElementIdBadge', selector)
-        },
-        async scrollToElement(selector: string) {
-          const ws = await viteServerWs
-          ws.send('nuxt-a11y:scrollToElement', selector)
-        },
-      })
-      promiseResolve(rpc)
-    })
-  })
 
-  viteServerWs.then((ws) => {
-    ws.on('nuxt-a11y:showViolations', async (payload) => {
-      if (isConnected) {
-        const _rpc = await rpc
-        _rpc.broadcast.showViolations(payload).catch(() => {})
-      }
+  async function sendToPage<K extends keyof PageEvents>(event: K, payload?: PageEvents[K]) {
+    const ws = await viteServerWs
+    ws.send(`${HMR_EVENT_PREFIX}:${event}` as string, payload)
+  }
+
+  let broadcast: (<K extends keyof ClientFunctions>(method: K, ...args: Parameters<ClientFunctions[K]>) => Promise<void>) | undefined
+
+  // registering
+  onDevtoolsReady((ctx) => {
+    ctx.docks.register({
+      id: 'nuxt-a11y',
+      type: 'iframe',
+      title: 'Nuxt a11y',
+      icon: 'iconoir:accessibility',
+      url: DEVTOOLS_UI_ROUTE,
+      groupId: NUXT_DEVTOOLS_GROUP_ID,
+      category: 'modules',
     })
-    ws.on('nuxt-a11y:scanRunning', async (payload: boolean) => {
-      if (isConnected) {
-        const _rpc = await rpc
-        _rpc.broadcast.scanRunning(payload).catch(() => {})
-      }
+
+    function register<K extends keyof ServerFunctions>({ name, type, handler }: {
+      name: K
+      type: 'query' | 'action'
+      handler: ServerFunctions[K]
+    }) {
+      ctx.rpc.register({ name: `${RPC_NAMESPACE}:${name}`, type, handler })
+    }
+
+    register({
+      name: `getOptions`,
+      type: 'query',
+      handler: () => options,
     })
-    ws.on('nuxt-a11y:constantScanningEnabled', async (payload: boolean) => {
-      if (isConnected) {
-        const _rpc = await rpc
-        _rpc.broadcast.constantScanningEnabled(payload).catch(() => {})
-      }
+
+    register({
+      name: `reset`,
+      type: 'action',
+      handler: () => sendToPage('reset'),
     })
-    ws.on('nuxt-a11y:routeChanged', async (payload: string) => {
-      if (isConnected) {
-        const _rpc = await rpc
-        _rpc.broadcast.routeChanged(payload).catch(() => {})
-      }
+
+    register({
+      name: `connected`,
+      type: 'action',
+      handler: async () => {
+        await sendToPage('connected')
+        isConnected = true
+      },
     })
-    ws.on('nuxt-a11y:activeTabChanged', async (payload: { tabId: string, isActive: boolean, totalTabCount: number }) => {
-      if (isConnected) {
-        const _rpc = await rpc
-        _rpc.broadcast.activeTabChanged(payload).catch(() => {})
-      }
+
+    register({
+      name: `enableConstantScanning`,
+      type: 'action',
+      handler: () => sendToPage('enableConstantScanning'),
     })
-  })
+
+    register({
+      name: `disableConstantScanning`,
+      type: 'action',
+      handler: () => sendToPage('disableConstantScanning'),
+    })
+
+    register({
+      name: `triggerScan`,
+      type: 'action',
+      handler: () => sendToPage('triggerScan'),
+    })
+
+    register({
+      name: `highlightElement`,
+      type: 'action',
+      handler: (selector, id, color) => sendToPage('highlightElement', { selector, id, color }),
+    })
+
+    register({
+      name: `unhighlightElement`,
+      type: 'action',
+      handler: selector => sendToPage('unhighlightElement', selector),
+    })
+
+    register({
+      name: `unhighlightAll`,
+      type: 'action',
+      handler: () => sendToPage('unhighlightAll'),
+    })
+
+    register({
+      name: `updateElementId`,
+      type: 'action',
+      handler: (selector, id) => sendToPage('updateElementId', { selector, id }),
+    })
+
+    register({
+      name: `removeElementIdBadge`,
+      type: 'action',
+      handler: selector => sendToPage('removeElementIdBadge', selector),
+    })
+
+    register({
+      name: `scrollToElement`,
+      type: 'action',
+      handler: selector => sendToPage('scrollToElement', selector),
+    })
+
+    broadcast = (method, ...args) => ctx.rpc.broadcast({
+      method: `${RPC_NAMESPACE}:${method}`,
+      args: args as never,
+      event: true,
+      optional: true,
+    })
+  }, nuxt)
+
+  // forwarding
+  function forwardToClient<K extends keyof ClientFunctions>(method: K) {
+    viteServerWs.then((ws) => {
+      ws.on(`${HMR_EVENT_PREFIX}:${method}`, (payload: Parameters<ClientFunctions[K]>[0]) => {
+        if (!isConnected || !broadcast)
+          return
+        broadcast(method, ...([payload] as Parameters<ClientFunctions[K]>)).catch(() => {})
+      })
+    })
+  }
+
+  forwardToClient('showViolations')
+  forwardToClient('scanRunning')
+  forwardToClient('constantScanningEnabled')
+  forwardToClient('routeChanged')
+  forwardToClient('activeTabChanged')
 }

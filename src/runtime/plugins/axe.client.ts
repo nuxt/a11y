@@ -28,7 +28,7 @@ const plugin: Plugin & ObjectPlugin = defineNuxtPlugin((nuxtApp) => {
   // Initialize active tab tracker
   const activeTabTracker = createActiveTabTracker((status) => {
     // Broadcast status changes to DevTools
-    hmr.broadcast(hmr.HMR_EVENTS.ACTIVE_TAB_CHANGED, status)
+    hmr.broadcast('activeTabChanged', status)
   })
 
   activeTabTracker.initialize()
@@ -37,7 +37,7 @@ const plugin: Plugin & ObjectPlugin = defineNuxtPlugin((nuxtApp) => {
   const TAB_ID = activeTabTracker.getTabId()
 
   const axeRunner = createAxeRunner(config, (isRunning) => {
-    hmr.broadcast(hmr.HMR_EVENTS.SCAN_RUNNING, isRunning)
+    hmr.broadcast('scanRunning', isRunning)
   })
 
   function getCurrentRoute(): string {
@@ -56,7 +56,7 @@ const plugin: Plugin & ObjectPlugin = defineNuxtPlugin((nuxtApp) => {
     }
 
     if (violations.length > 0 || alwaysBroadcast) {
-      hmr.broadcast(hmr.HMR_EVENTS.SHOW_VIOLATIONS, {
+      hmr.broadcast('showViolations', {
         violations: violationManager.getAll(TAB_ID),
         currentRoute: getCurrentRoute(),
         tabId: TAB_ID,
@@ -69,58 +69,58 @@ const plugin: Plugin & ObjectPlugin = defineNuxtPlugin((nuxtApp) => {
   })
 
   // Setup HMR event handlers
-  hmr.onConnected(async () => {
+  hmr.on('connected', async () => {
     // Always send active tab status when DevTools connects
-    hmr.broadcast(hmr.HMR_EVENTS.ACTIVE_TAB_CHANGED, activeTabTracker.getStatus())
+    hmr.broadcast('activeTabChanged', activeTabTracker.getStatus())
 
     // All tabs respond with their own data
     // Send current route first
-    hmr.broadcast(hmr.HMR_EVENTS.ROUTE_CHANGED, getCurrentRoute())
+    hmr.broadcast('routeChanged', getCurrentRoute())
     await scanAndBroadcast(true)
   })
 
-  hmr.onEnableScanning(() => {
+  hmr.on('enableConstantScanning', () => {
     scanner.enable()
-    hmr.broadcast(hmr.HMR_EVENTS.CONSTANT_SCANNING_ENABLED, true)
+    hmr.broadcast('constantScanningEnabled', true)
   })
 
-  hmr.onDisableScanning(() => {
+  hmr.on('disableConstantScanning', () => {
     scanner.disable()
-    hmr.broadcast(hmr.HMR_EVENTS.CONSTANT_SCANNING_ENABLED, false)
+    hmr.broadcast('constantScanningEnabled', false)
   })
 
-  hmr.onTriggerScan(async () => {
+  hmr.on('triggerScan', async () => {
     // All tabs respond to scan triggers
     await scanAndBroadcast(true)
   })
 
-  hmr.onReset(() => {
+  hmr.on('reset', () => {
     violationManager.reset(TAB_ID)
     highlighter.unhighlightAll()
-    hmr.broadcast(hmr.HMR_EVENTS.SHOW_VIOLATIONS, { violations: [], currentRoute: getCurrentRoute(), tabId: TAB_ID })
+    hmr.broadcast('showViolations', { violations: [], currentRoute: getCurrentRoute(), tabId: TAB_ID })
   })
 
-  hmr.onHighlightElement((payload) => {
+  hmr.on('highlightElement', (payload) => {
     highlighter.highlightElement(payload.selector, payload.id, payload.color)
   })
 
-  hmr.onUnhighlightElement((selector) => {
+  hmr.on('unhighlightElement', (selector) => {
     highlighter.unhighlightElement(selector)
   })
 
-  hmr.onUnhighlightAll(() => {
+  hmr.on('unhighlightAll', () => {
     highlighter.unhighlightAll()
   })
 
-  hmr.onUpdateElementId((payload) => {
+  hmr.on('updateElementId', (payload) => {
     highlighter.updateElementId(payload.selector, payload.id)
   })
 
-  hmr.onRemoveElementIdBadge((selector) => {
+  hmr.on('removeElementIdBadge', (selector) => {
     highlighter.removeElementIdBadge(selector)
   })
 
-  hmr.onScrollToElement((selector) => {
+  hmr.on('scrollToElement', (selector) => {
     highlighter.scrollToElement(selector)
   })
 
@@ -132,7 +132,7 @@ const plugin: Plugin & ObjectPlugin = defineNuxtPlugin((nuxtApp) => {
 
       // All tabs broadcast their own route changes
       // Broadcast route change to DevTools FIRST
-      hmr.broadcast(hmr.HMR_EVENTS.ROUTE_CHANGED, newPath)
+      hmr.broadcast('routeChanged', newPath)
 
       // Wait for DevTools to process the route change
       await new Promise(resolve => setTimeout(resolve, 150))

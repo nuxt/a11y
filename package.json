@@ -52,7 +52,7 @@
     "test:watch": "vitest watch"
   },
   "dependencies": {
-    "@nuxt/devtools-kit": "^3.4.2",
+    "@nuxt/devtools-kit": "^4.2.0",
     "@nuxt/kit": "^4.6.4",
     "axe-core": "^4.14.0",
     "linkedom": "^0.18.13",
@@ -66,6 +66,7 @@
     "@nuxt/schema": "4.6.4",
     "@nuxt/test-utils": "4.3.3",
     "@types/node": "24.19.2",
+    "@vitejs/devtools-kit": "^0.8.3",
     "@vitest/coverage-v8": "5.0.3",
     "birpc": "4.2.0",
     "changelogen": "0.6.2",
