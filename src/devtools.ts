@@ -8,13 +8,14 @@ import { RPC_NAMESPACE } from './rpc-types'
 import type { ClientFunctions, PageEvents, ServerFunctions } from './rpc-types'
 import type { ModuleOptions } from './module'
 import { useViteWebSocket } from './util'
+import { join } from 'node:path'
 
 const DEVTOOLS_UI_ROUTE = '/__nuxt-a11y-client'
 const DEVTOOLS_UI_LOCAL_PORT = 3030
 
 export function setupDevToolsUI(options: ModuleOptions, moduleResolve: Resolver['resolve'], nuxt: Nuxt = useNuxt()) {
   const clientPath = moduleResolve('./client')
-  const isProductionBuild = existsSync(clientPath)
+  const isProductionBuild = existsSync(join(clientPath, 'index.html'))
 
   addVitePlugin({
     name: 'nuxt-a11y-devtools-ui',
@@ -76,6 +77,7 @@ export function setupDevToolsUI(options: ModuleOptions, moduleResolve: Resolver[
       icon: 'iconoir:accessibility',
       url: DEVTOOLS_UI_ROUTE,
       groupId: NUXT_DEVTOOLS_GROUP_ID,
+      category: 'modules',
     })
 
     function register<K extends keyof ServerFunctions>({ name, type, handler }: {

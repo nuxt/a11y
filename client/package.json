@@ -6,6 +6,7 @@
     "@nuxt/devtools-ui-kit": "^4.1.0",
     "@nuxt/kit": "^4.6.4",
     "@types/node": "24.19.2",
+    "@vitejs/devtools-kit": "^0.8.3",
     "nuxt": "^4.6.4",
     "vue": "^3.5.43",
     "vue-router": "^5.4.0"

@@ -1,11 +1,12 @@
-import { onDevtoolsReady } from '@nuxt/devtools-kit/iframe-client'
+import { getDevToolsRpcClient } from '@vitejs/devtools-kit/client'
+import type { DevToolsRpcClient } from '@vitejs/devtools-kit/client'
 import { ref, computed, shallowRef } from 'vue'
 import { RPC_NAMESPACE } from '../../../src/rpc-types'
 import type { ClientFunctions, ServerFunctions } from '../../../src/rpc-types'
 import type { A11yViolation } from '../../../src/runtime/types'
 import { handleRouteChange } from './route-watcher'
 
-type DevtoolsKit = Parameters<Parameters<typeof onDevtoolsReady>[0]>[0]
+type DevtoolsKit = DevToolsRpcClient
 type AsyncServerFunctions = {
   [K in keyof ServerFunctions]: (...args: Parameters<ServerFunctions[K]>) => Promise<Awaited<ReturnType<ServerFunctions[K]>>>
 }
@@ -26,7 +27,7 @@ const SERVER_FUNCTION_NAMES: Record<keyof ServerFunctions, true> = {
 }
 
 function createServerRpc(kit: DevtoolsKit): AsyncServerFunctions {
-  // Our functions aren't in the kit's global RPC registry types, so widen `call`
+  // functions aren't in the kit's global RPC registry types, so widen `call`
   const call = kit.call.bind(kit) as (method: string, ...args: unknown[]) => Promise<unknown>
   const rpc: Record<string, (...args: unknown[]) => Promise<unknown>> = {}
 
@@ -59,14 +60,15 @@ export const currentRoute = computed(() => {
 
 export const nuxtA11yRpc = shallowRef<AsyncServerFunctions>()
 
-// Initialize RPC connection and register handlers
-let initializedKit: DevtoolsKit | undefined
+if (import.meta.client) {
+  getDevToolsRpcClient()
+    .then(setupRpc)
+    .catch((error) => {
+      console.error('[Nuxt A11y] Failed to connect to DevTools RPC:', error)
+    })
+}
 
-onDevtoolsReady(async (kit) => {
-  if (kit === initializedKit) return
-
-  initializedKit = kit
-
+async function setupRpc(kit: DevtoolsKit) {
   const clientFunctions: ClientFunctions = {
     showViolations(payload) {
       // Store violations for this specific tab
@@ -105,7 +107,7 @@ onDevtoolsReady(async (kit) => {
   catch (error) {
     console.debug('[Nuxt A11y] Initial connection error (expected):', error)
   }
-})
+}
 
 export function enableConstantScanning() {
   if (!nuxtA11yRpc.value) return
