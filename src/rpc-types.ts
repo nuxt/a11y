@@ -1,19 +1,9 @@
-import type { A11yViolation } from './runtime/types'
 import type { ModuleOptions } from './module'
+import type { ClientFunctions } from './runtime/types'
+
+export type { ActiveTabPayload, ClientFunctions, ViolationsPayload } from './runtime/types'
 
 export const RPC_NAMESPACE = 'nuxt-a11y'
-
-export interface ViolationsPayload {
-  violations: A11yViolation[]
-  currentRoute: string
-  tabId: string
-}
-
-export interface ActiveTabPayload {
-  tabId: string
-  isActive: boolean
-  totalTabCount: number
-}
 
 export interface ServerFunctions {
   getOptions: () => ModuleOptions
@@ -28,28 +18,6 @@ export interface ServerFunctions {
   updateElementId: (selector: string, id: number) => void
   removeElementIdBadge: (selector: string) => void
   scrollToElement: (selector: string) => void
-}
-
-export interface PageEvents {
-  connected: undefined
-  reset: undefined
-  enableConstantScanning: undefined
-  disableConstantScanning: undefined
-  triggerScan: undefined
-  highlightElement: { selector: string, id?: number, color?: string }
-  unhighlightElement: string
-  unhighlightAll: undefined
-  updateElementId: { selector: string, id: number }
-  removeElementIdBadge: string
-  scrollToElement: string
-}
-
-export interface ClientFunctions {
-  showViolations: (payload: ViolationsPayload) => void
-  scanRunning: (running: boolean) => void
-  constantScanningEnabled: (enabled: boolean) => void
-  routeChanged: (path: string) => void
-  activeTabChanged: (payload: ActiveTabPayload) => void
 }
 
 type Namespaced<T> = {

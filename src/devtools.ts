@@ -5,7 +5,8 @@ import { addVitePlugin, useNuxt } from '@nuxt/kit'
 import { NUXT_DEVTOOLS_GROUP_ID, onDevtoolsReady } from '@nuxt/devtools-kit'
 import { HMR_EVENT_PREFIX } from './runtime/constants'
 import { RPC_NAMESPACE } from './rpc-types'
-import type { ClientFunctions, PageEvents, ServerFunctions } from './rpc-types'
+import type { ServerFunctions } from './rpc-types'
+import type { ClientFunctions, PageEvents } from './runtime/types'
 import type { ModuleOptions } from './module'
 import { useViteWebSocket } from './util'
 import { join } from 'node:path'
@@ -58,10 +59,7 @@ export function setupDevToolsUI(options: ModuleOptions, moduleResolve: Resolver[
   let isConnected = false
   const viteServerWs = useViteWebSocket()
 
-  async function sendToPage<K extends keyof PageEvents>(
-    event: K,
-    ...[payload]: PageEvents[K] extends undefined ? [] : [PageEvents[K]]
-  ) {
+  async function sendToPage<K extends keyof PageEvents>(event: K, payload?: PageEvents[K]) {
     const ws = await viteServerWs
     ws.send(`${HMR_EVENT_PREFIX}:${event}` as string, payload)
   }
