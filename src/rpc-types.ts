@@ -1,17 +1,9 @@
-import type { A11yViolation } from './runtime/types'
 import type { ModuleOptions } from './module'
+import type { ClientFunctions } from './runtime/types'
 
-export interface ViolationsPayload {
-  violations: A11yViolation[]
-  currentRoute: string
-  tabId: string
-}
+export type { ActiveTabPayload, ClientFunctions, ViolationsPayload } from './runtime/types'
 
-export interface ActiveTabPayload {
-  tabId: string
-  isActive: boolean
-  totalTabCount: number
-}
+export const RPC_NAMESPACE = 'nuxt-a11y'
 
 export interface ServerFunctions {
   getOptions: () => ModuleOptions
@@ -28,10 +20,13 @@ export interface ServerFunctions {
   scrollToElement: (selector: string) => void
 }
 
-export interface ClientFunctions {
-  showViolations: (payload: ViolationsPayload) => void
-  scanRunning: (running: boolean) => void
-  constantScanningEnabled: (enabled: boolean) => void
-  routeChanged: (path: string) => void
-  activeTabChanged: (payload: ActiveTabPayload) => void
+type Namespaced<T> = {
+  [K in keyof T & string as `${typeof RPC_NAMESPACE}:${K}`]: T[K]
+}
+
+declare module '@vitejs/devtools-kit' {
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+  interface DevToolsRpcServerFunctions extends Namespaced<ServerFunctions> {}
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+  interface DevToolsRpcClientFunctions extends Namespaced<ClientFunctions> {}
 }

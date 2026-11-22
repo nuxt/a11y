@@ -1,8 +1,7 @@
 import { ref, watch } from 'vue'
 import { useDark } from '@vueuse/core'
-import type { ModuleOptions } from '../../../src/module'
 import { IMPACT_COLORS } from '../../../src/runtime/constants'
-import { axeViolations, currentRoute, highlightElement, nuxtA11yRpc } from './rpc'
+import { axeViolations, currentRoute, getOptions, highlightElement } from './rpc'
 import { isRootElementSelector } from './root-element-checker'
 import { pinElement, isElementPinned, clearAllPinned } from './pinned-elements'
 
@@ -19,10 +18,9 @@ export async function initAutoHighlight() {
   if (isInitialized.value) return
 
   // Fetch module options
-  if (nuxtA11yRpc.value) {
-    const options: ModuleOptions = await nuxtA11yRpc.value.getOptions()
+  const options = await getOptions()
+  if (options)
     autoHighlightEnabled.value = options.defaultHighlight ?? false
-  }
 
   // Watch for new violations and auto-highlight them
   watch([axeViolations, currentRoute], ([violations, route]) => {
