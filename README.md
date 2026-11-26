@@ -20,7 +20,10 @@ To install and add the module, you can run the following command:
 npx nuxt module add a11y
 ```
 
-The module is now automatically installed and added to your `nuxt.config.ts`. Now you can open your Nuxt app, go to the DevTools, and click the **Nuxt a11y** icon to get started.
+The module is now automatically installed and added to your `nuxt.config.ts`. Now you can open your Nuxt app, go to the DevTools, and open the **Accessibility** tab to get started.
+
+> [!NOTE]
+> The DevTools integration requires Nuxt DevTools v4 (Nuxt 4.5+ or Nuxt 5). On older DevTools versions, scanning and console logging still work, but the **Accessibility** tab won't appear.
 
 ## Features
 
@@ -45,7 +48,8 @@ A central hub showing:
 - Total violations and affected elements across your application
 - Violations grouped by impact level (critical, serious, moderate, minor)
 - Violation counts per page
-- Control panel for manual scans, auto-scanning, and clearing results
+- Control panel for manual scans, auto-scanning, copying a report, and clearing results
+- WCAG level filter to focus on A, AA, or AAA issues
 
 ### Violation Cards
 
@@ -53,6 +57,7 @@ A central hub showing:
 
 Each violation displays:
 - **Impact badge** with color-coded severity
+- **WCAG level badge** showing the conformance level the rule maps to
 - **Rule ID and description** from WCAG/axe-core
 - **Learn more link** to detailed documentation
 - **Affected elements count** with expandable details

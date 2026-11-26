@@ -1,24 +1,40 @@
-import type { NuxtDevtoolsClient } from '@nuxt/devtools-kit/types'
-import type { BirpcReturn } from 'birpc'
+import { getDevToolsRpcClient } from '@vitejs/devtools-kit/client'
+import { ref, computed, shallowRef } from 'vue'
 import type { ClientFunctions, ServerFunctions } from '../../../src/rpc-types'
-import { onDevtoolsClientConnected } from '@nuxt/devtools-kit/iframe-client'
-import { ref, computed } from 'vue'
+import { RPC_NAMESPACE } from '../../../src/rpc-types'
 import type { A11yViolation } from '../../../src/runtime/types'
 import { handleRouteChange } from './route-watcher'
 
-const RPC_NAMESPACE = 'nuxt-a11y-rpc'
+type ServerRpc = {
+  [K in keyof ServerFunctions]: (...args: Parameters<ServerFunctions[K]>) => Promise<Awaited<ReturnType<ServerFunctions[K]>>>
+}
+
+const serverFunctionNames = Object.keys({
+  getOptions: true,
+  reset: true,
+  connected: true,
+  enableConstantScanning: true,
+  disableConstantScanning: true,
+  triggerScan: true,
+  highlightElement: true,
+  unhighlightElement: true,
+  unhighlightAll: true,
+  updateElementId: true,
+  removeElementIdBadge: true,
+  scrollToElement: true,
+} satisfies Record<keyof ServerFunctions, true>) as (keyof ServerFunctions)[]
 
 // Store violations per tab
 const violationsByTab = ref<Map<string, A11yViolation[]>>(new Map())
-export const currentActiveTabId = ref<string>('')
+export const currentActiveTabId = shallowRef<string>('')
 
 // Current route per tab
 const routeByTab = ref<Map<string, string>>(new Map())
 
-export const isScanRunning = ref(false)
-export const isConstantScanningEnabled = ref(false)
-export const isRouteChangeScan = ref(false)
-export const totalTabCount = ref(1)
+export const isScanRunning = shallowRef(false)
+export const isConstantScanningEnabled = shallowRef(false)
+export const isRouteChangeScan = shallowRef(false)
+export const totalTabCount = shallowRef(1)
 
 // Computed values for the currently active tab
 export const axeViolations = computed(() => {
@@ -29,50 +45,58 @@ export const currentRoute = computed(() => {
   return routeByTab.value.get(currentActiveTabId.value) || '/'
 })
 
-export const devtools = ref<NuxtDevtoolsClient>()
-export const nuxtA11yRpc = ref<BirpcReturn<ServerFunctions>>()
-export const devtoolsRpc = ref<NuxtDevtoolsClient['rpc']>()
+export const nuxtA11yRpc = shallowRef<ServerRpc>()
+
+const clientFunctions: ClientFunctions = {
+  showViolations(payload) {
+    // Store violations for this specific tab
+    violationsByTab.value.set(payload.tabId, payload.violations)
+    // Update route for this tab
+    routeByTab.value.set(payload.tabId, payload.currentRoute)
+  },
+  scanRunning(running) {
+    isScanRunning.value = running
+  },
+  constantScanningEnabled(enabled) {
+    isConstantScanningEnabled.value = enabled
+  },
+  routeChanged(path) {
+    // Only handle route change if it's for the active tab
+    if (currentActiveTabId.value) {
+      routeByTab.value.set(currentActiveTabId.value, path)
+      handleRouteChange()
+    }
+  },
+  activeTabChanged(payload) {
+    // Update which tab is currently active
+    currentActiveTabId.value = payload.tabId
+    totalTabCount.value = payload.totalTabCount
+  },
+}
 
 // Initialize RPC connection and register handlers
-onDevtoolsClientConnected(async (client) => {
-  devtoolsRpc.value = client.devtools.rpc
-  devtools.value = client.devtools
+async function connect() {
+  const kit = await getDevToolsRpcClient()
+  const { rpc } = kit.scope(RPC_NAMESPACE)
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error untyped
-  nuxtA11yRpc.value = client.devtools.extendClientRpc<ServerFunctions, ClientFunctions>(RPC_NAMESPACE, {
-    showViolations(payload) {
-      // Store violations for this specific tab
-      violationsByTab.value.set(payload.tabId, payload.violations)
-      // Update route for this tab
-      routeByTab.value.set(payload.tabId, payload.currentRoute)
-    },
-    scanRunning(running: boolean) {
-      isScanRunning.value = running
-    },
-    constantScanningEnabled(enabled: boolean) {
-      isConstantScanningEnabled.value = enabled
-    },
-    routeChanged(path: string) {
-      // Only handle route change if it's for the active tab
-      if (currentActiveTabId.value) {
-        routeByTab.value.set(currentActiveTabId.value, path)
-        handleRouteChange()
-      }
-    },
-    activeTabChanged(payload) {
-      // Update which tab is currently active
-      currentActiveTabId.value = payload.tabId
-      totalTabCount.value = payload.totalTabCount
-    },
-  })
+  for (const [name, handler] of Object.entries(clientFunctions)) {
+    rpc.register({ name, type: 'event', handler })
+  }
+
+  nuxtA11yRpc.value = Object.fromEntries(
+    serverFunctionNames.map(name => [name, (...args: unknown[]) => rpc.call(name, ...args)]),
+  ) as ServerRpc
 
   try {
-    await nuxtA11yRpc.value!.connected()
+    await nuxtA11yRpc.value.connected()
   }
   catch (error) {
     console.debug('[Nuxt A11y] Initial connection error (expected):', error)
   }
+}
+
+connect().catch((error) => {
+  console.debug('[Nuxt A11y] Failed to connect to DevTools RPC:', error)
 })
 
 export function enableConstantScanning() {

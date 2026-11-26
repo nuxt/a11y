@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { shallowRef, onMounted, onUnmounted } from 'vue'
 
-const showScrollTop = ref(false)
+const showScrollTop = shallowRef(false)
 
 function handleScroll() {
   showScrollTop.value = window.scrollY > 300

@@ -1,4 +1,4 @@
-import { ref, watch } from 'vue'
+import { shallowRef, watch } from 'vue'
 import { useDark } from '@vueuse/core'
 import type { ModuleOptions } from '../../../src/module'
 import { IMPACT_COLORS } from '../../../src/runtime/constants'
@@ -8,8 +8,8 @@ import { pinElement, isElementPinned, clearAllPinned } from './pinned-elements'
 
 const isDark = useDark()
 
-const autoHighlightEnabled = ref(false)
-const isInitialized = ref(false)
+const autoHighlightEnabled = shallowRef(false)
+const isInitialized = shallowRef(false)
 
 /**
  * Initialize auto-highlight feature

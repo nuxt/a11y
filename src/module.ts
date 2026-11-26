@@ -53,8 +53,8 @@ export default defineNuxtModule<ModuleOptions>({
       nuxt.options.runtimeConfig.public.a11yLogIssues = options.logIssues
 
       extendViteConfig((config) => {
-        config.optimizeDeps = config.optimizeDeps || {}
-        config.optimizeDeps.include = config.optimizeDeps.include || []
+        config.optimizeDeps ??= {}
+        config.optimizeDeps.include ??= []
         config.optimizeDeps.include.push('@nuxt/a11y > axe-core')
       })
 

@@ -1,11 +1,11 @@
-import { ref, watch } from 'vue'
+import { shallowRef, watch } from 'vue'
 import { axeViolations, isScanRunning, isRouteChangeScan } from './rpc'
 
 const MINIMUM_SKELETON_TIME = 1500 // 1.5 seconds
 
 export function useSkeletonLoader() {
-  const isShowingSkeleton = ref(true)
-  const isInitialLoad = ref(true)
+  const isShowingSkeleton = shallowRef(true)
+  const isInitialLoad = shallowRef(true)
   let skeletonTimer: ReturnType<typeof setTimeout> | null = null
   let skeletonStartTime = 0
 

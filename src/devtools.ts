@@ -1,18 +1,16 @@
 import { existsSync } from 'node:fs'
 import type { Resolver } from '@nuxt/kit'
 import type { Nuxt } from 'nuxt/schema'
-import type { BirpcGroup } from 'birpc'
-import { addVitePlugin, useNuxt } from '@nuxt/kit'
-import { addCustomTab, extendServerRpc, onDevToolsInitialized } from '@nuxt/devtools-kit'
-import type { ClientFunctions, ServerFunctions } from './rpc-types'
+import { addVitePlugin } from '@nuxt/kit'
+import { NUXT_DEVTOOLS_GROUP_ID, onDevtoolsReady } from '@nuxt/devtools-kit'
+import type { ClientFunctions, ServerFunctionActions, ServerFunctionQueries } from './rpc-types'
+import { RPC_NAMESPACE } from './rpc-types'
 import type { ModuleOptions } from './module'
-import { useViteWebSocket } from './util'
 
 const DEVTOOLS_UI_ROUTE = '/__nuxt-a11y-client'
 const DEVTOOLS_UI_LOCAL_PORT = 3030
-const RPC_NAMESPACE = 'nuxt-a11y-rpc'
 
-export function setupDevToolsUI(options: ModuleOptions, moduleResolve: Resolver['resolve'], nuxt: Nuxt = useNuxt()) {
+export function setupDevToolsUI(options: ModuleOptions, moduleResolve: Resolver['resolve'], nuxt: Nuxt) {
   const clientPath = moduleResolve('./client')
   const isProductionBuild = existsSync(clientPath)
 
@@ -54,104 +52,60 @@ export function setupDevToolsUI(options: ModuleOptions, moduleResolve: Resolver[
     },
   })
 
-  addCustomTab({
-    name: 'nuxt-a11y',
-    title: 'Nuxt a11y',
-    icon: 'iconoir:accessibility',
-    view: {
+  onDevtoolsReady((ctx) => {
+    const ws = ctx.viteServer?.ws
+
+    if (!ws)
+      return
+
+    ctx.docks.register({
+      id: 'nuxt-a11y',
+      title: 'Accessibility',
+      icon: 'iconoir:accessibility',
       type: 'iframe',
-      src: DEVTOOLS_UI_ROUTE,
-    },
+      url: DEVTOOLS_UI_ROUTE,
+      groupId: NUXT_DEVTOOLS_GROUP_ID,
+      category: 'modules',
+    })
+
+    const { rpc } = ctx.scope(RPC_NAMESPACE)
+
+    const serverFunctionQueries: ServerFunctionQueries = {
+      getOptions: () => options,
+    }
+
+    for (const [name, handler] of Object.entries(serverFunctionQueries)) {
+      rpc.register({ name, type: 'query', handler })
+    }
+
+    const serverFunctionActions: ServerFunctionActions = {
+      reset: () => ws.send('nuxt-a11y:reset'),
+      connected: () => ws.send('nuxt-a11y:connected'),
+      enableConstantScanning: () => ws.send('nuxt-a11y:enableConstantScanning'),
+      disableConstantScanning: () => ws.send('nuxt-a11y:disableConstantScanning'),
+      triggerScan: () => ws.send('nuxt-a11y:triggerScan'),
+      highlightElement: (selector, id, color) => ws.send('nuxt-a11y:highlightElement', { selector, id, color }),
+      unhighlightElement: selector => ws.send('nuxt-a11y:unhighlightElement', selector),
+      unhighlightAll: () => ws.send('nuxt-a11y:unhighlightAll'),
+      updateElementId: (selector, id) => ws.send('nuxt-a11y:updateElementId', { selector, id }),
+      removeElementIdBadge: selector => ws.send('nuxt-a11y:removeElementIdBadge', selector),
+      scrollToElement: selector => ws.send('nuxt-a11y:scrollToElement', selector),
+    }
+
+    for (const [name, handler] of Object.entries(serverFunctionActions)) {
+      rpc.register({ name, type: 'action', handler })
+    }
+
+    const clientFunctions: ClientFunctions = {
+      showViolations: payload => rpc.broadcast({ method: 'showViolations', args: [payload], event: true }),
+      scanRunning: running => rpc.broadcast({ method: 'scanRunning', args: [running], event: true }),
+      constantScanningEnabled: enabled => rpc.broadcast({ method: 'constantScanningEnabled', args: [enabled], event: true }),
+      routeChanged: path => rpc.broadcast({ method: 'routeChanged', args: [path], event: true }),
+      activeTabChanged: payload => rpc.broadcast({ method: 'activeTabChanged', args: [payload], event: true }),
+    }
+
+    for (const [name, handler] of Object.entries(clientFunctions)) {
+      ws.on(`nuxt-a11y:${name}`, handler)
+    }
   }, nuxt)
-
-  let isConnected = false
-  const viteServerWs = useViteWebSocket()
-  const rpc = new Promise<BirpcGroup<ClientFunctions, ServerFunctions>>((promiseResolve) => {
-    onDevToolsInitialized(async () => {
-      const rpc = extendServerRpc<ClientFunctions, ServerFunctions>(RPC_NAMESPACE, {
-        getOptions() {
-          return options
-        },
-        async reset() {
-          const ws = await viteServerWs
-          ws.send('nuxt-a11y:reset')
-        },
-        async connected() {
-          const ws = await viteServerWs
-          ws.send('nuxt-a11y:connected')
-          isConnected = true
-        },
-        async enableConstantScanning() {
-          const ws = await viteServerWs
-          ws.send('nuxt-a11y:enableConstantScanning')
-        },
-        async disableConstantScanning() {
-          const ws = await viteServerWs
-          ws.send('nuxt-a11y:disableConstantScanning')
-        },
-        async triggerScan() {
-          const ws = await viteServerWs
-          ws.send('nuxt-a11y:triggerScan')
-        },
-        async highlightElement(selector: string, id?: number, color?: string) {
-          const ws = await viteServerWs
-          ws.send('nuxt-a11y:highlightElement', { selector, id, color })
-        },
-        async unhighlightElement(selector: string) {
-          const ws = await viteServerWs
-          ws.send('nuxt-a11y:unhighlightElement', selector)
-        },
-        async unhighlightAll() {
-          const ws = await viteServerWs
-          ws.send('nuxt-a11y:unhighlightAll')
-        },
-        async updateElementId(selector: string, id: number) {
-          const ws = await viteServerWs
-          ws.send('nuxt-a11y:updateElementId', { selector, id })
-        },
-        async removeElementIdBadge(selector: string) {
-          const ws = await viteServerWs
-          ws.send('nuxt-a11y:removeElementIdBadge', selector)
-        },
-        async scrollToElement(selector: string) {
-          const ws = await viteServerWs
-          ws.send('nuxt-a11y:scrollToElement', selector)
-        },
-      })
-      promiseResolve(rpc)
-    })
-  })
-
-  viteServerWs.then((ws) => {
-    ws.on('nuxt-a11y:showViolations', async (payload) => {
-      if (isConnected) {
-        const _rpc = await rpc
-        _rpc.broadcast.showViolations(payload).catch(() => {})
-      }
-    })
-    ws.on('nuxt-a11y:scanRunning', async (payload: boolean) => {
-      if (isConnected) {
-        const _rpc = await rpc
-        _rpc.broadcast.scanRunning(payload).catch(() => {})
-      }
-    })
-    ws.on('nuxt-a11y:constantScanningEnabled', async (payload: boolean) => {
-      if (isConnected) {
-        const _rpc = await rpc
-        _rpc.broadcast.constantScanningEnabled(payload).catch(() => {})
-      }
-    })
-    ws.on('nuxt-a11y:routeChanged', async (payload: string) => {
-      if (isConnected) {
-        const _rpc = await rpc
-        _rpc.broadcast.routeChanged(payload).catch(() => {})
-      }
-    })
-    ws.on('nuxt-a11y:activeTabChanged', async (payload: { tabId: string, isActive: boolean, totalTabCount: number }) => {
-      if (isConnected) {
-        const _rpc = await rpc
-        _rpc.broadcast.activeTabChanged(payload).catch(() => {})
-      }
-    })
-  })
 }
