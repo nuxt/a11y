@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { A11yViolation, A11yViolationNode, ImpactColors } from '../../../src/runtime/types'
-import { highlightElement, unhighlightElement, removeElementIdBadge, scrollToElement, currentRoute } from '../composables/rpc'
+import { callServer, currentRoute } from '../composables/rpc'
 import { computed } from 'vue'
 import { pinElement, unpinElement, getElementId, isElementPinned } from '../composables/pinned-elements'
 import { isRootElementSelector } from '../utils/root-element-checker'
@@ -84,14 +84,14 @@ function handleNodeClick(node: A11yViolationNode) {
   if (isElementPinned(selector)) {
     // Unpin: remove from global state and remove ID badge
     unpinElement(selector)
-    removeElementIdBadge(selector)
+    callServer('removeElementIdBadge', selector)
     // Always unhighlight to balance the highlight call from when we pinned
-    unhighlightElement(selector)
+    callServer('unhighlightElement', selector)
   }
   else {
     // Pin: add to global state with ID and highlight
     const id = pinElement(selector)
-    highlightElement(selector, id, currentColors.value.text)
+    callServer('highlightElement', selector, id, currentColors.value.text)
   }
 }
 
@@ -117,11 +117,11 @@ function handleScrollToElement(node: A11yViolationNode) {
   // Pin the element if not already pinned
   if (!isElementPinned(selector)) {
     const id = pinElement(selector)
-    highlightElement(selector, id, currentColors.value.text)
+    callServer('highlightElement', selector, id, currentColors.value.text)
   }
 
   // Scroll to the element
-  scrollToElement(selector)
+  callServer('scrollToElement', selector)
 }
 
 // Parent violation card handlers
@@ -137,9 +137,9 @@ function handleViolationClick() {
       if (isRootElementSelector(selector)) return
 
       unpinElement(selector)
-      removeElementIdBadge(selector)
+      callServer('removeElementIdBadge', selector)
       // Always unhighlight to balance the highlight call from when we pinned
-      unhighlightElement(selector)
+      callServer('unhighlightElement', selector)
     })
   }
   else {
@@ -155,7 +155,7 @@ function handleViolationClick() {
       }
 
       const id = pinElement(selector)
-      highlightElement(selector, id, currentColors.value.text)
+      callServer('highlightElement', selector, id, currentColors.value.text)
     })
 
     // Show notification once if any root elements were found

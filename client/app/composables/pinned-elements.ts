@@ -1,5 +1,5 @@
 import { ref } from 'vue'
-import { updateElementId } from './rpc'
+import { callServer } from './rpc'
 
 /**
  * Global state management for pinned elements with unique IDs
@@ -48,7 +48,7 @@ export function unpinElement(selector: string): void {
     const newId = index + 1
     pinnedElements.value.set(sel, newId)
     // Update the displayed ID on the screen
-    updateElementId(sel, newId)
+    callServer('updateElementId', sel, newId)
   })
 
   // Update next ID

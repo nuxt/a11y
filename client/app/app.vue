@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { axeViolations, currentRoute } from './composables/rpc'
-import { computed, shallowRef, onMounted } from 'vue'
+import { computed, shallowRef } from 'vue'
 import type { ViolationsByImpact, ImpactStat, A11yViolation, WcagLevel } from '../../src/runtime/types'
 import { IMPACT_LEVELS, IMPACT_COLORS } from '../../src/runtime/constants'
 import type axe from 'axe-core'
-import { initAutoHighlight } from './composables/auto-highlight'
+import { useAutoHighlight } from './composables/auto-highlight'
 
 const showCurrentPageFirst = shallowRef(true)
 const wcagFilter = shallowRef<WcagLevel>('all')
@@ -29,7 +29,7 @@ function matchesWcagLevel(tags: string[], level: WcagLevel): boolean {
 const { version: axeVersion, docsUrl: axeDocsUrl } = useAxeVersion()
 const { isShowingSkeleton } = useSkeletonLoader()
 
-onMounted(() => initAutoHighlight())
+useAutoHighlight()
 
 const violations = computed(() =>
   axeViolations.value.filter(v => matchesWcagLevel(v.tags, wcagFilter.value)),

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { WcagLevel } from '../../../src/runtime/types'
-import { isScanRunning, isConstantScanningEnabled, enableConstantScanning, disableConstantScanning, triggerScan, resetViolations, axeViolations, currentRoute } from '../composables/rpc'
+import { isScanRunning, isConstantScanningEnabled, callServer, axeViolations, currentRoute } from '../composables/rpc'
 import { copyToClipboard } from '../utils/clipboard'
 import { formatViolationsReport } from '../utils/format-report'
 
@@ -17,20 +17,20 @@ const emit = defineEmits<{
 
 function toggleConstantScanning() {
   if (isConstantScanningEnabled.value) {
-    disableConstantScanning()
+    callServer('disableConstantScanning')
   }
   else {
-    enableConstantScanning()
+    callServer('enableConstantScanning')
   }
 }
 
 function handleTriggerScan() {
-  triggerScan()
+  callServer('triggerScan')
 }
 
 function handleReset() {
   clearAllPinned()
-  resetViolations()
+  callServer('reset')
 }
 
 async function handleCopyReport() {

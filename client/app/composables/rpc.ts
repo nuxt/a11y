@@ -3,26 +3,8 @@ import { ref, computed, shallowRef } from 'vue'
 import type { ClientFunctions, ServerFunctions } from '../../../src/rpc-types'
 import { RPC_NAMESPACE } from '../../../src/rpc-types'
 import type { A11yViolation } from '../../../src/runtime/types'
+import type { ModuleOptions } from '../../../src/module'
 import { handleRouteChange } from './route-watcher'
-
-type ServerRpc = {
-  [K in keyof ServerFunctions]: (...args: Parameters<ServerFunctions[K]>) => Promise<Awaited<ReturnType<ServerFunctions[K]>>>
-}
-
-const serverFunctionNames = Object.keys({
-  getOptions: true,
-  reset: true,
-  connected: true,
-  enableConstantScanning: true,
-  disableConstantScanning: true,
-  triggerScan: true,
-  highlightElement: true,
-  unhighlightElement: true,
-  unhighlightAll: true,
-  updateElementId: true,
-  removeElementIdBadge: true,
-  scrollToElement: true,
-} satisfies Record<keyof ServerFunctions, true>) as (keyof ServerFunctions)[]
 
 // Store violations per tab
 const violationsByTab = ref<Map<string, A11yViolation[]>>(new Map())
@@ -45,7 +27,7 @@ export const currentRoute = computed(() => {
   return routeByTab.value.get(currentActiveTabId.value) || '/'
 })
 
-export const nuxtA11yRpc = shallowRef<ServerRpc>()
+export const moduleOptions = shallowRef<ModuleOptions>()
 
 const clientFunctions: ClientFunctions = {
   showViolations(payload) {
@@ -75,86 +57,49 @@ const clientFunctions: ClientFunctions = {
 }
 
 // Initialize RPC connection and register handlers
-async function connect() {
-  const kit = await getDevToolsRpcClient()
-  const { rpc } = kit.scope(RPC_NAMESPACE)
-
-  for (const [name, handler] of Object.entries(clientFunctions)) {
-    rpc.register({ name, type: 'event', handler })
-  }
-
-  nuxtA11yRpc.value = Object.fromEntries(
-    serverFunctionNames.map(name => [name, (...args: unknown[]) => rpc.call(name, ...args)]),
-  ) as ServerRpc
-
+async function connectDevtoolsRpc() {
   try {
-    await nuxtA11yRpc.value.connected()
+    const kit = await getDevToolsRpcClient()
+    const { rpc } = kit.scope(RPC_NAMESPACE)
+
+    for (const [name, handler] of Object.entries(clientFunctions)) {
+      rpc.register({ name, type: 'event', handler })
+    }
+
+    return rpc
   }
   catch (error) {
-    console.debug('[Nuxt A11y] Initial connection error (expected):', error)
+    console.debug('[Nuxt A11y] Failed to connect to DevTools RPC:', error)
   }
 }
 
-connect().catch((error) => {
-  console.debug('[Nuxt A11y] Failed to connect to DevTools RPC:', error)
-})
+const devtoolsRpcPromise = connectDevtoolsRpc()
 
-export function enableConstantScanning() {
-  if (!nuxtA11yRpc.value) return
+/**
+ * Call a server function once the DevTools RPC connection is ready.
+ * Resolves to `undefined` if the connection or the call fails.
+ */
+export async function callServer<K extends keyof ServerFunctions>(
+  method: K,
+  ...args: Parameters<ServerFunctions[K]>
+): Promise<Awaited<ReturnType<ServerFunctions[K]>> | undefined> {
+  const rpc = await devtoolsRpcPromise
 
-  nuxtA11yRpc.value.enableConstantScanning().catch(() => {})
+  if (!rpc)
+    return undefined
+
+  try {
+    return await rpc.call(method, ...args) as Awaited<ReturnType<ServerFunctions[K]>>
+  }
+  catch (error) {
+    console.debug(`[Nuxt A11y] Server call "${method}" failed:`, error)
+    return undefined
+  }
 }
 
-export function disableConstantScanning() {
-  if (!nuxtA11yRpc.value) return
-
-  nuxtA11yRpc.value.disableConstantScanning().catch(() => {})
+async function initialize() {
+  moduleOptions.value = await callServer('getOptions')
+  await callServer('connected')
 }
 
-export function triggerScan() {
-  if (!nuxtA11yRpc.value) return
-
-  nuxtA11yRpc.value.triggerScan().catch(() => {})
-}
-
-export function resetViolations() {
-  if (!nuxtA11yRpc.value) return
-
-  nuxtA11yRpc.value.reset().catch(() => {})
-}
-
-export async function highlightElement(selector: string, id?: number, color?: string) {
-  if (!nuxtA11yRpc.value)
-    return
-  await nuxtA11yRpc.value.highlightElement(selector, id, color)
-}
-
-export function unhighlightElement(selector: string) {
-  if (!nuxtA11yRpc.value) return
-
-  nuxtA11yRpc.value.unhighlightElement(selector).catch(() => {})
-}
-
-export function unhighlightAll() {
-  if (!nuxtA11yRpc.value) return
-
-  nuxtA11yRpc.value.unhighlightAll().catch(() => {})
-}
-
-export function updateElementId(selector: string, id: number) {
-  if (!nuxtA11yRpc.value) return
-
-  nuxtA11yRpc.value.updateElementId(selector, id).catch(() => {})
-}
-
-export function removeElementIdBadge(selector: string) {
-  if (!nuxtA11yRpc.value) return
-
-  nuxtA11yRpc.value.removeElementIdBadge(selector).catch(() => {})
-}
-
-export function scrollToElement(selector: string) {
-  if (!nuxtA11yRpc.value) return
-
-  nuxtA11yRpc.value.scrollToElement(selector).catch(() => {})
-}
+initialize()
