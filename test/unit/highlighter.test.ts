@@ -54,7 +54,7 @@ describe('highlighter', () => {
       highlightElement('#test', undefined, '#ff0000')
 
       expect(el.style.outline).toContain('black')
-      expect(el.style.boxShadow).toContain('#ff0000')
+      expect(el.style.boxShadow).toContain('rgb(255, 0, 0)')
       expect(el.style.zIndex).toBe('999998')
     })
 
