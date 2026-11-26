@@ -1,32 +1,19 @@
-import { ref, watch } from 'vue'
+import { watch } from 'vue'
 import { useDark } from '@vueuse/core'
-import type { ModuleOptions } from '../../../src/module'
 import { IMPACT_COLORS } from '../../../src/runtime/constants'
-import { axeViolations, currentRoute, highlightElement, nuxtA11yRpc } from './rpc'
-import { isRootElementSelector } from './root-element-checker'
+import { axeViolations, callServer, currentRoute, moduleOptions } from './rpc'
+import { isRootElementSelector } from '../utils/root-element-checker'
 import { pinElement, isElementPinned, clearAllPinned } from './pinned-elements'
 
-const isDark = useDark()
-
-const autoHighlightEnabled = ref(false)
-const isInitialized = ref(false)
-
 /**
- * Initialize auto-highlight feature
- * Fetches module options and sets up watcher
+ * Auto-highlight violations on the current route when the `defaultHighlight` module option is enabled
  */
-export async function initAutoHighlight() {
-  if (isInitialized.value) return
-
-  // Fetch module options
-  if (nuxtA11yRpc.value) {
-    const options: ModuleOptions = await nuxtA11yRpc.value.getOptions()
-    autoHighlightEnabled.value = options.defaultHighlight ?? false
-  }
+export function useAutoHighlight() {
+  const isDark = useDark()
 
   // Watch for new violations and auto-highlight them
-  watch([axeViolations, currentRoute], ([violations, route]) => {
-    if (!autoHighlightEnabled.value) return
+  watch([moduleOptions, axeViolations, currentRoute], ([options, violations, route]) => {
+    if (!options?.defaultHighlight) return
     if (!violations || violations.length === 0) return
 
     // Clear all previous pins when violations change
@@ -50,14 +37,8 @@ export async function initAutoHighlight() {
           // Pin element and highlight with ID badge
           const id = pinElement(selector)
           const colors = IMPACT_COLORS[violation.impact ?? 'moderate']
-          highlightElement(selector, id, isDark.value ? colors.dark.text : colors.light.text)
+          callServer('highlightElement', selector, id, isDark.value ? colors.dark.text : colors.light.text)
         })
       })
   }, { immediate: true })
-
-  isInitialized.value = true
-}
-
-export function isAutoHighlightEnabled() {
-  return autoHighlightEnabled.value
 }

@@ -1,6 +1,8 @@
 import type { A11yViolation } from './runtime/types'
 import type { ModuleOptions } from './module'
 
+export const RPC_NAMESPACE = 'nuxt-a11y'
+
 export interface ViolationsPayload {
   violations: A11yViolation[]
   currentRoute: string
@@ -13,8 +15,11 @@ export interface ActiveTabPayload {
   totalTabCount: number
 }
 
-export interface ServerFunctions {
+export interface ServerFunctionQueries {
   getOptions: () => ModuleOptions
+}
+
+export interface ServerFunctionActions {
   reset: () => void
   connected: () => void
   enableConstantScanning: () => void
@@ -27,6 +32,8 @@ export interface ServerFunctions {
   removeElementIdBadge: (selector: string) => void
   scrollToElement: (selector: string) => void
 }
+
+export type ServerFunctions = ServerFunctionQueries & ServerFunctionActions
 
 export interface ClientFunctions {
   showViolations: (payload: ViolationsPayload) => void

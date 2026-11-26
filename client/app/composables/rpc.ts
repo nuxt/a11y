@@ -1,24 +1,22 @@
-import type { NuxtDevtoolsClient } from '@nuxt/devtools-kit/types'
-import type { BirpcReturn } from 'birpc'
+import { getDevToolsRpcClient } from '@vitejs/devtools-kit/client'
+import { ref, computed, shallowRef } from 'vue'
 import type { ClientFunctions, ServerFunctions } from '../../../src/rpc-types'
-import { onDevtoolsClientConnected } from '@nuxt/devtools-kit/iframe-client'
-import { ref, computed } from 'vue'
+import { RPC_NAMESPACE } from '../../../src/rpc-types'
 import type { A11yViolation } from '../../../src/runtime/types'
+import type { ModuleOptions } from '../../../src/module'
 import { handleRouteChange } from './route-watcher'
-
-const RPC_NAMESPACE = 'nuxt-a11y-rpc'
 
 // Store violations per tab
 const violationsByTab = ref<Map<string, A11yViolation[]>>(new Map())
-export const currentActiveTabId = ref<string>('')
+export const currentActiveTabId = shallowRef<string>('')
 
 // Current route per tab
 const routeByTab = ref<Map<string, string>>(new Map())
 
-export const isScanRunning = ref(false)
-export const isConstantScanningEnabled = ref(false)
-export const isRouteChangeScan = ref(false)
-export const totalTabCount = ref(1)
+export const isScanRunning = shallowRef(false)
+export const isConstantScanningEnabled = shallowRef(false)
+export const isRouteChangeScan = shallowRef(false)
+export const totalTabCount = shallowRef(1)
 
 // Computed values for the currently active tab
 export const axeViolations = computed(() => {
@@ -29,108 +27,79 @@ export const currentRoute = computed(() => {
   return routeByTab.value.get(currentActiveTabId.value) || '/'
 })
 
-export const devtools = ref<NuxtDevtoolsClient>()
-export const nuxtA11yRpc = ref<BirpcReturn<ServerFunctions>>()
-export const devtoolsRpc = ref<NuxtDevtoolsClient['rpc']>()
+export const moduleOptions = shallowRef<ModuleOptions>()
+
+const clientFunctions: ClientFunctions = {
+  showViolations(payload) {
+    // Store violations for this specific tab
+    violationsByTab.value.set(payload.tabId, payload.violations)
+    // Update route for this tab
+    routeByTab.value.set(payload.tabId, payload.currentRoute)
+  },
+  scanRunning(running) {
+    isScanRunning.value = running
+  },
+  constantScanningEnabled(enabled) {
+    isConstantScanningEnabled.value = enabled
+  },
+  routeChanged(path) {
+    // Only handle route change if it's for the active tab
+    if (currentActiveTabId.value) {
+      routeByTab.value.set(currentActiveTabId.value, path)
+      handleRouteChange()
+    }
+  },
+  activeTabChanged(payload) {
+    // Update which tab is currently active
+    currentActiveTabId.value = payload.tabId
+    totalTabCount.value = payload.totalTabCount
+  },
+}
 
 // Initialize RPC connection and register handlers
-onDevtoolsClientConnected(async (client) => {
-  devtoolsRpc.value = client.devtools.rpc
-  devtools.value = client.devtools
-
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-expect-error untyped
-  nuxtA11yRpc.value = client.devtools.extendClientRpc<ServerFunctions, ClientFunctions>(RPC_NAMESPACE, {
-    showViolations(payload) {
-      // Store violations for this specific tab
-      violationsByTab.value.set(payload.tabId, payload.violations)
-      // Update route for this tab
-      routeByTab.value.set(payload.tabId, payload.currentRoute)
-    },
-    scanRunning(running: boolean) {
-      isScanRunning.value = running
-    },
-    constantScanningEnabled(enabled: boolean) {
-      isConstantScanningEnabled.value = enabled
-    },
-    routeChanged(path: string) {
-      // Only handle route change if it's for the active tab
-      if (currentActiveTabId.value) {
-        routeByTab.value.set(currentActiveTabId.value, path)
-        handleRouteChange()
-      }
-    },
-    activeTabChanged(payload) {
-      // Update which tab is currently active
-      currentActiveTabId.value = payload.tabId
-      totalTabCount.value = payload.totalTabCount
-    },
-  })
-
+async function connectDevtoolsRpc() {
   try {
-    await nuxtA11yRpc.value!.connected()
+    const kit = await getDevToolsRpcClient()
+    const { rpc } = kit.scope(RPC_NAMESPACE)
+
+    for (const [name, handler] of Object.entries(clientFunctions)) {
+      rpc.register({ name, type: 'event', handler })
+    }
+
+    return rpc
   }
   catch (error) {
-    console.debug('[Nuxt A11y] Initial connection error (expected):', error)
+    console.debug('[Nuxt A11y] Failed to connect to DevTools RPC:', error)
   }
-})
-
-export function enableConstantScanning() {
-  if (!nuxtA11yRpc.value) return
-
-  nuxtA11yRpc.value.enableConstantScanning().catch(() => {})
 }
 
-export function disableConstantScanning() {
-  if (!nuxtA11yRpc.value) return
+const devtoolsRpcPromise = connectDevtoolsRpc()
 
-  nuxtA11yRpc.value.disableConstantScanning().catch(() => {})
+/**
+ * Call a server function once the DevTools RPC connection is ready.
+ * Resolves to `undefined` if the connection or the call fails.
+ */
+export async function callServer<K extends keyof ServerFunctions>(
+  method: K,
+  ...args: Parameters<ServerFunctions[K]>
+): Promise<Awaited<ReturnType<ServerFunctions[K]>> | undefined> {
+  const rpc = await devtoolsRpcPromise
+
+  if (!rpc)
+    return undefined
+
+  try {
+    return await rpc.call(method, ...args) as Awaited<ReturnType<ServerFunctions[K]>>
+  }
+  catch (error) {
+    console.debug(`[Nuxt A11y] Server call "${method}" failed:`, error)
+    return undefined
+  }
 }
 
-export function triggerScan() {
-  if (!nuxtA11yRpc.value) return
-
-  nuxtA11yRpc.value.triggerScan().catch(() => {})
+async function initialize() {
+  moduleOptions.value = await callServer('getOptions')
+  await callServer('connected')
 }
 
-export function resetViolations() {
-  if (!nuxtA11yRpc.value) return
-
-  nuxtA11yRpc.value.reset().catch(() => {})
-}
-
-export async function highlightElement(selector: string, id?: number, color?: string) {
-  if (!nuxtA11yRpc.value)
-    return
-  await nuxtA11yRpc.value.highlightElement(selector, id, color)
-}
-
-export function unhighlightElement(selector: string) {
-  if (!nuxtA11yRpc.value) return
-
-  nuxtA11yRpc.value.unhighlightElement(selector).catch(() => {})
-}
-
-export function unhighlightAll() {
-  if (!nuxtA11yRpc.value) return
-
-  nuxtA11yRpc.value.unhighlightAll().catch(() => {})
-}
-
-export function updateElementId(selector: string, id: number) {
-  if (!nuxtA11yRpc.value) return
-
-  nuxtA11yRpc.value.updateElementId(selector, id).catch(() => {})
-}
-
-export function removeElementIdBadge(selector: string) {
-  if (!nuxtA11yRpc.value) return
-
-  nuxtA11yRpc.value.removeElementIdBadge(selector).catch(() => {})
-}
-
-export function scrollToElement(selector: string) {
-  if (!nuxtA11yRpc.value) return
-
-  nuxtA11yRpc.value.scrollToElement(selector).catch(() => {})
-}
+initialize()
