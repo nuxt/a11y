@@ -3,7 +3,7 @@ import { useDark } from '@vueuse/core'
 import type { ModuleOptions } from '../../../src/module'
 import { IMPACT_COLORS } from '../../../src/runtime/constants'
 import { axeViolations, currentRoute, highlightElement, nuxtA11yRpc } from './rpc'
-import { isRootElementSelector } from './root-element-checker'
+import { isRootElementSelector } from '../utils/root-element-checker'
 import { pinElement, isElementPinned, clearAllPinned } from './pinned-elements'
 
 const isDark = useDark()

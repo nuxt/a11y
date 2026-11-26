@@ -3,7 +3,7 @@ import type { A11yViolation, A11yViolationNode, ImpactColors } from '../../../sr
 import { highlightElement, unhighlightElement, removeElementIdBadge, scrollToElement, currentRoute } from '../composables/rpc'
 import { computed } from 'vue'
 import { pinElement, unpinElement, getElementId, isElementPinned } from '../composables/pinned-elements'
-import { isRootElementSelector } from '../composables/root-element-checker'
+import { isRootElementSelector } from '../utils/root-element-checker'
 import { useDark } from '@vueuse/core'
 
 const props = defineProps<{
