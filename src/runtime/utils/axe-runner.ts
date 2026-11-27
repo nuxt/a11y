@@ -44,9 +44,13 @@ export function createAxeRunner(config: AxeRunnerConfig | undefined, onScanState
     try {
       const result = await new Promise<Axe.AxeResults>((resolve, reject) => {
         axe.run({
-          // Exclude any Nuxt DevTools Elements and highlight wrappers
           exclude: [
+            // Nuxt DevTools elements
             '[id^="nuxt-devtools-"]',
+            // Nuxt dev error overlay and its badge
+            'nuxt-error-overlay',
+            'nuxt-error-overlay-badge',
+            // Nuxt a11y's highlight overlay
             '#__nuxt_a11y_badge_container__',
           ],
         }, {
